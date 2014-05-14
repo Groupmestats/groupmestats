@@ -58,7 +58,7 @@ end
 
 puts 'Welcome to the Groupme scraper installer.  Before you continue, make sure you have ruby and SQLite3 installed, and have run the Bundler.'
 
-file_path = '/srv/groupme/etc/groupme.yaml'
+file_path = '/etc/groupme.yaml'
 input = ask 'Enter the full path for the config file[Default: /etc/groupme.yaml]:'
 
 if !input.empty?
