@@ -9,6 +9,7 @@ require 'time'
 require 'sqlite3'
 
 $file
+$group_id
 $initialize 
 $database = {}
 $time = 86400
@@ -20,16 +21,9 @@ optparse = OptionParser.new do |opts|
     opts.on('-f config','--config=CONFIG_FILE', 'Groupme API config file.  Default is <PROJECT_TREE>/etc/groupme.yaml') do |config_file|
         $file = config_file
     end
-    opts.on('-d database','--database=DATABASE','SQLite database.  REQUIRED') do |database_name|
-        $database = database_name
-    end
     opts.on('-t time','--time=TIME','How long in the past you wish to retreive messages, in seconds.  Default is 24 hours') do |input_time|
         $time = input_time.to_i
     end
-
-    opts.on('-n','--new','Creates the tables for a given database.  Should be run first.') do
-        $initialize = true
-    end 
     opts.on( '-h', '--help', 'Display this screen' ) do
         puts opts
         exit
@@ -53,6 +47,8 @@ class Groupme
         end
     
         $token = groupme['groupme']['token']
+        $database = groupme['groupme']['database']
+        $group_id = groupme['groupme']['group_id']
         base_uri groupme['groupme']['api']
         format :json
 
@@ -80,7 +76,7 @@ end
 def populateUsers
     gm = Groupme.new
     database = SQLite3::Database.new( $database )
-    merrifield = gm.get('/groups/3180471/?')
+    merrifield = gm.get("/groups/#{$group_id}/?")
     merrifield['response']['members'].each do | x |
         if database.execute( "select * from users where uid='#{x['user_id']}'").empty?
             database.execute( "INSERT INTO users(Name, Uid) VALUES ('#{CGI::escape(x['nickname'])}', '#{x['user_id']}')" )
@@ -95,12 +91,12 @@ def scrapeMessages(id, searchTime)
     gm = Groupme.new
     database = SQLite3::Database.new( $database ) 
     
-    merrifield = gm.get('groups/3180471/?') 
+    merrifield = gm.get("groups/#{$group_id}/?") 
 
     if id == 0
-        messages = gm.get('groups/3180471/messages?')
+        messages = gm.get("groups/#{$group_id}/messages?")
     else
-        messages = gm.get("groups/3180471/messages?before_id=#{id}&")
+        messages = gm.get("groups/#{$group_id}/messages?before_id=#{id}&")
     end
 
     messages['response']['messages'].each do | message |
