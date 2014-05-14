@@ -1,0 +1,119 @@
+#!/sw/bin/ruby
+require 'rubygems'
+require 'json'
+require 'yaml'
+require 'httparty'
+require 'optparse'
+require 'cgi'
+require 'pp'
+require 'time'
+require 'sqlite3'
+
+$file = 'groupme.yaml'
+$database = {}
+$time = 86400
+
+class Groupme
+    include HTTParty
+
+    groupme = YAML.load_file($file)
+    $token = groupme['groupme']['token']
+    base_uri groupme['groupme']['api']
+    format :json
+
+    def get(query)
+        query += "#{$token}"
+        self.class.get(query)
+    end
+end
+
+def populateUsers
+    gm = Groupme.new
+    database = SQLite3::Database.new( $database )
+    merrifield = gm.get('/groups/3180471/?')
+    merrifield['response']['members'].each do | x |
+        if database.execute( "select * from users where uid='#{x['user_id']}'").empty?
+            database.execute( "INSERT INTO users(Name, Uid) VALUES ('#{CGI::escape(x['nickname'])}', '#{x['user_id']}')" )
+        end
+    end
+end
+
+def scrapeMessages(id, searchTime)
+    gm = Groupme.new
+    database = SQLite3::Database.new( $database ) 
+    
+    merrifield = gm.get('groups/3180471/?') 
+
+    if id == 0
+        messages = gm.get('groups/3180471/messages?')
+    else
+        messages = gm.get("groups/3180471/messages?before_id=#{id}&")
+    end
+
+    messages['response']['messages'].each do | message |
+        t = Time.at(message['created_at'])
+        if ((Time.now.to_i - t.to_i) < searchTime)
+           if database.execute( "SELECT * FROM messages WHERE id='#{message['id']}'").empty?
+               image = "none"
+               liked_users = ""
+               num_likes = 0
+               if !message['attachments'].empty?
+                   if message['attachments'][0]['type'] == "image"
+                      image = message['attachments'][0]['url'] 
+                   end
+               end
+               if !message['favorited_by'].nil?
+                   if message['favorited_by'].length != 0
+                       message['favorited_by'].each do | user |
+                           liked_users += "*#{user}*" 
+                           num_likes += 1
+                       end
+                   end 
+               end
+               if !message['text'].nil?
+                   database.execute( "INSERT INTO messages(id, created_at, user_id, text, favored_by, num_favored, image) VALUES ('#{message['id']}','#{message['created_at']}', '#{message['user_id']}', '#{CGI::escape(message['text'])}', '#{liked_users}', '#{num_likes}','#{image}')" )
+               else
+                   database.execute( "INSERT INTO messages(id, created_at, user_id, text, favored_by, num_favored, image) VALUES ('#{message['id']}','#{message['created_at']}', '#{message['user_id']}', 'none', '#{liked_users}','#{num_likes}','#{image}')" )
+               end
+           end
+           message['favorited_by'].each do | likedMembers |
+                merrifield['response']['members'].each do | x |
+                    if x['user_id'] == likedMembers
+                    end
+                end
+           end
+        end
+    end
+
+    t = messages['response']['messages'].last['created_at']
+    
+    if ((Time.now.to_i - t) < searchTime)
+        scrapeMessages(messages['response']['messages'].last['id'], searchTime)
+    end
+end
+
+#Define option flags
+optparse = OptionParser.new do |opts|
+    opts.banner = "Groupme ultility that pulls messages at a given interval and write them to a SQLite database\nUsage: groupeme_scraper [OPTIONS]"
+
+    opts.on('-f config','--config=CONFIG_FILE', 'Groupme API config file.  Default is /etc/groupme.yaml') do |config_file|
+        $file = config_file
+    end
+    opts.on('-d database','--database=DATABASE','SQLite database.  Default is *NEEDS TO BE ADDED') do |database_name|
+        $database = database_name
+    end
+    opts.on('-t time','--time=TIME','How long in the past you wish to retreive messages, in seconds.  Default is 24 hours') do |input_time|
+        $time = input_time.to_i
+        pp $time
+    end
+
+    opts.on( '-h', '--help', 'Display this screen' ) do
+        puts opts
+        exit
+    end
+end
+
+optparse.parse!
+
+populateUsers
+scrapeMessages(0, $time)
