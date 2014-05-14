@@ -22,7 +22,7 @@ class Groupme
     format :json
 
     def get(query)
-        query += "#{$token}"
+        query += "token=#{$token}"
         self.class.get(query)
     end
 end
