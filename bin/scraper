@@ -16,7 +16,7 @@ $time = 86400
 
 #Define option flags
 optparse = OptionParser.new do |opts|
-    opts.banner = "Groupme ultility that pulls messages at a given interval and write them to a SQLite database\nUsage: scraper [OPTIONS]\n\nUpon running the first time, you should run:\nscraper -n [OPTIONS]\n\nOptions:\n\n"
+    opts.banner = "Groupme ultility that pulls messages at a given interval and write them to a SQLite database\nUsage: scraper [OPTIONS]\n\nDo not run unless you have run configure_scraper first.\n\nOptions:\n\n"
 
     opts.on('-f config','--config=CONFIG_FILE', 'Groupme API config file.  Default is <PROJECT_TREE>/etc/groupme.yaml') do |config_file|
         $file = config_file
@@ -56,18 +56,6 @@ class Groupme
             query += "token=#{$token}"
             response = self.class.get(query)
         end
-    end
-end
-
-#This will create the users and messages tables.  Run this before running any other methods
-def createTables
-    database = SQLite3::Database.new( $database )
-    if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users';").empty?
-        database.execute('CREATE TABLE users(Id INTEGER, Name TEXT, Uid INTEGER);')
-    end
-    
-    if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='messages';").empty?
-        database.execute('CREATE TABLE messages(id INT, created_at INT, user_id INT, text TEXT, favored_by TEXT, num_favored INT,image TEXT);')
     end
 end
 
@@ -141,9 +129,5 @@ def scrapeMessages(id, searchTime)
     end
 end
 
-if $initialize
-    createTables
-else
-    populateUsers
-    scrapeMessages(0, $time)
-end
+populateUsers
+scrapeMessages(0, $time)
