@@ -1,32 +1,82 @@
-#!/sw/bin/ruby
+#!/usr/bin/ruby
 require 'rubygems'
 require 'json'
 require 'yaml'
 require 'httparty'
 require 'optparse'
 require 'cgi'
-require 'pp'
 require 'time'
 require 'sqlite3'
 
-$file = 'groupme.yaml'
+$file
+$initialize 
 $database = {}
 $time = 86400
 
-class Groupme
-    include HTTParty
+#Define option flags
+optparse = OptionParser.new do |opts|
+    opts.banner = "Groupme ultility that pulls messages at a given interval and write them to a SQLite database\nUsage: scraper [OPTIONS]\n\nUpon running the first time, you should run:\nscraper -n [OPTIONS]\n\nOptions:\n\n"
 
-    groupme = YAML.load_file($file)
-    $token = groupme['groupme']['token']
-    base_uri groupme['groupme']['api']
-    format :json
+    opts.on('-f config','--config=CONFIG_FILE', 'Groupme API config file.  Default is <PROJECT_TREE>/etc/groupme.yaml') do |config_file|
+        $file = config_file
+    end
+    opts.on('-d database','--database=DATABASE','SQLite database.  REQUIRED') do |database_name|
+        $database = database_name
+    end
+    opts.on('-t time','--time=TIME','How long in the past you wish to retreive messages, in seconds.  Default is 24 hours') do |input_time|
+        $time = input_time.to_i
+    end
 
-    def get(query)
-        query += "token=#{$token}"
-        self.class.get(query)
+    opts.on('-n','--new','Creates the tables for a given database.  Should be run first.') do
+        $initialize = true
+    end 
+    opts.on( '-h', '--help', 'Display this screen' ) do
+        puts opts
+        exit
     end
 end
 
+optparse.parse!
+
+#Class that invokes HTTParty.  This passes in a config file for Groupme API.
+#See the attached groupme.yaml.example for details
+class Groupme
+    include HTTParty
+
+    if $file.nil?
+        abort('You need to pass a configuratin file')
+    else
+        begin
+            groupme = YAML.load_file($file)
+        rescue
+            abort('Configuration file not found.  Exiting...')
+        end
+    
+        $token = groupme['groupme']['token']
+        base_uri groupme['groupme']['api']
+        format :json
+
+        def get(query)
+            query += "token=#{$token}"
+            response = self.class.get(query)
+        end
+    end
+end
+
+#This will create the users and messages tables.  Run this before running any other methods
+def createTables
+    database = SQLite3::Database.new( $database )
+    if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users';").empty?
+        database.execute('CREATE TABLE users(Id INTEGER, Name TEXT, Uid INTEGER);')
+    end
+    
+    if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='messages';").empty?
+        database.execute('CREATE TABLE messages(id INT, created_at INT, user_id INT, text TEXT, favored_by TEXT, num_favored INT,image TEXT);')
+    end
+end
+
+#This will populate the uid and current name of all new users to the users table
+#of the database.
 def populateUsers
     gm = Groupme.new
     database = SQLite3::Database.new( $database )
@@ -38,6 +88,9 @@ def populateUsers
     end
 end
 
+#This will pull all messages for a given period of time, and store it in the messages table
+#Argument 1 - time, in epoch seconds, to start the search.  0 is the present
+#Argument 2 - how far back to search, in epoch seconds.
 def scrapeMessages(id, searchTime)
     gm = Groupme.new
     database = SQLite3::Database.new( $database ) 
@@ -92,28 +145,9 @@ def scrapeMessages(id, searchTime)
     end
 end
 
-#Define option flags
-optparse = OptionParser.new do |opts|
-    opts.banner = "Groupme ultility that pulls messages at a given interval and write them to a SQLite database\nUsage: groupeme_scraper [OPTIONS]"
-
-    opts.on('-f config','--config=CONFIG_FILE', 'Groupme API config file.  Default is /etc/groupme.yaml') do |config_file|
-        $file = config_file
-    end
-    opts.on('-d database','--database=DATABASE','SQLite database.  Default is *NEEDS TO BE ADDED') do |database_name|
-        $database = database_name
-    end
-    opts.on('-t time','--time=TIME','How long in the past you wish to retreive messages, in seconds.  Default is 24 hours') do |input_time|
-        $time = input_time.to_i
-        pp $time
-    end
-
-    opts.on( '-h', '--help', 'Display this screen' ) do
-        puts opts
-        exit
-    end
+if $initialize
+    createTables
+else
+    populateUsers
+    scrapeMessages(0, $time)
 end
-
-optparse.parse!
-
-populateUsers
-scrapeMessages(0, $time)
