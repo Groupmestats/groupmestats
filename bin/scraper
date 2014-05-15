@@ -7,6 +7,7 @@ require 'optparse'
 require 'cgi'
 require 'time'
 require 'sqlite3'
+require 'pp'
 
 $file
 $group_id
@@ -53,8 +54,20 @@ class Groupme
         format :json
 
         def get(query)
-            query += "token=#{$token}"
-            response = self.class.get(query)
+            new_query = query + "token=#{$token}"
+            response = self.class.get(new_query)
+
+            retry_attempts = 0
+
+            if response.code != 200            
+                while retry_attempts < 3 do
+                    puts "Could not connect to groupme.com.  Will retry in 60 seconds"       
+                    sleep(60)
+                    self.class.get(query)
+                    retry_attempts += 1
+                end
+            end
+            return response
         end
     end
 end
