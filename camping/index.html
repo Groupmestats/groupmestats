@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<link href="/css/bootstrap.css" rel="stylesheet" type="text/css"></link>
+	<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+	<script src="/js/jquery-1.11.1.min.js"></script>
+	<script type='text/javascript'>
+
+	google.load('visualization', '1.0', {'packages':['corechart']});
+
+	$(document).ready(function(){
+		$.ajax({
+			url: "/rest/postsmost"
+			})
+			.done(function(data){
+				drawChart(data)
+			})
+	});
+
+	function drawChart(chartData) {
+		var data = new google.visualization.DataTable();
+		data.addColumn('string', 'Topping');
+		data.addColumn('number', 'Slices');
+		data.addRows(chartData);
+
+		// Set chart options
+		var options = {'title':'Posts in Merrifielderos by User',
+		'width':800,
+		'height':600};
+
+		// Instantiate and draw our chart, passing in some options.
+		var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+		chart.draw(data, options);
+		}
+	</script>
+	
+</head>
+
+<body class="container">
+<div class="row">
+	<div class="col-md-12">		
+		<h1>Groupme Stats Test</h1>
+		<div id="chart_div"></div>
+	</div>
+</div>
+<body>
+
+</html>
