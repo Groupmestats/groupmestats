@@ -1,4 +1,0 @@
----
-groupme:
-  api: https://api.groupme.com/v3//
-  token: <oauth_token>

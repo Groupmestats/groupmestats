@@ -7,6 +7,23 @@ The command scraper takes in an ammount of time, in seconds, to pull messages fr
 
 scraper -f config_file [-t time]
 
-The command configure_scrapper will prompt the user for their config file, database file, oauth token, and group name.  It will also create the 'users' and 'messages' tables.  This is to be run before running scraper.
+Scraper uses a sqlite3 database with three tables:
+
+**users**
+Name(TEXT) - Name of the user, when first added
+Uid(INT) - Unique Groupme user id
+
+**messages**
+id(INT) - Unique groupme message id
+created_at(INT) - Time, in seconds from epoch, of message cretion
+user_id(INT) - Unique Groupme user id
+text(TEXT) - Message text
+image(TEXT) - Image url.  'None' if there was no attachment
+
+**likes**
+message_id(INT) - Unique groupme message id
+user_id(INT) - Unique Groupme user id
+
+The command configure_scrapper will prompt the user for their config file, database file, oauth token, and group name.  It will also create the sqlite3 tables.  This is to be run before running scraper for the first time.
 
 For more information on Groupme oauth, see here: https://dev.groupme.com/tutorials/oauth
