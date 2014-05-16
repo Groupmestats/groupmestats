@@ -10,7 +10,7 @@ scraper -f config_file [-t time]
 Scraper uses a sqlite3 database with three tables:
 
 **users**
-Name(TEXT) - Name of the user, when first added
+Name(TEXT) - Name of the user, when first added\n
 Uid(INT) - Unique Groupme user id
 
 **messages**
