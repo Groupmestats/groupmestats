@@ -10,20 +10,19 @@ scraper -f config_file [-t time]
 Scraper uses a sqlite3 database with three tables:
 
 **users**
-
-Name(TEXT) - Name of the user, when first added
-Uid(INT) - Unique Groupme user id
+*Name(TEXT) - Name of the user, when first added
+*Uid(INT) - Unique Groupme user id
 
 **messages**
-id(INT) - Unique groupme message id
-created_at(INT) - Time, in seconds from epoch, of message cretion
-user_id(INT) - Unique Groupme user id
-text(TEXT) - Message text
-image(TEXT) - Image url.  'None' if there was no attachment
+*id(INT) - Unique groupme message id
+*created_at(INT) - Time, in seconds from epoch, of message cretion
+*user_id(INT) - Unique Groupme user id
+*text(TEXT) - Message text
+*image(TEXT) - Image url.  'None' if there was no attachment
 
 **likes**
-message_id(INT) - Unique groupme message id
-user_id(INT) - Unique Groupme user id
+*message_id(INT) - Unique groupme message id
+*user_id(INT) - Unique Groupme user id
 
 The command configure_scrapper will prompt the user for their config file, database file, oauth token, and group name.  It will also create the sqlite3 tables.  This is to be run before running scraper for the first time.
 
