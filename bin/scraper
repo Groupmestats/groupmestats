@@ -7,13 +7,12 @@ require 'optparse'
 require 'cgi'
 require 'time'
 require 'sqlite3'
-require 'pp'
 
 $file
 $group_id
 $initialize 
 $database = {}
-$time = 86400
+$time = Time.now.to_i
 
 #Define option flags
 optparse = OptionParser.new do |opts|
@@ -22,7 +21,7 @@ optparse = OptionParser.new do |opts|
     opts.on('-f config','--config=CONFIG_FILE', 'Groupme API config file.  Default is <PROJECT_TREE>/etc/groupme.yaml') do |config_file|
         $file = config_file
     end
-    opts.on('-t time','--time=TIME','How long in the past you wish to retreive messages, in seconds.  Default is 24 hours') do |input_time|
+    opts.on('-t time','--time=TIME','How long in the past you wish to retreive messages, in seconds. By default, scraper will pull all messages from a group if a time isn\'t specified.') do |input_time|
         $time = input_time.to_i
     end
     opts.on( '-h', '--help', 'Display this screen' ) do
@@ -60,6 +59,9 @@ class Groupme
             retry_attempts = 0
 
             if response.code != 200            
+                if response.nil?
+                    abort('No more messages returned from groupme. Perhaps you have pulled all available messages?')
+                end
                 while retry_attempts < 3 do
                     puts "Could not connect to groupme.com.  Will retry in 60 seconds"       
                     sleep(60)
@@ -141,5 +143,5 @@ def scrapeMessages(id, searchTime)
     end
 end
 
-populateUsers
+$populateUsers
 scrapeMessages(0, $time)
