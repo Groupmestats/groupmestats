@@ -12,7 +12,6 @@ Scraper uses a sqlite3 database with three tables:
 **users**
 
 Name(TEXT) - Name of the user, when first added
-
 Uid(INT) - Unique Groupme user id
 
 **messages**
