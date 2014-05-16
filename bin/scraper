@@ -127,12 +127,11 @@ def scrapeMessages(id, searchTime)
                    database.execute( "INSERT INTO messages(id, created_at, user_id, text, image) VALUES ('#{message['id']}','#{message['created_at']}', '#{message['user_id']}', 'none', '#{image}')" )
                end
            end
-#           message['favorited_by'].each do | likedMembers |
-#                merrifield['response']['members'].each do | x |
-#                    if x['user_id'] == likedMembers
-#                    end
-#                end
-#           end
+           message['favorited_by'].each do | likedMembers |
+               if database.execute("SELECT count(user_id) FROM likes WHERE message_id=#{message['id']} AND user_id=#{likedMembers}")[0][0] == 0
+                   database.execute("INSERT INTO likes(message_id, user_id) VALUES ('#{message['id'].to_i}', '#{likedMembers}')" ) 
+               end 
+           end
         end
     end
 
