@@ -22,11 +22,15 @@ def createTables(database_path)
     end
 
     if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users';").empty?
-        database.execute('CREATE TABLE users(Id INTEGER, Name TEXT, Uid INTEGER);')
+        database.execute('CREATE TABLE users(Name TEXT, Uid INT);')
     end
     
     if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='messages';").empty?
-        database.execute('CREATE TABLE messages(id INT, created_at INT, user_id INT, text TEXT, favored_by TEXT, num_favored INT,image TEXT);')
+        database.execute('CREATE TABLE messages(id INT, created_at INT, user_id INT, text TEXT, image TEXT);')
+    end
+
+    if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='likes';").empty?
+        database.execute('CREATE TABLE likes(message_id INT, user_id INT)' )
     end
 end
 
