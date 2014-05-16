@@ -80,9 +80,11 @@ def populateUsers
     gm = Groupme.new
     database = SQLite3::Database.new( $database )
     merrifield = gm.get("/groups/#{$group_id}/?")
-    merrifield['response']['members'].each do | x |
-        if database.execute( "select * from users where uid='#{x['user_id']}'").empty?
-            database.execute( "INSERT INTO users(Name, Uid) VALUES ('#{CGI::escape(x['nickname'])}', '#{x['user_id']}')" )
+    merrifield['response']['members'].each do | member |
+        if database.execute( "SELECT * FROM users WHERE uid='#{member['user_id']}'").empty?
+            database.execute( "INSERT INTO users(Name, Uid) VALUES (?, ?)", 
+            member['nickname'], 
+            member['user_id'] )
         end
     end
 end
@@ -117,19 +119,33 @@ def scrapeMessages(id, searchTime)
                if !message['favorited_by'].nil?
                    if message['favorited_by'].length != 0
                        message['favorited_by'].each do | user |
-                           database.execute( "INSERT INTO likes(message_id, user_id) VALUES ('#{message['id'].to_i}', '#{user}')" )
+                           database.execute( "INSERT INTO likes(message_id, user_id) VALUES (?, ?)",
+                           message['id'], 
+                           user )
                        end
                    end 
                end
                if !message['text'].nil?
-                   database.execute( "INSERT INTO messages(id, created_at, user_id, text, image) VALUES ('#{message['id']}','#{message['created_at']}', '#{message['user_id']}', '#{CGI::escape(message['text'])}', '#{image}')" )
+                   database.execute( "INSERT INTO messages(id, created_at, user_id, text, image) VALUES (?, ?, ?, ?, ?)",
+                   message['id'],
+                   message['created_at'], 
+                   message['user_id'], 
+                   message['text'], 
+                   image )
                else
-                   database.execute( "INSERT INTO messages(id, created_at, user_id, text, image) VALUES ('#{message['id']}','#{message['created_at']}', '#{message['user_id']}', 'none', '#{image}')" )
+                   database.execute( "INSERT INTO messages(id, created_at, user_id, text, image) VALUES (?, ?, ?, ?, ?)",
+                   message['id'],
+                   message['created_at'], 
+                   message['user_id'], 
+                   'none', 
+                   image )
                end
            end
            message['favorited_by'].each do | likedMembers |
                if database.execute("SELECT count(user_id) FROM likes WHERE message_id=#{message['id']} AND user_id=#{likedMembers}")[0][0] == 0
-                   database.execute("INSERT INTO likes(message_id, user_id) VALUES ('#{message['id'].to_i}', '#{likedMembers}')" ) 
+                   database.execute("INSERT INTO likes(message_id, user_id) VALUES (?, ?)",
+                   message['id'], 
+                   likedMembers ) 
                end 
            end
         end
@@ -142,5 +158,5 @@ def scrapeMessages(id, searchTime)
     end
 end
 
-$populateUsers
+populateUsers
 scrapeMessages(0, $time)
