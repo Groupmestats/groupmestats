@@ -1,6 +1,7 @@
 require 'sqlite3'
 require 'json'
 require 'yaml'
+require 'pp'
 
 Camping.goes :GroupStats
 if !ARGV[1].nil?
