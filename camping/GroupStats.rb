@@ -35,7 +35,7 @@ module GroupStats::Controllers
             abort('Did not specify a valid database file')
         end
 
-		result = database.execute( "SELECT users.Name, count(user_id) as count FROM messages join users on messages.user_id = users.Uid group by user_id order by count desc")
+		result = database.execute( "SELECT users.Name, count(messages.user_id) as count FROM users left join messages on messages.user_id = users.user_id group by messages.user_id order by count desc")
 		headers['Content-Type'] = "application/json"
 		return result.to_json
     end
