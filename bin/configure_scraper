@@ -35,7 +35,7 @@ def createTables(database_path)
 end
 
 def writeConfig(file_path, token, database_path, group_name)
-    groups = Configure_Scraper.get("groups?token=#{token}")
+    groups = Configure_Scraper.get("groups?token=#{token}", :verify => false)
 
     if groups.code != 200
         abort('Invalid token')

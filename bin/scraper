@@ -54,7 +54,7 @@ class Groupme
 
         def get(query)
             new_query = query + "token=#{$token}"
-            response = self.class.get(new_query)
+            response = self.class.get(new_query, :verify => false)
 
             retry_attempts = 0
 
