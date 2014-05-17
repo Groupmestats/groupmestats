@@ -84,8 +84,8 @@ def populateUsers
     database = SQLite3::Database.new( $database )
     merrifield = gm.get("/groups/#{$group_id}/?")
     merrifield['response']['members'].each do | member |
-        if database.execute( "SELECT * FROM users WHERE uid='#{member['user_id']}'").empty?
-            database.execute( "INSERT INTO users(Name, Uid) VALUES (?, ?)", 
+        if database.execute( "SELECT * FROM users WHERE user_id='#{member['user_id']}'").empty?
+            database.execute( "INSERT INTO users(Name, user_id) VALUES (?, ?)", 
             member['nickname'], 
             member['user_id'] )
         end
@@ -110,7 +110,7 @@ def scrapeMessages(id, searchTime)
     messages['response']['messages'].each do | message |
         t = Time.at(message['created_at'])
         if ((Time.now.to_i - t.to_i) < searchTime)
-           if database.execute( "SELECT * FROM messages WHERE id='#{message['id']}'").empty?
+           if database.execute( "SELECT * FROM messages WHERE message_id='#{message['id']}'").empty?
                image = "none"
                liked_users = ""
                num_likes = 0
@@ -129,7 +129,7 @@ def scrapeMessages(id, searchTime)
                    end 
                end
                if !message['text'].nil?
-                   database.execute( "INSERT INTO messages(id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                   database.execute( "INSERT INTO messages(message_id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, ?, ?, ?, ?, ?, ?)",
                    message['id'],
                    message['created_at'], 
                    message['user_id'],
@@ -138,7 +138,7 @@ def scrapeMessages(id, searchTime)
                    message['text'], 
                    image )
                else
-                   database.execute( "INSERT INTO messages(id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                   database.execute( "INSERT INTO messages(message_id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, ?, ?, ?, ?, ?, ?)",
                    message['id'],
                    message['created_at'],
                    message['user_id'],
