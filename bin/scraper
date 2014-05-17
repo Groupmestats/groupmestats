@@ -68,6 +68,9 @@ class Groupme
                     self.class.get(query)
                     retry_attempts += 1
                 end
+                if retry_attempts >= 3
+                    abort('Could not connect to groupme')
+                end
             end
             return response
         end
