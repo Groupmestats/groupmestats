@@ -4,13 +4,31 @@
 
 angular.module('myApp.controllers', [])
 	.controller('HomeController', ['$scope', '$http', function($scope, $http) {
-		$http({method: 'GET', url: '/rest/postsmost'}).
-			success(function(data, status, headers, config) {
-				drawChart(data)
-			}).
-			error(function(data, status, headers, config) {
+		$scope.days = 0
+		$scope.$watch('days', function(newValue, oldValue) {
+             requestChart();
+           });
+		
+		function requestChart(){
+			var daysToRequest = $scope.days
+			if(daysToRequest == 0)
+			{
+				daysToRequest = 9999999
+			}
+			$http({method: 'GET', url: '/rest/postsmost', params: {days : daysToRequest}}).
+				success(function(data, status, headers, config) {
+					drawChart(data)
+				}).
+				error(function(data, status, headers, config) {
 
-			});
+				});
+		}
+		requestChart(); //inital load
+		
+		$scope.setDays = function(newday)
+		{
+			$scope.days = newday;
+		}
 		
 		//this is going in a directive soon
 		function drawChart(chartData) {
