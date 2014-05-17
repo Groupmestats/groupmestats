@@ -10,7 +10,6 @@ else
     $config_file = 'web.yaml'
 end
 
-pp $config_file
 module GroupStats::Controllers
   class Index < R '/'
     def get
