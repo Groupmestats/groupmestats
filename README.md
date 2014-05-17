@@ -17,6 +17,8 @@ Scraper uses a sqlite3 database with three tables:
 * id(INT) - Unique groupme message id
 * created_at(INT) - Time, in seconds from epoch, of message cretion
 * user_id(INT) - Unique Groupme user id
+* group_id(INT) - Uniquer group_id that the message belongs to
+* avatar_url(TEXT) - URL to the avatar that the user had at time of posting
 * text(TEXT) - Message text
 * image(TEXT) - Image url.  'None' if there was no attachment
 
