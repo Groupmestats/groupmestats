@@ -1,3 +1,4 @@
 ---
 groupme:
    database: <DB_PATH>
+   index: <INDEX.HTML_PATH>

@@ -13,7 +13,12 @@ end
 module GroupStats::Controllers
   class Index < R '/'
     def get
-      File.open("/srv/groupme/camping/index.html")
+      begin 
+        config = YAML.load_file($config_file)
+      rescue
+        abort('Configuration file not found.  Exiting...')
+      end
+      File.open(config['groupme']['index'])
     end
   end
   
