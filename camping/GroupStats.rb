@@ -13,7 +13,7 @@ end
 module GroupStats::Controllers
   class Index < R '/'
     def get
-      File.open("index.html")
+      File.open("/srv/groupme/camping/index.html")
     end
   end
   
