@@ -129,18 +129,16 @@ def scrapeMessages(id, searchTime)
                    end 
                end
                if !message['text'].nil?
-                   database.execute( "INSERT INTO messages(message_id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                   database.execute( "INSERT INTO messages(message_id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, datetime('#{message['created_at']}', 'unixepoch'), ?, ?, ?, ?, ?)",
                    message['id'],
-                   message['created_at'], 
                    message['user_id'],
                    message['group_id'],
                    message['avatar_url'], 
                    message['text'], 
                    image )
                else
-                   database.execute( "INSERT INTO messages(message_id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                   database.execute( "INSERT INTO messages(message_id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, datetime('#{message['created_at']}', 'unixepoch'), ?, ?, ?, ?, ?)",
                    message['id'],
-                   message['created_at'],
                    message['user_id'],
                    message['group_id'],
                    message['avatar_url'], 
