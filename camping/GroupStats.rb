@@ -39,7 +39,7 @@ module GroupStats::Controllers
             abort('Did not specify a valid database file')
         end
 
-		result = database.execute( "SELECT users.Name, count(messages.user_id) as count FROM users left join messages on messages.user_id = users.user_id where datetime(messages.created_at, 'unixepoch') > datetime('now', ?) group by messages.user_id order by count desc",
+		result = database.execute( "SELECT users.Name, count(messages.user_id) as count FROM users left join messages on messages.user_id = users.user_id where messages.created_at > datetime('now', ?) group by messages.user_id order by count desc",
 		"-" + @input.days + " day")
 		headers['Content-Type'] = "application/json"
 		return result.to_json
