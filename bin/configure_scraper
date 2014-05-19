@@ -22,7 +22,7 @@ def createTables(database_path)
     end
 
     if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='groups';").empty?
-        database.execute('CREATE TABLE groups(group_id INT, late_scraped DATETIME);')
+        database.execute('CREATE TABLE groups(group_id INT PRIMARY KEY, late_scraped DATETIME);')
     end
 
     if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users';").empty?
