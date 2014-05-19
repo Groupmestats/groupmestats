@@ -4,13 +4,11 @@ require 'json'
 require 'yaml'
 require 'httparty'
 require 'optparse'
-require 'cgi'
 require 'time'
 require 'sqlite3'
 
 $file
 $group_id
-$initialize 
 $database = {}
 $time = Time.now.to_i
 
