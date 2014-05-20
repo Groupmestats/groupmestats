@@ -8,7 +8,6 @@ require 'sqlite3'
 require 'pp'
 
 $file = 'test.yaml'
-$group_id
 $database = {}
 $time = Time.now.to_i
 
@@ -28,7 +27,6 @@ class Groupme
     
         $token = groupme['groupme']['token']
         $database = groupme['groupme']['database']
-        $group_id = groupme['groupme']['group_id']
         base_uri groupme['groupme']['api']
         format :json
 
@@ -62,11 +60,13 @@ class Groupme
     end
 end
 
+#For a given token, returns the user_id
 def getUser(token)
     gm = Groupme.new
     return gm.get("/users/me/", token)['response']['id']
 end
 
+#For a given token, returns an array of hashes, containing the name and group_id of each group the user belongs to
 def getGroups(token)
     gm = Groupme.new
     groups = gm.get("/groups/", token)
@@ -180,7 +180,7 @@ end
 
 $token = groupme['groupme']['token']
 $database = groupme['groupme']['database']
-$group_id = groupme['groupme']['group_id']
-#populateUsers($group_id, $token)
-#scrapeMessages(0, $time, $group_id, $token)
+group_id = groupme['groupme']['group_id']
+#populateUsers(group_id, $token)
+#scrapeMessages(0, $time, group_id, $token)
 pp getGroups($token)
