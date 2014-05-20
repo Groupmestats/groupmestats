@@ -3,7 +3,6 @@ require 'rubygems'
 require 'json'
 require 'yaml'
 require 'httparty'
-require 'optparse'
 require 'time'
 require 'sqlite3'
 require 'pp'
@@ -12,24 +11,6 @@ $file
 $group_id
 $database = {}
 $time = Time.now.to_i
-
-#Define option flags
-optparse = OptionParser.new do |opts|
-    opts.banner = "Groupme ultility that pulls messages at a given interval and write them to a SQLite database\nUsage: scraper [OPTIONS]\n\nDo not run unless you have run configure_scraper first.\n\nOptions:\n\n"
-
-    opts.on('-f config','--config=CONFIG_FILE', 'Groupme API config file.  Default is <PROJECT_TREE>/etc/groupme.yaml') do |config_file|
-        $file = config_file
-    end
-    opts.on('-t time','--time=TIME','How long in the past you wish to retreive messages, in seconds. By default, scraper will pull all messages from a group if a time isn\'t specified.') do |input_time|
-        $time = input_time.to_i
-    end
-    opts.on( '-h', '--help', 'Display this screen' ) do
-        puts opts
-        exit
-    end
-end
-
-optparse.parse!
 
 #Class that invokes HTTParty.  This passes in a config file for Groupme API.
 #See the attached groupme.yaml.example for details
