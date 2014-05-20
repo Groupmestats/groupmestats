@@ -6,6 +6,7 @@ require 'httparty'
 require 'optparse'
 require 'time'
 require 'sqlite3'
+require 'pp'
 
 $file
 $group_id
@@ -50,8 +51,13 @@ class Groupme
         base_uri groupme['groupme']['api']
         format :json
 
-        def get(query, token)
-            new_query = query + "?token=#{token}"
+        def get(query, token, args=nil)
+            if args.nil?
+                new_query = query + "?token=#{token}"
+            else
+                new_query = query + "?token=#{token}&#{args}"
+            end
+
             response = self.class.get(new_query, :verify => false)
 
             retry_attempts = 0
@@ -75,13 +81,18 @@ class Groupme
     end
 end
 
+def getUser(token)
+    gm = Groupme.new
+    return gm.get("/users/me/", token)['response']['id']
+end
+
 #This will populate the uid and current name of all new users to the users table
 #of the database.
 def populateUsers(group_id, token)
     gm = Groupme.new
     database = SQLite3::Database.new( $database )
-    merrifield = gm.get("/groups/#{group_id}/", token)
-    merrifield['response']['members'].each do | member |
+    group = gm.get("/groups/#{group_id}/", token)
+    group['response']['members'].each do | member |
         if database.execute( "SELECT * FROM users WHERE user_id='#{member['user_id']}'").empty?
             database.execute( "INSERT INTO users(Name, user_id, group_id, avatar_url) VALUES (?, ?, ?, ?)", 
             member['nickname'], 
@@ -95,73 +106,76 @@ end
 #This will pull all messages for a given period of time, and store it in the messages table
 #Argument 1 - time, in epoch seconds, to start the search.  0 is the present
 #Argument 2 - how far back to search, in epoch seconds.
-def scrapeMessages(id, searchTime)
+def scrapeMessages(searchTime, group_id, token)
     gm = Groupme.new
     database = SQLite3::Database.new( $database ) 
     
-    merrifield = gm.get("groups/#{$group_id}/?") 
+    id = 0
+    t = Time.now.to_i
+    while (Time.now.to_i - t.to_i) < searchTime do
 
-    if id == 0
-        messages = gm.get("groups/#{$group_id}/messages?")
-    else
-        messages = gm.get("groups/#{$group_id}/messages?before_id=#{id}&")
-    end
+        if id == 0
+            messages = gm.get("groups/#{group_id}/messages", token)
+        else
+            messages = gm.get("groups/#{group_id}/messages", token, "before_id=#{id}")
+        end
 
-    messages['response']['messages'].each do | message |
-        t = Time.at(message['created_at'])
-        if ((Time.now.to_i - t.to_i) < searchTime)
-           if database.execute( "SELECT * FROM messages WHERE message_id='#{message['id']}'").empty?
-               image = "none"
-               liked_users = ""
-               num_likes = 0
-               if !message['attachments'].empty?
-                   if message['attachments'][0]['type'] == "image"
-                      image = message['attachments'][0]['url'] 
+        messages['response']['messages'].each do | message |
+            t = Time.at(message['created_at'])
+            if ((Time.now.to_i - t.to_i) < searchTime)
+               if database.execute( "SELECT * FROM messages WHERE message_id='#{message['id']}'").empty?
+                   image = "none"
+                   liked_users = ""
+                   num_likes = 0
+                   if !message['attachments'].empty?
+                       if message['attachments'][0]['type'] == "image"
+                          image = message['attachments'][0]['url'] 
+                       end
+                   end
+                   if !message['favorited_by'].nil?
+                       if message['favorited_by'].length != 0
+                           message['favorited_by'].each do | user |
+                               database.execute( "INSERT INTO likes(message_id, user_id) VALUES (?, ?)",
+                               message['id'], 
+                               user )
+                           end
+                       end 
+                   end
+                   if !message['text'].nil?
+                       database.execute( "INSERT INTO messages(message_id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, datetime('#{message['created_at']}', 'unixepoch'), ?, ?, ?, ?, ?)",
+                       message['id'],
+                       message['user_id'],
+                       message['group_id'],
+                       message['avatar_url'], 
+                       message['text'], 
+                       image )
+                   else
+                       database.execute( "INSERT INTO messages(message_id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, datetime('#{message['created_at']}', 'unixepoch'), ?, ?, ?, ?, ?)",
+                       message['id'],
+                       message['user_id'],
+                       message['group_id'],
+                       message['avatar_url'], 
+                       'none', 
+                       image )
                    end
                end
-               if !message['favorited_by'].nil?
-                   if message['favorited_by'].length != 0
-                       message['favorited_by'].each do | user |
-                           database.execute( "INSERT INTO likes(message_id, user_id) VALUES (?, ?)",
-                           message['id'], 
-                           user )
-                       end
+               message['favorited_by'].each do | likedMembers |
+                   if database.execute("SELECT count(user_id) FROM likes WHERE message_id=#{message['id']} AND user_id=#{likedMembers}")[0][0] == 0
+                       database.execute("INSERT INTO likes(message_id, user_id) VALUES (?, ?)",
+                       message['id'], 
+                       likedMembers ) 
                    end 
                end
-               if !message['text'].nil?
-                   database.execute( "INSERT INTO messages(message_id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, datetime('#{message['created_at']}', 'unixepoch'), ?, ?, ?, ?, ?)",
-                   message['id'],
-                   message['user_id'],
-                   message['group_id'],
-                   message['avatar_url'], 
-                   message['text'], 
-                   image )
-               else
-                   database.execute( "INSERT INTO messages(message_id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, datetime('#{message['created_at']}', 'unixepoch'), ?, ?, ?, ?, ?)",
-                   message['id'],
-                   message['user_id'],
-                   message['group_id'],
-                   message['avatar_url'], 
-                   'none', 
-                   image )
-               end
-           end
-           message['favorited_by'].each do | likedMembers |
-               if database.execute("SELECT count(user_id) FROM likes WHERE message_id=#{message['id']} AND user_id=#{likedMembers}")[0][0] == 0
-                   database.execute("INSERT INTO likes(message_id, user_id) VALUES (?, ?)",
-                   message['id'], 
-                   likedMembers ) 
-               end 
-           end
+            end
+        end
+
+        t = messages['response']['messages'].last['created_at']
+       
+        id = messages['response']['messages'].last['id'] 
+        #if ((Time.now.to_i - t) < searchTime)
+        #    scrapeMessages(messages['response']['messages'].last['id'], searchTime)
         end
     end
-
-    t = messages['response']['messages'].last['created_at']
-    
-    if ((Time.now.to_i - t) < searchTime)
-        scrapeMessages(messages['response']['messages'].last['id'], searchTime)
-    end
-end
 
 begin
     groupme = YAML.load_file($file)
@@ -172,5 +186,6 @@ end
 $token = groupme['groupme']['token']
 $database = groupme['groupme']['database']
 $group_id = groupme['groupme']['group_id']
-populateUsers($group_id, $token)
-#scrapeMessages(0, $time)
+#populateUsers($group_id, $token)
+#scrapeMessages(0, $time, $group_id, $token)
+pp getUser($token)
