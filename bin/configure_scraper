@@ -26,7 +26,7 @@ def createTables(database_path)
     end
 
     if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users';").empty?
-        database.execute('CREATE TABLE users(Name TEXT, user_id INT PRIMARY KEY, group_id INT, FOREIGN KEY(group_id) REFERENCES groups(group_id));')
+        database.execute('CREATE TABLE users(Name TEXT, user_id INT PRIMARY KEY, group_id INT, avatar_url TEXT, FOREIGN KEY(group_id) REFERENCES groups(group_id));')
     end
     
     if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='messages';").empty?
