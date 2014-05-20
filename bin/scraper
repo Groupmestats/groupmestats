@@ -73,7 +73,9 @@ def getGroups(token)
     group_ids = Array.new
 
     groups['response'].each do |group|
-        group_ids.push(group['id'])
+        group_ids.push({
+            :name => group['name'],
+            :group_id => group['id']})
     end
 
     return group_ids
