@@ -50,8 +50,8 @@ class Groupme
         base_uri groupme['groupme']['api']
         format :json
 
-        def get(query)
-            new_query = query + "token=#{$token}"
+        def get(query, token)
+            new_query = query + "?token=#{token}"
             response = self.class.get(new_query, :verify => false)
 
             retry_attempts = 0
@@ -77,15 +77,17 @@ end
 
 #This will populate the uid and current name of all new users to the users table
 #of the database.
-def populateUsers
+def populateUsers(group_id, token)
     gm = Groupme.new
     database = SQLite3::Database.new( $database )
-    merrifield = gm.get("/groups/#{$group_id}/?")
+    merrifield = gm.get("/groups/#{group_id}/", token)
     merrifield['response']['members'].each do | member |
         if database.execute( "SELECT * FROM users WHERE user_id='#{member['user_id']}'").empty?
-            database.execute( "INSERT INTO users(Name, user_id) VALUES (?, ?)", 
+            database.execute( "INSERT INTO users(Name, user_id, group_id, avatar_url) VALUES (?, ?, ?, ?)", 
             member['nickname'], 
-            member['user_id'] )
+            member['user_id'],
+            group_id,
+            member['image_url'] )
         end
     end
 end
@@ -161,5 +163,14 @@ def scrapeMessages(id, searchTime)
     end
 end
 
-populateUsers
-scrapeMessages(0, $time)
+begin
+    groupme = YAML.load_file($file)
+rescue
+    abort('Configuration file not found.  Exiting...')
+end
+
+$token = groupme['groupme']['token']
+$database = groupme['groupme']['database']
+$group_id = groupme['groupme']['group_id']
+populateUsers($group_id, $token)
+#scrapeMessages(0, $time)
