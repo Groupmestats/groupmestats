@@ -7,7 +7,7 @@ require 'time'
 require 'sqlite3'
 require 'pp'
 
-$file
+$file = 'test.yaml'
 $group_id
 $database = {}
 $time = Time.now.to_i
@@ -65,6 +65,18 @@ end
 def getUser(token)
     gm = Groupme.new
     return gm.get("/users/me/", token)['response']['id']
+end
+
+def getGroups(token)
+    gm = Groupme.new
+    groups = gm.get("/groups/", token)
+    group_ids = Array.new
+
+    groups['response'].each do |group|
+        group_ids.push(group['id'])
+    end
+
+    return group_ids
 end
 
 #This will populate the uid and current name of all new users to the users table
@@ -169,4 +181,4 @@ $database = groupme['groupme']['database']
 $group_id = groupme['groupme']['group_id']
 #populateUsers($group_id, $token)
 #scrapeMessages(0, $time, $group_id, $token)
-pp getUser($token)
+pp getGroups($token)
