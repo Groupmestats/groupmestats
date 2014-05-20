@@ -81,19 +81,43 @@ def getGroups(token)
     return group_ids
 end
 
-#This will populate the uid and current name of all new users to the users table
-#of the database.
-def populateUsers(group_id, token)
+def populateGroup(group_id, token)
     gm = Groupme.new
     database = SQLite3::Database.new( $database )
-    group = gm.get("/groups/#{group_id}/", token)
-    group['response']['members'].each do | member |
+    group = gm.get("/groups/#{group_id}/", token)['response']
+  
+    #Adds new group if they don't exist, and updates the group if they do 
+    if database.execute( "SELECT * FROM groups WHERE group_id='#{group['group_id']}'").empty? 
+        database.execute( "INSERT INTO groups(group_id, name, image, creator, created_at, updated_at) VALUES (?, ?, ?, ?, datetime('#{group['created_at']}','unixepoch'), datetime('#{group['updated_at']}','unixepoch'))",
+            group['group_id'],
+            group['name'],
+            group['image_url'],
+            group['creator_user_id'] )
+    else
+        database.execute( "UPDATE groups SET name=?, image=?, creator=?, created_at=datetime('#{group['created_at']}','unixepoch'), updated_at=datetime('#{group['updated_at']}','unixepoch') WHERE group_id='#{group['group_id']}'",
+            group['name'],
+            group['image_url'],
+            group['creator_user_id'] )
+    end
+   
+    #Adds any new members to the group, and updates any members who have made changes 
+    group['members'].each do | member |
         if database.execute( "SELECT * FROM users WHERE user_id='#{member['user_id']}'").empty?
-            database.execute( "INSERT INTO users(Name, user_id, group_id, avatar_url) VALUES (?, ?, ?, ?)", 
-            member['nickname'], 
-            member['user_id'],
-            group_id,
-            member['image_url'] )
+            database.execute( "INSERT INTO users(user_id, avatar_url) VALUES (?, ?)", 
+                member['user_id'],
+                member['image_url'] )
+        else
+            database.execute( "UPDATE users SET avatar_url=? WHERE user_id='#{member['user_id']}'",
+                member['image_url'] )
+        end
+        if database.execute( "SELECT * FROM user_groups WHERE user_id='#{member['user_id']}' AND group_id='#{group['group_id']}'").empty?
+            database.execute( "INSERT INTO user_groups(user_id, group_id, name) VALUES (?, ?, ?)",
+                member['user_id'],
+                group['group_id'],
+                member['nickname'] )
+        else
+            database.execute( "UPDATE user_groups SET name=? WHERE user_id='#{member['user_id']}' AND group_id='#{group['group_id']}'",
+                member['nickname'] )
         end
     end
 end
@@ -110,12 +134,12 @@ def scrapeMessages(searchTime, group_id, token)
     while (Time.now.to_i - t.to_i) < searchTime do
 
         if id == 0
-            messages = gm.get("groups/#{group_id}/messages", token)
+            messages = gm.get("groups/#{group_id}/messages", token)['response']
         else
-            messages = gm.get("groups/#{group_id}/messages", token, "before_id=#{id}")
+            messages = gm.get("groups/#{group_id}/messages", token, "before_id=#{id}")['response']
         end
 
-        messages['response']['messages'].each do | message |
+        messages['messages'].each do | message |
             t = Time.at(message['created_at'])
             if ((Time.now.to_i - t.to_i) < searchTime)
                if database.execute( "SELECT * FROM messages WHERE message_id='#{message['id']}'").empty?
@@ -164,11 +188,8 @@ def scrapeMessages(searchTime, group_id, token)
             end
         end
 
-        t = messages['response']['messages'].last['created_at']
-       
-        id = messages['response']['messages'].last['id'] 
-        #if ((Time.now.to_i - t) < searchTime)
-        #    scrapeMessages(messages['response']['messages'].last['id'], searchTime)
+        t = messages['messages'].last['created_at']
+        id = messages['messages'].last['id'] 
         end
     end
 
@@ -181,6 +202,6 @@ end
 $token = groupme['groupme']['token']
 $database = groupme['groupme']['database']
 group_id = groupme['groupme']['group_id']
-#populateUsers(group_id, $token)
-#scrapeMessages(0, $time, group_id, $token)
-pp getGroups($token)
+populateGroup(group_id, $token)
+scrapeMessages($time, group_id, $token)
+#pp getGroups($token)
