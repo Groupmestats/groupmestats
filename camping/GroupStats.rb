@@ -54,7 +54,7 @@ module GroupStats::Controllers
 										FROM user_groups
 										join users on users.user_id = user_groups.user_id
 										join messages on messages.user_id = users.user_id
-										where messages.created_at > datetime('now', ?) and messages.group_id = ?
+										where messages.created_at > datetime('now', ?) and user_groups.group_id = ?
 										group by messages.user_id order by count desc",
 		"-" + @input.days + " day",
 		@input.groupid)
