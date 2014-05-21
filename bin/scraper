@@ -81,6 +81,7 @@ def getGroups(token)
     return group_ids
 end
 
+#For a given token and group, it adds the group and users, if new.  Otherwise, it just updates them
 def populateGroup(group_id, token)
     gm = Groupme.new
     database = SQLite3::Database.new( $database )
@@ -122,9 +123,7 @@ def populateGroup(group_id, token)
     end
 end
 
-#This will pull all messages for a given period of time, and store it in the messages table
-#Argument 1 - time, in epoch seconds, to start the search.  0 is the present
-#Argument 2 - how far back to search, in epoch seconds.
+#This will pull all messages for a given period of time, group, and token, and store it in the messages table.  Takes in a time, in epoch seconds.  To search for all messages, entire the current epoch time.
 def scrapeMessages(searchTime, group_id, token)
     gm = Groupme.new
     database = SQLite3::Database.new( $database ) 
