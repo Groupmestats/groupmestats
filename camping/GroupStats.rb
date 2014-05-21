@@ -18,7 +18,7 @@ module GroupStats::Controllers
       rescue
         abort('Configuration file not found.  Exiting...')
       end
-      File.open(config['groupme']['index'])
+      File.open('index.html')
     end
   end
   
@@ -26,6 +26,10 @@ module GroupStats::Controllers
     def get()
 		if(@input.days == nil)
 			@input.days = "9999999999"
+		end
+		if(@input.groupid == nil)
+			@status = 400
+			return 'need group id'
 		end
         begin
             config = YAML.load_file($config_file)
@@ -39,8 +43,14 @@ module GroupStats::Controllers
             abort('Did not specify a valid database file')
         end
 
-		result = database.execute( "SELECT users.Name, count(messages.user_id) as count FROM users left join messages on messages.user_id = users.user_id where messages.created_at > datetime('now', ?) group by messages.user_id order by count desc",
-		"-" + @input.days + " day")
+		result = database.execute( "SELECT user_groups.Name, count(messages.user_id) as count
+										FROM user_groups
+										join users on users.user_id = user_groups.user_id
+										join messages on messages.user_id = users.user_id
+										where messages.created_at > datetime('now', ?) and messages.group_id = ?
+										group by messages.user_id order by count desc",
+		"-" + @input.days + " day",
+		@input.groupid)
 		headers['Content-Type'] = "application/json"
 		return result.to_json
     end
