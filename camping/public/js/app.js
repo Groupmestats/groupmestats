@@ -10,7 +10,8 @@ angular.module('myApp', [
   'myApp.controllers'
 ]).
 config(['$routeProvider', function($routeProvider) {
-  $routeProvider.when('/home', {templateUrl: 'partials/home.html', controller: 'HomeController'});
+  $routeProvider.when('/home', {templateUrl: 'partials/grouplist.html', controller: 'GroupListController'});
+  $routeProvider.when('/group', {templateUrl: 'partials/group.html', controller: 'GroupController'});
   $routeProvider.when('/about', {templateUrl: 'partials/about.html', controller: 'AboutController'});
   $routeProvider.otherwise({redirectTo: '/home'});
 }])

@@ -34,7 +34,9 @@ module GroupStats::Controllers
   
   class GroupList < R '/rest/grouplist'
 	def get()
-		return 'something'
+		result = $database.execute("select * from groups")
+		headers["Content-Type"] = "application/json"
+		return result.to_json
 	end
   end
   
