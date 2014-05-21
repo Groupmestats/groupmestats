@@ -1,2 +1,4 @@
 *.sqlite3
 camping/web.yaml
+*.yaml
+*.db
