@@ -49,14 +49,7 @@ module GroupStats::Controllers
 			@status = 400
 			return 'need group id'
 		end
-        begin
-            config = YAML.load_file($config_file)
-        rescue
-            abort('Configuration file not found.  Exiting...')
-        end
- 
-        
-
+		
 		result = $database.execute( "SELECT user_groups.Name, count(messages.user_id) as count
 										FROM user_groups
 										join users on users.user_id = user_groups.user_id
