@@ -138,7 +138,7 @@ def scrapeMessages(searchTime, group_id, token)
     
     id = 0
     t = Time.now.to_i
-    while (Time.now.to_i - t.to_i) < searchTime do
+    while (Time.now.to_i - t.to_i) < (searchTime + 604800) do
 
         if id == 0
             messages = gm.get("groups/#{group_id}/messages", token)['response']
@@ -185,6 +185,9 @@ def scrapeMessages(searchTime, group_id, token)
                        image )
                    end
                end
+            end    
+            #For likes, we want to scan all posts a week back from the search time
+            if ((Time.now.to_i - t.to_i) < (searchTime.to_i + 604800) )
                message['favorited_by'].each do | likedMembers |
                    if database.execute("SELECT count(user_id) FROM likes WHERE message_id=#{message['id']} AND user_id=#{likedMembers}")[0][0] == 0
                        database.execute("INSERT INTO likes(message_id, user_id) VALUES (?, ?)",
@@ -210,4 +213,4 @@ $token = groupme['groupme']['token']
 $database = groupme['groupme']['database']
 group_id = groupme['groupme']['group_id']
 populateGroup(group_id, $token)
-scrapeMessages($time, group_id, $token)
+scrapeMessages(86400, group_id, $token)
