@@ -3,7 +3,16 @@
 /* Controllers */
 
 angular.module('myApp.controllers', [])
-	.controller('HomeController', ['$scope', '$http', function($scope, $http) {
+	.controller('GroupListController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
+		 $http({method: 'GET', url: '/rest/grouplist'}).
+				success(function(data, status, headers, config) {
+					$scope.groupList = data
+				}).
+				error(function(data, status, headers, config) {
+
+				});
+	}])
+	.controller('GroupController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
 		$scope.days = 0
 		$scope.$watch('days', function(newValue, oldValue) {
              requestChart();
@@ -15,7 +24,7 @@ angular.module('myApp.controllers', [])
 			{
 				daysToRequest = 9999999
 			}
-			$http({method: 'GET', url: '/rest/postsmost', params: {days : daysToRequest}}).
+			$http({method: 'GET', url: '/rest/postsmost', params: {days : daysToRequest, groupid : $routeParams.groupid}}).
 				success(function(data, status, headers, config) {
 					drawChart(data)
 				}).
