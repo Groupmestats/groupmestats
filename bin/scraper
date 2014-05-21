@@ -5,7 +5,6 @@ require 'yaml'
 require 'httparty'
 require 'time'
 require 'sqlite3'
-require 'pp'
 
 $file = 'test.yaml'
 $database = {}
@@ -79,6 +78,15 @@ def getGroups(token)
     end
 
     return group_ids
+end
+
+#For a given token and group, it returns the last time the group was updated
+def getLastUpdate(group_id, token)
+    gm = Groupme.new
+    database = SQLite3::Database.new( $database )
+    group = gm.get("/groups/#{group_id}/", token)['response']
+
+    return group['updated_at']
 end
 
 #For a given token and group, it adds the group and users, if new.  Otherwise, it just updates them
@@ -203,4 +211,3 @@ $database = groupme['groupme']['database']
 group_id = groupme['groupme']['group_id']
 populateGroup(group_id, $token)
 scrapeMessages($time, group_id, $token)
-#pp getGroups($token)
