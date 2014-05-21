@@ -1,7 +1,6 @@
 #!/usr/bin/ruby
 require 'rubygems'
 require 'json'
-require 'httparty'
 require 'time'
 require 'sqlite3'
 require_relative 'groupme'
