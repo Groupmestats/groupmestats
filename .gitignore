@@ -2,3 +2,4 @@
 camping/web.yaml
 *.yaml
 *.db
+*test*
