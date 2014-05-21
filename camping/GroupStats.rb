@@ -28,12 +28,12 @@ end
 module GroupStats::Controllers
   class Index < R '/'
     def get
-      begin 
-        config = YAML.load_file($config_file)
-      rescue
-        abort('Configuration file not found.  Exiting...')
-      end
-      File.open(config['groupme']['index'])
+       begin 
+         config = YAML.load_file($config_file)
+       rescue
+         abort('Configuration file not found.  Exiting...')
+       end
+       File.open(File.join(File.expand_path(File.dirname(__FILE__)), 'index.html') )
     end
   end
   
