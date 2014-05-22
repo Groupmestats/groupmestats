@@ -44,7 +44,25 @@ module GroupStats::Controllers
 		return result.to_json
 	end
   end
-  
+
+  class WordCloud < R '/rest/wordcloud'
+    def get()
+        if(@input.days == nil)
+            @input.days = "9999999999"
+        end
+        if(@input.groupid == nil)
+            @status = 400
+            return 'need group id'
+        end
+ 
+        result = $database.execute( "SELECT text FROM messages WHERE messages.created_at > datetime('now', ?) AND group_id=?",
+        "-" + @input.days + " day",
+        @input.groupid)
+        headers['Content-Type'] = "application/json"
+        return result.to_json
+    end 
+  end
+    
   class PostsMost < R '/rest/postsmost'
     def get()
 		if(@input.days == nil)
