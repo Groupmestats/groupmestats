@@ -13,6 +13,32 @@ class Scraper
     def initialize(database, token)
         @database = database
         @token = token
+
+        begin
+            database = SQLite3::Database.new( database_path )
+        rescue
+            abort('Invalid database file')
+        end
+
+        if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='user_groups';").empty?
+            database.execute('CREATE TABLE user_groups(user_id INT, group_id INT, name TEXT, FOREIGN KEY(user_id) REFERENCES users(user_id), FOREIGN KEY(group_id) REFERENCES groups(group_id));')
+        end
+
+        if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='groups';").empty?
+            database.execute('CREATE TABLE groups(group_id INT PRIMARY KEY, name TEXT, date_scraped DATETIME, image TEXT, creator TEXT, created_at DATETIME, updated_at DATETIME);')
+        end
+
+        if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='users';").empty?
+            database.execute('CREATE TABLE users(user_id INT PRIMARY KEY, avatar_url TEXT);')
+        end
+
+        if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='messages';").empty?
+            database.execute('CREATE TABLE messages(message_id INT PRIMARY KEY, created_at DATETIME, user_id INT, group_id INT, avatar_url TEXT, text TEXT, image TEXT, FOREIGN KEY(user_id) REFERENCES users(user_id), FOREIGN KEY(group_id) REFERENCES groups(group_id));')
+        end
+
+        if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='likes';").empty?
+            database.execute('CREATE TABLE likes(message_id INT, user_id INT, FOREIGN KEY(message_id) REFERENCES messages(message_id), FOREIGN KEY(user_id) REFERENCES users(user_id))' )
+        end        
     end
 
     #Returns the user_id
