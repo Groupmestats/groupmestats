@@ -4,6 +4,7 @@ require 'json'
 require 'time'
 require 'sqlite3'
 require_relative 'groupme'
+require 'pp'
 
 #Scraper class.  This is initialized with a path to the sqlite database and a groupme oauth token
 class Scraper
@@ -13,9 +14,10 @@ class Scraper
     def initialize(database, token)
         @database = database
         @token = token
-
+    
+        database_path = database
         begin
-            database = SQLite3::Database.new( database_path )
+            database = SQLite3::Database.new( @database )
         rescue
             abort('Invalid database file')
         end
