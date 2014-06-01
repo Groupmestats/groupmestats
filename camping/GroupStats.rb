@@ -2,6 +2,9 @@ require 'sqlite3'
 require 'json'
 require 'yaml'
 require 'pp'
+require 'camping/session'
+require 'set'
+require 'erb'
 
 Camping.goes :GroupStats
 if !ARGV[1].nil?
@@ -11,6 +14,8 @@ else
 end
 
 def GroupStats.create
+    set :secret, "this is my secret."
+    include Camping::Session
     puts "creating db connection"
     begin 
         config = YAML.load_file($config_file)
@@ -23,25 +28,37 @@ def GroupStats.create
     rescue
         abort('Did not specify a valid database file')
     end
+    
+    begin
+        $client_id = config['groupme']['client_id']
+    rescue
+        abort('Did not specify a GroupMe client_id')
+    end
 end
 
 module GroupStats::Controllers
 
   class Index < R '/'
-    def get
-        begin 
-            config = YAML.load_file($config_file)
-        rescue
-            abort('Configuration file not found.  Exiting...')
+    def get 
+        if(@state.token == nil)
+            client_id = $client_id
+            template_path = File.join(File.expand_path(File.dirname(__FILE__)), 'authenticate.html')
+            return ERB.new(File.read(template_path)).result(binding)
+        else
+            begin 
+                config = YAML.load_file($config_file)
+            rescue
+                abort('Configuration file not found.  Exiting...')
+            end
+            File.open(File.join(File.expand_path(File.dirname(__FILE__)), 'index.html') )
         end
-        File.open(File.join(File.expand_path(File.dirname(__FILE__)), 'index.html') )
     end
   end
   
   class Authenticate < R '/authenticate'
     def get
-       @input.token = access_token
-       
+       @state.token = @input.access_token
+       return redirect Index
     end
   end
   
@@ -111,5 +128,7 @@ module GroupStats::Controllers
 end
 
 module GroupStats::Views
-  #not using
+    def initalAuth
+        p "Welcome to my blog"
+    end
 end

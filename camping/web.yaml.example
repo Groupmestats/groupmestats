@@ -1,4 +1,4 @@
 ---
 groupme:
    database: <DB_PATH>
-   index: <INDEX.HTML_PATH>
+   client_id: <YOUR GROUPME APP'S CLIENT ID>

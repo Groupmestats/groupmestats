@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en" ng-app="myApp" class="no-js"> <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Groupme stats</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="css/bootstrap.css"/>
+  
+</head>
+<body>
+
+	<body class="container">
+	<div class="row">
+		<div class="col-md-12">
+			<h3>welcome to the <i>super duper groupme stats program</i>, stranger</h3><br/>
+			<form action="https://oauth.groupme.com/oauth/authorize">
+				<input type="hidden" name="client_id" value="<%= client_id %>">
+				<button type="submit" class="btn btn-default btn-lg">
+					Authenticate with GroupMe
+				</button>
+			</form>
+			<br/>
+			<p style="font-style:italic">disclaimer we won't steal your data or anything i swear</p>
+		</div>
+	</div>
+	<hr>
+
+</body>
+</html>
