@@ -15,7 +15,6 @@ class Scraper
         @database = database
         @token = token
     
-        database_path = database
         begin
             database = SQLite3::Database.new( @database )
         rescue
