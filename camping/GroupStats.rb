@@ -81,7 +81,8 @@ module GroupStats::Controllers
             return 'need group id'
         end
 
-        result = $database.execute( "select user_groups.Name, count(likes.user_id) as count from user_groups left join likes on messages.message_id=likes.message_id left join messages on messages.user_id=user_groups.user_id where messages.group_id=? and user_groups.group_id=? group by messages.user_id order by count desc",
+        result = $database.execute( "select user_groups.Name, count(likes.user_id) as count from user_groups left join likes on messages.message_id=likes.message_id left join messages on messages.user_id=user_groups.user_id where messages.created_at > datetime('now', ?) and messages.group_id=? and user_groups.group_id=? group by messages.user_id order by count desc",
+        "-" + @input.days + " day",
         @input.groupid,
         @input.groupid)
         headers['Content-Type'] = "application/json"
