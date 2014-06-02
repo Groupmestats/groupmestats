@@ -5,18 +5,20 @@ require 'pp'
 require 'camping/session'
 require 'set'
 require 'erb'
+require_relative '../bin/scraper.rb'
 
 Camping.goes :GroupStats
-if !ARGV[1].nil?
-    $config_file = ARGV[1]
-else
+#if !ARGV[1].nil?
+#    $config_file = ARGV[1]
+#else
     $config_file = 'web.yaml'
-end
+#end
 
 def GroupStats.create
     set :secret, "this is my secret."
     include Camping::Session
     puts "creating db connection"
+    pp $config_file
     begin 
         config = YAML.load_file($config_file)
     rescue
@@ -24,7 +26,8 @@ def GroupStats.create
     end
 
     begin
-        $database = SQLite3::Database.new( config['groupme']['database'] )
+        $database_path = config['groupme']['database']
+        $database = SQLite3::Database.new( $database_path )
     rescue
         abort('Did not specify a valid database file')
     end
@@ -58,14 +61,17 @@ module GroupStats::Controllers
   class Authenticate < R '/authenticate'
     def get
        @state.token = @input.access_token
+       $scraper = Scraper.new($database_path, @state.token)
        return redirect Index
     end
   end
   
   class GroupList < R '/rest/grouplist'
     def get()
-        result = $database.execute("select * from groups")
-        headers["Content-Type"] = "application/json"
+        result = $scraper.getGroups
+        result.each do | group |
+#            $scraper.populateGroup(group['group_id'].to_i)
+        end
         return result.to_json
     end
   end

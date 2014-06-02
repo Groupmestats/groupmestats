@@ -4,7 +4,6 @@ require 'json'
 require 'time'
 require 'sqlite3'
 require_relative 'groupme'
-require 'pp'
 
 #Scraper class.  This is initialized with a path to the sqlite database and a groupme oauth token
 class Scraper
@@ -57,9 +56,10 @@ class Scraper
         groups['response'].each do |group|
             group_ids.push({
                 :name => group['name'],
-                :group_id => group['id']})
+                :group_id => group['id'],
+                :image => group['image_url']})
         end
-
+        
         return group_ids
     end
 
