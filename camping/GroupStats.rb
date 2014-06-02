@@ -8,17 +8,16 @@ require 'erb'
 require_relative '../bin/scraper.rb'
 
 Camping.goes :GroupStats
-#if !ARGV[1].nil?
-#    $config_file = ARGV[1]
-#else
+if !ARGV[1].nil?
+    $config_file = ARGV[1]
+else
     $config_file = 'web.yaml'
-#end
+end
 
 def GroupStats.create
     set :secret, "this is my secret."
     include Camping::Session
     puts "creating db connection"
-    pp $config_file
     begin 
         config = YAML.load_file($config_file)
     rescue
