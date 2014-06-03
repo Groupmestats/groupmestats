@@ -80,13 +80,13 @@ class Scraper
       
         #Adds new group if they don't exist, and updates the group if they do 
         if database.execute( "SELECT * FROM groups WHERE group_id='#{group['group_id']}'").empty? 
-            database.execute( "INSERT INTO groups(group_id, name, image, creator, created_at, updated_at) VALUES (?, ?, ?, ?, datetime('#{group['created_at']}','unixepoch'), datetime('#{group['updated_at']}','unixepoch'))",
+            database.execute( "INSERT INTO groups(group_id, name, image, creator, created_at) VALUES (?, ?, ?, ?, datetime('#{group['created_at']}','unixepoch'))",
                 group['group_id'],
                 group['name'],
                 group['image_url'],
                 group['creator_user_id'] )
         else
-            database.execute( "UPDATE groups SET name=?, image=?, creator=?, created_at=datetime('#{group['created_at']}','unixepoch'), updated_at=datetime('#{group['updated_at']}','unixepoch') WHERE group_id='#{group['group_id']}'",
+            database.execute( "UPDATE groups SET name=?, image=?, creator=?, created_at=datetime('#{group['created_at']}','unixepoch') WHERE group_id='#{group['group_id']}'",
                 group['name'],
                 group['image_url'],
                 group['creator_user_id'] )
@@ -196,6 +196,10 @@ class Scraper
 
             t = messages['messages'].last['created_at']
             id = messages['messages'].last['id'] 
+
+            group = gm.get("groups/#{group_id}/", @token)['response']
+            database = SQLite3::Database.new( @database )
+            database.execute("UPDATE groups SET updated_at=datetime('#{group['updated_at']}','unixepoch') WHERE group_id='#{group['group_id']}'")
         end
     end
 end
