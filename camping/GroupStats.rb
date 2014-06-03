@@ -58,6 +58,7 @@ module GroupStats::Controllers
     def get()
         result = $scraper.getGroups
         result.each do | group |
+            #TODO: Will, add a progress bar here!!!!
             $scraper.populateGroup(group['group_id'].to_i)
         end
         return result.to_json

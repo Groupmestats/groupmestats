@@ -55,11 +55,11 @@ class Scraper
 
         groups['response'].each do |group|
             group_ids.push({
-                :name => group['name'],
-                :group_id => group['id'],
-                :image => group['image_url']})
+                'name' => group['name'],
+                'group_id' => group['id'],
+                'image' => group['image_url']})
         end
-        
+
         return group_ids
     end
 
