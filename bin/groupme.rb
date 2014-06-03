@@ -23,7 +23,7 @@ class Groupme
 
         if response.code != 200
             if response.nil?
-                abort('No more messages returned from groupme. Perhaps you have pulled all available messages?')
+                return 'nil'
             end
             while retry_attempts < 3 do
                 puts "Could not connect to groupme.com.  Will retry in 60 seconds"

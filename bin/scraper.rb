@@ -145,6 +145,10 @@ class Scraper
                 messages = gm.get("groups/#{group_id}/messages", @token, "before_id=#{id}")['response']
             end
 
+            if messages.nil?
+                return false
+            end
+
             messages['messages'].each do | message |
                 t = Time.at(message['created_at'])
                 if ((Time.now.to_i - t.to_i) < searchTime)
