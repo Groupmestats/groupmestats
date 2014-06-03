@@ -65,6 +65,13 @@ module GroupStats::Controllers
     end
   end
 
+  class ScrapeGroup < R '/rest/scrapegroup'
+    def get()
+        $scraper.scrapeNewMessages(@input.groupid)
+        return true
+    end
+  end
+
   class WordCloud < R '/rest/wordcloud'
     def get()
         if(@input.days == nil)
