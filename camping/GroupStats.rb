@@ -1,39 +1,33 @@
 require 'sqlite3'
 require 'json'
 require 'yaml'
-require 'pp'
 require 'camping/session'
 require 'set'
 require 'erb'
 require_relative '../bin/scraper.rb'
 
 Camping.goes :GroupStats
-if !ARGV[1].nil?
-    $config_file = ARGV[1]
-else
-    $config_file = 'web.yaml'
-end
 
 def GroupStats.create
     set :secret, "this is my secret."
     include Camping::Session
-    puts "creating db connection"
-    begin 
-        config = YAML.load_file($config_file)
-    rescue
+
+    begin
+        $config = YAML.load_file(File.join(File.expand_path(File.dirname(__FILE__)), 'web.yaml') )
+    rescue Errno::ENOENT => e
         abort('Configuration file not found.  Exiting...')
     end
 
     begin
-        $database_path = config['groupme']['database']
+        $database_path = $config['groupme']['database']
         $database = SQLite3::Database.new( $database_path )
-    rescue
+    rescue Errno::ENOENT => e
         abort('Did not specify a valid database file')
     end
     
-    begin
-        $client_id = config['groupme']['client_id']
-    rescue
+    if !$config['groupme']['client_id'].nil?
+        $client_id = $config['groupme']['client_id']
+    else    
         abort('Did not specify a GroupMe client_id')
     end
 end
@@ -47,11 +41,6 @@ module GroupStats::Controllers
             template_path = File.join(File.expand_path(File.dirname(__FILE__)), 'authenticate.html')
             return ERB.new(File.read(template_path)).result(binding)
         else
-            begin 
-                config = YAML.load_file($config_file)
-            rescue
-                abort('Configuration file not found.  Exiting...')
-            end
             File.open(File.join(File.expand_path(File.dirname(__FILE__)), 'index.html') )
         end
     end
@@ -69,7 +58,7 @@ module GroupStats::Controllers
     def get()
         result = $scraper.getGroups
         result.each do | group |
-#            $scraper.populateGroup(group['group_id'].to_i)
+            $scraper.populateGroup(group['group_id'].to_i)
         end
         return result.to_json
     end
