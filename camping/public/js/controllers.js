@@ -4,7 +4,33 @@
 
 angular.module('myApp.controllers', [])
 	.controller('GroupListController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
-		 $http({method: 'GET', url: '/rest/grouplist'}).
+		$scope.scrapeGroup = function(index)
+		{
+			var group = $scope.groupList[index]
+			group.loading = true;
+			$http({method: 'GET', url: '/rest/scrapegroup', params: { groupid: group.group_id }}).
+				success(function(data, status, headers, config) {
+					group.loading = false;
+					//todo: refresh last updated date
+				}).
+				error(function(data, status, headers, config) {
+					group.loading = false;
+				});
+		}
+	
+		$scope.refreshGroupList = function(index)
+		{
+			$scope.groupListLoading = true;
+			$http({method: 'GET', url: '/rest/refreshGroupList'}).
+				success(function(data, status, headers, config) {
+					$scope.groupListLoading = false;
+				}).
+				error(function(data, status, headers, config) {
+					$scope.groupListLoading = false;
+				});
+		}
+	
+		$http({method: 'GET', url: '/rest/groupList'}).
 				success(function(data, status, headers, config) {
 					$scope.groupList = data
 				}).

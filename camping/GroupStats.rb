@@ -54,17 +54,26 @@ module GroupStats::Controllers
     end
   end
   
-  class GroupList < R '/rest/grouplist'
+  class GroupList < R '/rest/groupList'
     def get()
-        result = $scraper.getGroups
-        result.each do | group |
-            #TODO: Will, add a progress bar here!!!!
-            $scraper.populateGroup(group['group_id'].to_i)
-        end
+        $database.results_as_hash = true
+        #result = $database.execute( "SELECT * FROM groups join user_groups on groups.group_id = user_groups.group_id where user_groups.user_id = ?", ####) #TODO: update to only get user's groups
+        result = $database.execute( "SELECT * FROM groups");
+        $database.results_as_hash = false
         return result.to_json
     end
   end
-
+  
+  class RefreshGroupList < R '/rest/refreshGroupList'
+    def get()
+        groups = $scraper.getGroups
+        groups.each do | group |
+            $scraper.populateGroup(group['group_id'].to_i)
+        end
+        return groups.to_json
+    end
+  end
+  
   class ScrapeGroup < R '/rest/scrapegroup'
     def get()
         $scraper.scrapeNewMessages(@input.groupid)
