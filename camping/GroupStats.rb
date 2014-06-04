@@ -57,8 +57,9 @@ module GroupStats::Controllers
   class GroupList < R '/rest/groupList'
     def get()
         $database.results_as_hash = true
-        #result = $database.execute( "SELECT * FROM groups join user_groups on groups.group_id = user_groups.group_id where user_groups.user_id = ?", ####) #TODO: update to only get user's groups
-        result = $database.execute( "SELECT * FROM groups");
+        result = $database.execute( "SELECT groups.group_id, groups.name, groups.image, groups.updated_at FROM groups join user_groups on groups.group_id = user_groups.group_id where user_groups.user_id = ?", 
+        $scraper.getUser) #TODO: update to only get user's groups
+        #result = $database.execute( "SELECT * FROM groups");
         $database.results_as_hash = false
         return result.to_json
     end
