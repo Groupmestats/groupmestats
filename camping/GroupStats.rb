@@ -82,6 +82,44 @@ module GroupStats::Controllers
     end
   end
 
+  class TopPost < R '/rest/toppost'
+    def get()
+        if(@input.days == nil)
+            @input.days = "9999999999"
+        end
+        if(@input.groupid == nil)
+            @status = 400
+            return 'need group id'
+        end
+
+        result = $database.execute( "select count(likes.user_id) as count, messages.text, user_groups.Name, users.avatar_url from likes join messages on messages.message_id=likes.message_id left join user_groups on user_groups.user_id=messages.user_id left join users on users.user_id=messages.user_id WHERE messages.created_at > datetime('now', ?) AND messages.group_id=? AND user_groups.group_id=? and messages.image=='none' group by messages.message_id order by count desc limit 1",
+        "-" + @input.days + " day",
+        @input.groupid,
+        @input.groupid)
+        headers['Content-Type'] = "application/json"
+        return result.to_json
+    end
+  end
+
+  class TopImage < R '/rest/topimage'
+    def get()
+        if(@input.days == nil)
+            @input.days = "9999999999"
+        end
+        if(@input.groupid == nil)
+            @status = 400
+            return 'need group id'
+        end
+
+        result = $database.execute("select count(likes.user_id) as count, messages.text, messages.image, user_groups.Name, users.avatar_url from likes join messages on messages.message_id=likes.message_id left join user_groups on user_groups.user_id=messages.user_id left join users on users.user_id=messages.user_id WHERE messages.created_at > datetime('now', ?) AND messages.group_id=? AND user_groups.group_id=? and messages.image!='none' group by messages.message_id order by count desc limit 1",
+        "-" + @input.days + " day",
+        @input.groupid,
+        @input.groupid)
+        headers['Content-Type'] = "application/json"
+        return result.to_json
+    end
+  end
+
   class WordCloud < R '/rest/wordcloud'
     def get()
         if(@input.days == nil)
