@@ -8,10 +8,12 @@ require_relative '../bin/scraper.rb'
 
 Camping.goes :GroupStats
 
-def GroupStats.create
+module GroupStats
     set :secret, "this is my secret."
     include Camping::Session
+end
 
+def GroupStats.create
     begin
         $config = YAML.load_file(File.join(File.expand_path(File.dirname(__FILE__)), 'web.yaml') )
     rescue Errno::ENOENT => e
@@ -36,6 +38,7 @@ module GroupStats::Controllers
 
   class Index < R '/'
     def get 
+        puts('AT INDEX @state.token nil ? ' +  String(@state.token == nil ));
         if(@state.token == nil)
             client_id = $client_id
             template_path = File.join(File.expand_path(File.dirname(__FILE__)), 'authenticate.html')
@@ -48,8 +51,11 @@ module GroupStats::Controllers
   
   class Authenticate < R '/authenticate'
     def get
+        puts('authenticating');
        @state.token = @input.access_token
-       $scraper = Scraper.new($database_path, @state.token)
+       @state.scraper = Scraper.new($database_path, @state.token)
+       @state.user_id = @state.scraper.getUser
+       puts('@state.token = ' + @state.token );
        return redirect Index
     end
   end
@@ -57,9 +63,11 @@ module GroupStats::Controllers
   class GroupList < R '/rest/groupList'
     def get()
         $database.results_as_hash = true
-        result = $database.execute( "SELECT groups.group_id, groups.name, groups.image, groups.updated_at FROM groups join user_groups on groups.group_id = user_groups.group_id where user_groups.user_id = ?", 
-        $scraper.getUser) #TODO: update to only get user's groups
-        #result = $database.execute( "SELECT * FROM groups");
+        result = $database.execute( "SELECT groups.group_id, groups.name, groups.image, groups.updated_at 
+            FROM groups join user_groups on groups.group_id = user_groups.group_id 
+            where user_groups.user_id = ?", 
+            @state.user_id
+        )
         $database.results_as_hash = false
         return result.to_json
     end
@@ -67,9 +75,9 @@ module GroupStats::Controllers
   
   class RefreshGroupList < R '/rest/refreshGroupList'
     def get()
-        groups = $scraper.getGroups
+        groups = @state.scraper.getGroups
         groups.each do | group |
-            $scraper.populateGroup(group['group_id'].to_i)
+            @state.scraper.populateGroup(group['group_id'].to_i)
         end
         return groups.to_json
     end
@@ -77,7 +85,7 @@ module GroupStats::Controllers
   
   class ScrapeGroup < R '/rest/scrapegroup'
     def get()
-        $scraper.scrapeNewMessages(@input.groupid)
+        @state.scraper.scrapeNewMessages(@input.groupid)
         return true
     end
   end
