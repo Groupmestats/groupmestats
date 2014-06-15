@@ -45,6 +45,14 @@ angular.module('myApp.controllers', [])
              requestChart();
            });
 		
+		$http({method: 'GET', url: '/rest/group', params: {groupid : $routeParams.groupid}}).
+				success(function(data, status, headers, config) {
+					$scope.group = data
+				}).
+				error(function(data, status, headers, config) {
+
+				});
+		
 		function requestChart(){
 			var daysToRequest = $scope.days
 			if(daysToRequest == 0)

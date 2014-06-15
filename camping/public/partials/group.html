@@ -1,4 +1,5 @@
 <div class="col-md-12">
+	<img src="{{group.image}}.avatar" style="float:left; padding-right:15px"></img><h3>{{group.name}}</h3>
 	<br/>
 	<div class="btn-group">
 	  <button type="button" class="btn btn-default" ng-click="setDays(0)">All</button>
@@ -8,5 +9,5 @@
 	  <button type="button" class="btn btn-default" ng-click="setDays(1)">Day</button>
 	</div>
 	
-	<div gms-piechart gms-title="Posts in Merrifielderos by User" gms-data="piechartData" style="width:800px;height:600px;"></div>
+	<div gms-piechart gms-title="Posts in {{group.name}} by User" gms-data="piechartData" style="width:800px;height:600px;"></div>
 </div>

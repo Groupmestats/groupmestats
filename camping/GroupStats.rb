@@ -73,6 +73,24 @@ module GroupStats::Controllers
     end
   end
   
+  class Group < R '/rest/group'
+    def get()
+        $database.results_as_hash = true
+        result = $database.execute( "SELECT groups.group_id, groups.name, groups.image, groups.updated_at 
+            FROM groups join user_groups on groups.group_id = user_groups.group_id 
+            where user_groups.user_id = ? and groups.group_id = ?", 
+            @state.user_id,
+            @input.groupid
+        )
+        if(result.length == 0)
+            @status = 400
+            return "";
+        end
+        $database.results_as_hash = false
+        return result[0].to_json
+    end
+  end
+  
   class RefreshGroupList < R '/rest/refreshGroupList'
     def get()
         groups = @state.scraper.getGroups
