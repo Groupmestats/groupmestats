@@ -34,6 +34,14 @@ def GroupStats.create
     end
 end
 
+def checkGroups
+    if @state.groups.include?(@input.group)
+        return true
+    else
+        return false
+    end
+end
+
 module GroupStats::Controllers
 
   class Index < R '/'
@@ -52,14 +60,21 @@ module GroupStats::Controllers
   class Authenticate < R '/authenticate'
     def get
         puts('authenticating');
-       @state.token = @input.access_token
-       @state.scraper = Scraper.new($database_path, @state.token)
-       @state.user_id = @state.scraper.getUser
-       puts('@state.token = ' + @state.token );
-       return redirect Index
+        @state.token = @input.access_token
+        @state.scraper = Scraper.new($database_path, @state.token)
+        @state.user_id = @state.scraper.getUser
+        puts('@state.token = ' + @state.token );
+
+        @state.groups = Array.new
+        @state.scraper.getGroups.each do |group|
+            @state.groups.push(group['group_id'])
+        end
+
+        puts @state.groups
+        return redirect Index
     end
   end
-  
+
   class GroupList < R '/rest/groupList'
     def get()
         $database.results_as_hash = true
@@ -137,7 +152,11 @@ module GroupStats::Controllers
             @status = 400
             return 'need group id'
         end
- 
+
+        #if GroupStats.checkGroups(@input.groupid)
+        #    return nil
+        #end 
+
         result = $database.execute( "SELECT text FROM messages WHERE messages.created_at > datetime('now', ?) AND group_id=?",
         "-" + @input.days + " day",
         @input.groupid)
