@@ -43,6 +43,7 @@ angular.module('myApp.controllers', [])
 		$scope.piechartData = "";
 		$scope.$watch('days', function(newValue, oldValue) {
              requestChart();
+			 requestTop();
            });
 		
 		$http({method: 'GET', url: '/rest/group', params: {groupid : $routeParams.groupid}}).
@@ -67,7 +68,22 @@ angular.module('myApp.controllers', [])
 
 				});
 		}
+		
+		function requestTop(){
+			var daysToRequest = $scope.days
+			if(daysToRequest == 0)
+			{
+				daysToRequest = 9999999
+			}
+			$http({method: 'GET', url: '/rest/toppost', params: {days : daysToRequest, groupid : $routeParams.groupid, num: 5}}).
+				success(function(data, status, headers, config) {
+					$scope.topPosts = data
+				}).
+				error(function(data, status, headers, config) {
 
+				});
+		}
+		
 		$scope.setDays = function(newday)
 		{
 			$scope.days = newday;
