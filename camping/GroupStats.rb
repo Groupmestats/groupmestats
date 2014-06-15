@@ -34,14 +34,6 @@ def GroupStats.create
     end
 end
 
-def checkGroups
-    if @state.groups.include?(@input.group)
-        return true
-    else
-        return false
-    end
-end
-
 module GroupStats::Controllers
 
   class Index < R '/'
@@ -67,12 +59,19 @@ module GroupStats::Controllers
 
         @state.groups = Array.new
         @state.scraper.getGroups.each do |group|
-            @state.groups.push(group['group_id'])
+            @state.groups.push(group['group_id'].to_i)
         end
 
-        puts @state.groups
         return redirect Index
     end
+  end
+
+  def getGroups(group_id)
+      if @state.groups.include?(group_id.to_i)
+          return true
+      else
+          return false
+      end
   end
 
   class GroupList < R '/rest/groupList'
@@ -90,6 +89,10 @@ module GroupStats::Controllers
   
   class Group < R '/rest/group'
     def get()
+        if !getGroups(@input.groupid)
+            return 'nil'
+        end
+ 
         $database.results_as_hash = true
         result = $database.execute( "SELECT groups.group_id, groups.name, groups.image, groups.updated_at 
             FROM groups join user_groups on groups.group_id = user_groups.group_id 
@@ -118,6 +121,10 @@ module GroupStats::Controllers
   
   class ScrapeGroup < R '/rest/scrapegroup'
     def get()
+        if !getGroups(@input.groupid)
+            return 'nil'
+        end
+
         @state.scraper.scrapeNewMessages(@input.groupid)
         return true
     end
@@ -135,6 +142,11 @@ module GroupStats::Controllers
         if(@input.num == nil)
             @input.num = 1
         end
+
+        if !getGroups(@input.groupid)
+            return 'nil'
+        end
+
         $database.results_as_hash = true
         result = $database.execute( "select count(likes.user_id) as count, messages.text, user_groups.Name, users.avatar_url from likes join messages on messages.message_id=likes.message_id left join user_groups on user_groups.user_id=messages.user_id left join users on users.user_id=messages.user_id WHERE messages.created_at > datetime('now', ?) AND messages.group_id=? AND user_groups.group_id=? and messages.image=='none' group by messages.message_id order by count desc limit ?",
         "-" + @input.days + " day",
@@ -157,6 +169,10 @@ module GroupStats::Controllers
             return 'need group id'
         end
 
+        if getGroups(@input.groupid)
+            return 'nil'
+        end
+
         result = $database.execute("select count(likes.user_id) as count, messages.text, messages.image, user_groups.Name, users.avatar_url from likes join messages on messages.message_id=likes.message_id left join user_groups on user_groups.user_id=messages.user_id left join users on users.user_id=messages.user_id WHERE messages.created_at > datetime('now', ?) AND messages.group_id=? AND user_groups.group_id=? and messages.image!='none' group by messages.message_id order by count desc limit 1",
         "-" + @input.days + " day",
         @input.groupid,
@@ -176,9 +192,13 @@ module GroupStats::Controllers
             return 'need group id'
         end
 
-        #if GroupStats.checkGroups(@input.groupid)
-        #    return nil
-        #end 
+        if getGroups(@input.groupid)
+            return 'nil'
+        end
+
+        if getGroups(@input.groupid)
+            return 'nil'
+        end 
 
         result = $database.execute( "SELECT text FROM messages WHERE messages.created_at > datetime('now', ?) AND group_id=?",
         "-" + @input.days + " day",
@@ -196,6 +216,10 @@ module GroupStats::Controllers
         if(@input.groupid == nil)
             @status = 400
             return 'need group id'
+        end
+
+        if getGroups(@input.groupid)
+            return 'nil'
         end
 
         result = $database.execute( "select user_groups.Name, count(likes.user_id) as count from user_groups left join likes on messages.message_id=likes.message_id left join messages on messages.user_id=user_groups.user_id where messages.created_at > datetime('now', ?) and messages.group_id=? and user_groups.group_id=? group by messages.user_id order by count desc",
@@ -217,6 +241,10 @@ module GroupStats::Controllers
             return 'need group id'
         end
 
+        if getGroups(@input.groupid)
+            return 'nil'
+        end
+
         result = $database.execute( "select user_groups.Name, count(likes.user_id) as count from likes left join user_groups on user_groups.user_id=likes.user_id left join messages on messages.message_id=likes.message_id where messages.created_at > datetime('now', ?) and messages.group_id=? and user_groups.group_id=? group by likes.user_id order by count desc",        
         "-" + @input.days + " day",
         @input.groupid,
@@ -234,6 +262,10 @@ module GroupStats::Controllers
         if(@input.groupid == nil)
             @status = 400
             return 'need group id'
+        end
+
+        if getGroups(@input.groupid)
+            return 'nil'
         end
         
         result = $database.execute( "SELECT user_groups.Name, count(messages.user_id) as count FROM user_groups left join messages on messages.user_id = user_groups.user_id WHERE messages.created_at > datetime('now', ?) AND messages.group_id=? AND user_groups.group_id=? group by messages.user_id order by count desc",
