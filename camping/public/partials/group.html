@@ -9,5 +9,8 @@
 	  <button type="button" class="btn btn-default" ng-click="setDays(1)">Day</button>
 	</div>
 	
+	<h4>Top 5 posts:</h4>
+	<p ng-repeat="post in topPosts"><b>{{post.name}}</b> ({{post.count}}): {{post.text}}</p>
+	
 	<div gms-piechart gms-title="Posts in {{group.name}} by User" gms-data="piechartData" style="width:800px;height:600px;"></div>
 </div>
