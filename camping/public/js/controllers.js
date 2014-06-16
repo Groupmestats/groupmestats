@@ -42,7 +42,8 @@ angular.module('myApp.controllers', [])
 		$scope.days = 0
 		$scope.piechartData = "";
 		$scope.$watch('days', function(newValue, oldValue) {
-             requestChart();
+             requestPostsMostChart();
+             requestLikesReceivedChart();
 			 requestTop();
            });
 		
@@ -54,7 +55,7 @@ angular.module('myApp.controllers', [])
 
 				});
 		
-		function requestChart(){
+		function requestPostsMostChart(){
 			var daysToRequest = $scope.days
 			if(daysToRequest == 0)
 			{
@@ -62,12 +63,28 @@ angular.module('myApp.controllers', [])
 			}
 			$http({method: 'GET', url: '/rest/postsmost', params: {days : daysToRequest, groupid : $routeParams.groupid}}).
 				success(function(data, status, headers, config) {
-					$scope.piechartData = data
+					$scope.postsMostData = data
 				}).
 				error(function(data, status, headers, config) {
 
 				});
 		}
+
+        function requestLikesReceivedChart(){
+            var daysToRequest = $scope.days
+            if(daysToRequest == 0)
+            {
+                daysToRequest = 9999999
+            }
+            $http({method: 'GET', url: '/rest/totallikesreceived', params: {days : daysToRequest, groupid : $routeParams.groupid}}).
+                success(function(data, status, headers, config) {
+                    $scope.likesReceivedData = data
+                }).
+                error(function(data, status, headers, config) {
+
+                });
+        }
+
 		
 		function requestTop(){
 			var daysToRequest = $scope.days
