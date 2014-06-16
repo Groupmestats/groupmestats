@@ -58,14 +58,19 @@ module GroupStats::Controllers
         puts('@state.token = ' + @state.token );
 
         @state.groups = Array.new
-        @state.scraper.getGroups.each do |group|
-            @state.groups.push(group['group_id'].to_i)
-        end
+        updateStateGroupList(@state.scraper.getGroups)
 
         return redirect Index
     end
   end
 
+  def updateStateGroupList(grouplist)
+    @state.groups = Array.new
+        grouplist.each do |group|
+            @state.groups.push(group['group_id'].to_i)
+        end
+    end
+  
   def getGroups(group_id)
       if @state.groups.include?(group_id.to_i)
           return true
@@ -115,6 +120,7 @@ module GroupStats::Controllers
         groups.each do | group |
             @state.scraper.populateGroup(group['group_id'].to_i)
         end
+        updateStateGroupList(groups)
         return groups.to_json
     end
   end
