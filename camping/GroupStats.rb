@@ -169,7 +169,7 @@ module GroupStats::Controllers
             return 'need group id'
         end
 
-        if getGroups(@input.groupid)
+        if !getGroups(@input.groupid)
             return 'nil'
         end
 
@@ -192,13 +192,9 @@ module GroupStats::Controllers
             return 'need group id'
         end
 
-        if getGroups(@input.groupid)
+        if !getGroups(@input.groupid)
             return 'nil'
         end
-
-        if getGroups(@input.groupid)
-            return 'nil'
-        end 
 
         result = $database.execute( "SELECT text FROM messages WHERE messages.created_at > datetime('now', ?) AND group_id=?",
         "-" + @input.days + " day",
@@ -218,7 +214,7 @@ module GroupStats::Controllers
             return 'need group id'
         end
 
-        if getGroups(@input.groupid)
+        if !getGroups(@input.groupid)
             return 'nil'
         end
 
@@ -241,7 +237,7 @@ module GroupStats::Controllers
             return 'need group id'
         end
 
-        if getGroups(@input.groupid)
+        if !getGroups(@input.groupid)
             return 'nil'
         end
 
@@ -264,7 +260,7 @@ module GroupStats::Controllers
             return 'need group id'
         end
 
-        if getGroups(@input.groupid)
+        if !getGroups(@input.groupid)
             return 'nil'
         end
         
