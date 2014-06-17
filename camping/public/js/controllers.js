@@ -44,6 +44,7 @@ angular.module('myApp.controllers', [])
 		$scope.$watch('days', function(newValue, oldValue) {
              requestPostsMostChart();
              requestLikesReceivedChart();
+             requestDailyPostFreqChart();
 			 requestTop();
            });
 		
@@ -84,7 +85,21 @@ angular.module('myApp.controllers', [])
 
                 });
         }
+        
+        function requestDailyPostFreqChart(){
+            var daysToRequest = $scope.days
+            if(daysToRequest == 0)
+            {
+                daysToRequest = 9999999
+            }
+            $http({method: 'GET', url: '/rest/dailypostfrequency', params: {days : daysToRequest, groupid : $routeParams.groupid}}).
+                success(function(data, status, headers, config) {
+                    $scope.dailyFreqData = data
+                }).
+                error(function(data, status, headers, config) {
 
+                });
+        }
 		
 		function requestTop(){
 			var daysToRequest = $scope.days

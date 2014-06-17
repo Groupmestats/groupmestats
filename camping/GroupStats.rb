@@ -278,6 +278,28 @@ module GroupStats::Controllers
         return result.to_json
     end
   end
+
+  class DailyPostFrequency < R '/rest/dailypostfrequency'
+    def get()
+        if(@input.days == nil)
+            @input.days = "9999999999"
+        end
+        if(@input.groupid == nil)
+            @status = 400
+            return 'need group id'
+        end
+
+        if !getGroups(@input.groupid)
+            return 'nil'
+        end
+
+        result = $database.execute( "select strftime('%H', messages.created_at, '-05:00') as time, count(strftime('%H', messages.created_at, '-05:00')) from messages where messages.created_at > datetime('now', ?) AND messages.group_id=? group by strftime('%H', messages.created_at) order by time asc",
+        "-" + @input.days + " day",
+        @input.groupid)
+        headers['Content-Type'] = "application/json"
+        return result.to_json
+    end
+  end
 end
 
 module GroupStats::Views
