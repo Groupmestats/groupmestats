@@ -22,18 +22,25 @@ angular.module('myApp.directives', []).
 				$scope.chart = new Highcharts.Chart({
 					chart: {
 						type: 'pie',
-						renderTo: element[0]
+						renderTo: element[0],
 					},
 					plotOptions: {
 					   pie: {
 						   allowPointSelect: true,
-						   cursor: 'pointer',
+						   animation: {
+                               duration: 2000
+                           },
+                           cursor: 'pointer',
 						   dataLabels: {
 							   enabled: false
 						   },
 						   showInLegend: true
 					    }
 				    },
+                    tooltip: {
+                        pointFormat: '<b>{point.y}</b><br/>',
+                        shared: true
+                    },
                     legend: {
                         align: 'right',
                         title: {
@@ -46,7 +53,7 @@ angular.module('myApp.directives', []).
                         borderWidth: 2,
                         layout: 'vertical',
                         verticalAlign: 'top',
-                        //y: 100,
+                        y: 100,
                         shadow: true
                     },
 					series: []
