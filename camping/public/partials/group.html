@@ -12,6 +12,6 @@
 	<h4>Top 5 posts:</h4>
 	<p ng-repeat="post in topPosts"><b>{{post.name}}</b> ({{post.count}}): {{post.text}}</p>
 	
-	<div gms-piechart gms-title="Posts" gms-legend-title="Users" gms-data="postsMostData" style="min-width:530px;min-height:400px;"></div> 
-    <div gms-piechart gms-title="Likes Received" gms-legend-title="Users" gms-data="likesReceivedData" style="min-width:530px;min-height:400px;"></div>
+	<div gms-piechart gms-title="Total Posts in <b>{{group.name}}</b> by User" gms-legend-title="Users" gms-data="postsMostData" style="min-width:530px;min-height:400px;"></div> 
+    <div gms-piechart gms-title="Total Likes Received in <b>{{group.name}}</b> by User" gms-legend-title="Users" gms-data="likesReceivedData" style="min-width:530px;min-height:400px;"></div>
 </div>
