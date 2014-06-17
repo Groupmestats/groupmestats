@@ -34,6 +34,21 @@ angular.module('myApp.directives', []).
 						   showInLegend: true
 					    }
 				    },
+                    legend: {
+                        align: 'right',
+                        title: {
+                            text: attrs.gmsLegendTitle,
+                            style: {
+                                fontWeight: 'bold',
+                            }
+                        },
+                        borderColor: 'black',
+                        borderWidth: 2,
+                        layout: 'vertical',
+                        verticalAlign: 'top',
+                        //y: 100,
+                        shadow: true
+                    },
 					series: []
 				});
 
