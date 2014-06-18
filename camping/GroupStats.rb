@@ -297,6 +297,24 @@ module GroupStats::Controllers
         "-" + @input.days + " day",
         @input.groupid)
         headers['Content-Type'] = "application/json"
+        
+        i = 0
+        while (i < 24)
+            check = true
+            result.each do |count|
+                if count[0].to_i == i
+                    count[0] = count[0].to_i
+                    check = false
+                end
+            end
+
+            if check == true
+                result.push([i,0])
+            end
+            i += 1
+        end
+
+        result.sort! {|a,b| a[0] <=> b[0]}
         return result.to_json
     end
   end

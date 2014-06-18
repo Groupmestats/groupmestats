@@ -94,7 +94,7 @@ angular.module('myApp.directives', []).
                         renderTo: element[0],
                     },
                     plotOptions: {
-                       pie: {
+                       line: {
                            allowPointSelect: true,
                            animation: {
                                duration: 2000
@@ -103,8 +103,13 @@ angular.module('myApp.directives', []).
                            dataLabels: {
                                enabled: false
                            },
-                           showInLegend: true
+                           showInLegend: false 
                         }
+                    },
+                    xAxis: {
+                        type: 'category',
+                        //min: 0,
+                        //max: 23
                     },
                     tooltip: {
                         pointFormat: '<b>{point.y}</b><br/>',
