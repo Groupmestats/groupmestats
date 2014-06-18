@@ -91,6 +91,13 @@ module GroupStats::Controllers
         return result.to_json
     end
   end
+
+  class User < R '/rest/user'
+    def get()
+        result = @state.scraper.getUserInfo
+        return result.to_json
+    end
+  end
   
   class Group < R '/rest/group'
     def get()

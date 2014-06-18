@@ -47,6 +47,11 @@ class Scraper
         return gm.get("/users/me/", @token)['response']['id']
     end
 
+    def getUserInfo
+        gm = Groupme.new
+        return gm.get("/users/me/", @token)
+    end
+
     #Returns an array of hashes, containing the name and group_id of each group the user belongs to
     def getGroups
         gm = Groupme.new

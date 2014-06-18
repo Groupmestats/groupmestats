@@ -140,4 +140,15 @@ angular.module('myApp.controllers', [])
 	}])
 	.controller('AboutController', ['$scope', function($scope) {
 
-	}]);
+	}])
+    .controller('GlanceController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
+        //var user = $scope.user[index]
+
+        $http({method: 'GET', url: '/rest/user'}).
+                success(function(data, status, headers, config) {
+                    $scope.user = data.response
+                }).
+                error(function(data, status, headers, config) {
+
+                });
+    }]);

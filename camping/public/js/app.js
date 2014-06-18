@@ -12,6 +12,7 @@ angular.module('myApp', [
 config(['$routeProvider', function($routeProvider) {
   $routeProvider.when('/home', {templateUrl: 'partials/grouplist.html', controller: 'GroupListController'});
   $routeProvider.when('/group', {templateUrl: 'partials/group.html', controller: 'GroupController'});
+  $routeProvider.when('/glance', {templateUrl: 'partials/glance.html', controller: 'GlanceController'});
   $routeProvider.when('/about', {templateUrl: 'partials/about.html', controller: 'AboutController'});
   $routeProvider.otherwise({redirectTo: '/home'});
 }])
