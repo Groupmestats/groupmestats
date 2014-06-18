@@ -146,7 +146,7 @@ angular.module('myApp.controllers', [])
 
         $http({method: 'GET', url: '/rest/user'}).
                 success(function(data, status, headers, config) {
-                    $scope.user = data.response
+                    $scope.user = data
                 }).
                 error(function(data, status, headers, config) {
 

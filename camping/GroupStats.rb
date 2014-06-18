@@ -95,6 +95,26 @@ module GroupStats::Controllers
   class User < R '/rest/user'
     def get()
         result = @state.scraper.getUserInfo
+        result = result['response']
+        
+        total_posts = $database.execute("SELECT  count(messages.user_id) as count FROM messages WHERE messages.user_id=?",
+            @state.user_id
+        )
+        result['total_posts'] = total_posts[0][0]
+        
+        total_likes_received = $database.execute("select count(likes.user_id) as count from likes left join messages on messages.message_id=likes.message_id where messages.user_id=?",
+            @state.user_id
+        )
+        result['total_likes_received'] = total_likes_received[0][0]
+
+        result['likes_to_posts_ratio'] = result['total_likes_received'].to_f/result['total_posts'].to_f
+
+        top_post = $database.execute("select count(likes.user_id) as count, messages.text from likes join messages on messages.message_id=likes.message_id WHERE messages.user_id=? and messages.image=='none' group by messages.message_id order by count desc limit 1",
+            @state.user_id
+        )
+        result['top_post_likes'] = top_post[0][0]
+        result['top_post'] = top_post[0][1]
+        
         return result.to_json
     end
   end
