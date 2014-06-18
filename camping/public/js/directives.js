@@ -108,8 +108,15 @@ angular.module('myApp.directives', []).
                     },
                     xAxis: {
                         type: 'category',
-                        //min: 0,
-                        //max: 23
+                        title: {
+                            text: attrs.gmsXaxisTitle
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: attrs.gmsYaxisTitle
+                        },
                     },
                     tooltip: {
                         pointFormat: '<b>{point.y}</b><br/>',
@@ -118,7 +125,7 @@ angular.module('myApp.directives', []).
                     series: []
                 });
 
-                function drawChart(chartData, title, element) {
+                function drawChart(chartData, title, xaxisTitle, yaxisTitle, element) {
                     if($scope.chart.series[0])
                     {
                         $scope.chart.series[0].remove(true);

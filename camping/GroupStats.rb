@@ -297,7 +297,7 @@ module GroupStats::Controllers
         "-" + @input.days + " day",
         @input.groupid)
         headers['Content-Type'] = "application/json"
-        
+       
         i = 0
         while (i < 24)
             check = true
