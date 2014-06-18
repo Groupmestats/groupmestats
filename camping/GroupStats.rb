@@ -318,6 +318,50 @@ module GroupStats::Controllers
         return result.to_json
     end
   end
+
+  class WeeklyPostFrequency < R '/rest/weeklypostfrequency'
+    def get()
+        if(@input.days == nil)
+            @input.days = "9999999999"
+        end
+        if(@input.groupid == nil)
+            @status = 400
+            return 'need group id'
+        end
+
+        if !getGroups(@input.groupid)
+            return 'nil'
+        end
+
+        result = $database.execute( "select strftime('%w', messages.created_at) as time, count(strftime('%w', messages.created_at)) from messages where messages.created_at > datetime('now', ?) AND messages.group_id=? group by strftime('%w', messages.created_at) order by time asc",
+        "-" + @input.days + " day",
+        @input.groupid)
+        headers['Content-Type'] = "application/json"
+
+        i = 0
+        while (i < 7)
+            check = true
+            result.each do |count|
+                if count[0].to_i == i
+                    count[0] = count[0].to_i
+                    check = false
+                end
+            end
+
+            if check == true
+                result.push([i,0])
+            end
+            i += 1
+        end
+
+        result.sort! {|a,b| a[0] <=> b[0]}
+        result.each do |count|
+            date = Date.new(2014,6,15 + count[0])
+            count[0] = date.strftime("%A")
+        end
+        return result.to_json
+    end
+  end
 end
 
 module GroupStats::Views
