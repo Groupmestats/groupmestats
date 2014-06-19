@@ -232,6 +232,21 @@ module GroupStats::Controllers
         result = $database.execute( "SELECT text FROM messages WHERE messages.created_at > datetime('now', ?) AND group_id=?",
         "-" + @input.days + " day",
         @input.groupid)
+
+        stop_words = Array.new
+        f = File.open("commonlyusedwords.txt") or die "Unable to open file..."
+        f.each_line do | line |
+            stop_words.push line.split("\n")
+        end
+
+        result.each do | text |
+            stop_words.each do | stop_word |
+                if text[0].to_s.downcase.include? stop_word[0].downcase
+                    text[0].gsub!(/(^|\s|\W)#{stop_word[0].to_s}(\'s|\s|\W|$)/i, ' ')
+                end
+            end
+        end
+
         headers['Content-Type'] = "application/json"
         return result.to_json
     end 
