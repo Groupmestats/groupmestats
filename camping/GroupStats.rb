@@ -1,3 +1,4 @@
+require 'pp'
 require 'sqlite3'
 require 'json'
 require 'yaml'
@@ -234,21 +235,40 @@ module GroupStats::Controllers
         @input.groupid)
 
         stop_words = Array.new
-        f = File.open("commonlyusedwords.txt") or die "Unable to open file..."
+        f = File.open(File.join(File.expand_path(File.dirname(__FILE__)), 'commonlyusedwords.txt') )
         f.each_line do | line |
             stop_words.push line.split("\n")
         end
 
+        counts = Hash.new 0
+        #counts = Array.new 0
         result.each do | text |
             stop_words.each do | stop_word |
                 if text[0].to_s.downcase.include? stop_word[0].downcase
                     text[0].gsub!(/(^|\s|\W)#{stop_word[0].to_s}(\'s|\s|\W|$)/i, ' ')
                 end
             end
+            text[0].split.each do | word |
+                word = word.downcase
+                word.delete!("^a-zA-Z0-9")
+                counts[word] += 1
+                #if counts.find {|w| w[:text] == word}
+                    #counts.find {|w| w[:text] == word}[:size] += 1
+                #else
+                    #counts.push({:text => word, :size => 1})
+                #end
+            end
+
         end
 
+        final = Array.new 0
+        counts.each do | x |
+            final.push(x.to_a)
+        end
         headers['Content-Type'] = "application/json"
+        pp counts.to_a
         return result.to_json
+        #return counts.to_a
     end 
   end
 
