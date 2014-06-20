@@ -59,6 +59,7 @@ module GroupStats::Controllers
         puts('@state.token = ' + @state.token );
 
         @state.groups = Array.new
+        refreshGroupList()
         updateStateGroupList(@state.scraper.getGroups)
 
         return redirect Index
@@ -78,6 +79,15 @@ module GroupStats::Controllers
       else
           return false
       end
+  end
+
+  def refreshGroupList()
+      groups = @state.scraper.getGroups
+      groups.each do | group |
+          @state.scraper.populateGroup(group['group_id'].to_i)
+      end
+      updateStateGroupList(groups)
+      return groups.to_json
   end
 
   class GroupList < R '/rest/groupList'
@@ -139,17 +149,6 @@ module GroupStats::Controllers
         end
         $database.results_as_hash = false
         return result[0].to_json
-    end
-  end
-  
-  class RefreshGroupList < R '/rest/refreshGroupList'
-    def get()
-        groups = @state.scraper.getGroups
-        groups.each do | group |
-            @state.scraper.populateGroup(group['group_id'].to_i)
-        end
-        updateStateGroupList(groups)
-        return groups.to_json
     end
   end
   

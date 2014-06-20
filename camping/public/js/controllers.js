@@ -18,18 +18,6 @@ angular.module('myApp.controllers', [])
 				});
 		}
 	
-		$scope.refreshGroupList = function(index)
-		{
-			$scope.groupListLoading = true;
-			$http({method: 'GET', url: '/rest/refreshGroupList'}).
-				success(function(data, status, headers, config) {
-					$scope.groupListLoading = false;
-				}).
-				error(function(data, status, headers, config) {
-					$scope.groupListLoading = false;
-				});
-		}
-	
 		$http({method: 'GET', url: '/rest/groupList'}).
 				success(function(data, status, headers, config) {
 					$scope.groupList = data
@@ -46,6 +34,7 @@ angular.module('myApp.controllers', [])
              requestLikesReceivedChart();
              requestDailyPostFreqChart();
              requestWeeklyPostFreqChart();
+             requestWordCloud();
 			 requestTop();
            });
 		
@@ -116,7 +105,22 @@ angular.module('myApp.controllers', [])
 
                 });
         } 
-    	
+    
+        function requestWordCloud(){
+            var daysToRequest = $scope.days
+            if(daysToRequest == 0)
+            {
+                daysToRequest = 9999999
+            }
+            $http({method: 'GET', url: '/rest/wordcloud', params: {days : daysToRequest, groupid : $routeParams.groupid}}).
+                success(function(data, status, headers, config) {
+                    $scope.wordCloudData = data
+                }).
+                error(function(data, status, headers, config) {
+                
+                });
+        }
+	
 		function requestTop(){
 			var daysToRequest = $scope.days
 			if(daysToRequest == 0)
