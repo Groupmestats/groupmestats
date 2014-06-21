@@ -14,6 +14,7 @@ config(['$routeProvider', function($routeProvider) {
   $routeProvider.when('/group', {templateUrl: 'partials/group.html', controller: 'GroupController'});
   $routeProvider.when('/glance', {templateUrl: 'partials/glance.html', controller: 'GlanceController'});
   $routeProvider.when('/about', {templateUrl: 'partials/about.html', controller: 'AboutController'});
+  $routeProvider.when('/user', {templateUrl: 'partials/user.html', controller: 'UserController'});
   $routeProvider.otherwise({redirectTo: '/home'});
 }])
 .run(['$rootScope', '$location', function($rootScope, $location) {

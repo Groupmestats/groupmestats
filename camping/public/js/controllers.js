@@ -179,4 +179,14 @@ angular.module('myApp.controllers', [])
                 error(function(data, status, headers, config) {
 
                 });
-    }]);
+    }])
+	.controller('UserController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
+        $http({method: 'GET', url: '/rest/user',params: {userid : $routeParams.userid, groupid : $routeParams.groupid}}).
+                success(function(data, status, headers, config) {
+                    $scope.user = data
+                }).
+                error(function(data, status, headers, config) {
+
+                });
+    }])
+	;
