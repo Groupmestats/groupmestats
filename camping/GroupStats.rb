@@ -111,36 +111,71 @@ module GroupStats::Controllers
 
   class User < R '/rest/user'
     def get()
+        ifGroup = true
         if(@input.userid == nil)
             @input.userid = @state.user_id
         end
         if(@input.groupid == nil)
-            return "ffffff"
+            ifGroup = false
         end
+        
+        result = Hash.new
         $database.results_as_hash = true
-        result = $database.execute("SELECT * from users join user_groups using(user_id) where user_id = ? and group_id = ?",
-            @input.userid,
-            @input.groupid
-        )
-        result = result[0]
-        
-        total_posts = $database.execute("SELECT  count(messages.user_id) as count FROM messages WHERE messages.user_id=?",
-            @input.userid
-        )[0][0]
-        result.merge!(:total_posts => total_posts)
-        
-        total_likes_received = $database.execute("select count(likes.user_id) as count from likes left join messages on messages.message_id=likes.message_id where messages.user_id=?",
-            @input.userid
-        )[0][0]
-        result.merge!(:total_likes_received => total_likes_received)
-        
-        result.merge!(:likes_to_posts_ratio => total_likes_received.to_f/total_posts.to_f)
+        if ifGroup 
+            result = $database.execute("SELECT * from users join user_groups using(user_id) where user_id = ? and group_id = ?",
+                @input.userid,
+                @input.groupid
+            )
+            result = result[0]
+        else
+            result = @state.scraper.getUserInfo
+            result = result['response']
+        end
+       
+        if ifGroup
+            total_posts = $database.execute("SELECT  count(messages.user_id) as count FROM messages WHERE messages.user_id=? AND messages.group_id=?",
+                @input.userid,
+                @input.groupid
+            )[0][0]
+            result.merge!(:total_posts => total_posts)
+        else 
+            total_posts = $database.execute("SELECT  count(messages.user_id) as count FROM messages WHERE messages.user_id=?",
+                @input.userid
+            )[0][0]
+            result.merge!(:total_posts => total_posts)
+        end
+           
+        if ifGroup 
+            total_likes_received = $database.execute("select count(likes.user_id) as count from likes left join messages on messages.message_id=likes.message_id where messages.user_id=? AND messages.group_id=?",
+                @input.userid,
+                @input.groupid
+            )[0][0]
+            result.merge!(:total_likes_received => total_likes_received)
+            
+            result.merge!(:likes_to_posts_ratio => total_likes_received.to_f/total_posts.to_f)
+        else
+            total_likes_received = $database.execute("select count(likes.user_id) as count from likes left join messages on messages.message_id=likes.message_id where messages.user_id=?",
+                @input.userid
+            )[0][0]
+            result.merge!(:total_likes_received => total_likes_received)
 
-        #top_post = $database.execute("select count(likes.user_id) as count, messages.text from likes join messages on messages.message_id=likes.message_id WHERE messages.user_id=? and messages.image=='none' group by messages.message_id order by count desc limit 1",
-        #    @input.userid
-        #)
-        #result['top_post_likes'] = top_post[0][0]
-        #result['top_post'] = top_post[0][1]
+            result.merge!(:likes_to_posts_ratio => total_likes_received.to_f/total_posts.to_f)
+        end
+
+        if ifGroup
+            top_post = $database.execute("select count(likes.user_id) as count, messages.text from likes join messages on messages.message_id=likes.message_id WHERE messages.user_id=? and messages.group_id=? and messages.image=='none' group by messages.message_id order by count desc limit 1",
+                @input.userid,
+                @input.groupid
+            )
+            result.merge!(:top_post_likes => top_post[0][0])
+            result.merge!(:top_post => top_post[0][1])
+        else
+            top_post = $database.execute("select count(likes.user_id) as count, messages.text from likes join messages on messages.message_id=likes.message_id WHERE messages.user_id=? and messages.image=='none' group by messages.message_id order by count desc limit 1",
+                @input.userid,
+            )
+            result.merge!(:top_post_likes => top_post[0][0])
+            result.merge!(:top_post => top_post[0][1])
+        end
         $database.results_as_hash = false
         
         return result.to_json
@@ -290,7 +325,6 @@ module GroupStats::Controllers
             final.push(x.to_a)
         end
         headers['Content-Type'] = "application/json"
-        pp counts.to_a
         return result.to_json
         #return counts.to_a
     end 
