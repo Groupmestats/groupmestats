@@ -167,8 +167,10 @@ module GroupStats::Controllers
                 @input.userid,
                 @input.groupid
             )
-            result.merge!(:top_post_likes => top_post[0][0])
-            result.merge!(:top_post => top_post[0][1])
+            if !top_post.empty?
+                result.merge!(:top_post_likes => top_post[0][0])
+                result.merge!(:top_post => top_post[0][1])
+            end
         else
             top_post = $database.execute("select count(likes.user_id) as count, messages.text from likes join messages on messages.message_id=likes.message_id WHERE messages.user_id=? and messages.image=='none' group by messages.message_id order by count desc limit 1",
                 @input.userid,
