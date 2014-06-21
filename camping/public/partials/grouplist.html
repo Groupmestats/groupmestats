@@ -1,5 +1,8 @@
 <div class="col-md-8" ng-show="groupListLoading"><p>Refreshing your list of groups...</p></div>
 <div class="col-md-8" ng-show="!groupListLoading">
+  <p>
+      <a ng-click="refreshGroupList()">Refresh group list</a>
+  </p>
 	<table class="table">
 		<tr ng-repeat="group in groupList">
 			<td><img src="{{group.image}}.avatar"/></td>

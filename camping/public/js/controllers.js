@@ -25,7 +25,18 @@ angular.module('myApp.controllers', [])
 				error(function(data, status, headers, config) {
 
 				});
-	}])
+       $scope.refreshGroupList = function(index)
+      {
+          $scope.groupListLoading = true;
+          $http({method: 'GET', url: '/rest/refreshGroupList'}).
+              success(function(data, status, headers, config) {
+                  $scope.groupListLoading = false;
+              }).
+              error(function(data, status, headers, config) {
+                  $scope.groupListLoading = false;
+              });
+      }
+}])
 	.controller('GroupController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
 		$scope.days = 0
 		$scope.piechartData = "";

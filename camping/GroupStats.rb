@@ -103,6 +103,12 @@ module GroupStats::Controllers
     end
   end
 
+  class RefreshGroupList < R '/rest/refreshGroupList'
+    def get()
+        return refreshGroupList()
+    end
+  end
+
   class User < R '/rest/user'
     def get()
         result = @state.scraper.getUserInfo
