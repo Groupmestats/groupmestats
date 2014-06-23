@@ -508,6 +508,48 @@ module GroupStats::Controllers
         return result.to_json
     end
   end
+
+  class GroupJoinRate < R '/rest/groupjoinrate'
+    def get()
+        if(@input.days == nil)
+            @input.days = "9999999999"
+        end
+        if(@input.groupid == nil)
+            @status = 400
+            return 'need group id'
+        end
+        if(@input.num == nil)
+            @input.num = 1
+        end
+
+        if !getGroups(@input.groupid)
+            return 'nil'
+        end
+
+        #$database.results_as_hash = true
+        temp_result = $database.execute( "SELECT strftime('%s', MIN(m.created_at)) First_Post
+            FROM messages m       
+                 INNER JOIN user_groups ug
+                       ON m.group_id = ug.group_id
+                          AND m.user_id = ug.user_id           
+                   INNER JOIN groups g        
+                         ON ug.[group_id] = g.[group_id]   
+            WHERE m.group_id=?
+            GROUP BY g.[name], ug.name
+            ORDER BY First_Post",
+        @input.groupid)
+
+        i = 0
+        result = Array.new 
+        temp_result.each do | element |
+            result.push([element[0].to_i, i])
+            i += 1
+        end
+        headers['Content-Type'] = "application/json"
+        $database.results_as_hash = false
+        return result.to_json
+    end
+  end
   
 end
 

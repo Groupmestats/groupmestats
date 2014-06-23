@@ -13,11 +13,11 @@
 	<p ng-repeat="post in topPosts"><b>{{post.name}}</b> ({{post.count}}): {{post.text}}</p>
 	<div gms-piechart gms-title="Total Posts in <b>{{group.name}}</b> by User" gms-legend-title="Users" gms-data="postsMostData" style="min-width:530px;min-height:400px;"></div> 
     <div gms-piechart gms-title="Total Likes Received in <b>{{group.name}}</b> by User" gms-legend-title="Users" gms-data="likesReceivedData" style="min-width:530px;min-height:400px;"></div>
-    <div gms-linegraph gms-title="Daily Frequency of Posts in <b>{{group.name}}</b> by Hour" gms-xaxis-title="Hour" gms-yaxis-title="Posts" gms-data="dailyFreqData" style="min-width:530px;min-height:400px;"></div>
+  <!--  <div gms-linegraph gms-title="Daily Frequency of Posts in <b>{{group.name}}</b> by Hour" gms-xaxis-title="Hour" gms-yaxis-title="Posts" gms-data="dailyFreqData" style="min-width:530px;min-height:400px;"></div> -->
 	<div gms-bargraph gms-title="Weekly Frequency of Posts in <b>{{group.name}}</b> by Day" gms-xaxis-title="Day" gms-yaxis-title="Posts" gms-data="weeklyFreqData" style="min-width:530px;min-height:400px;"></div>
 	<div gms-heatmap gms-title="we need more heat, mon" gms-xaxis-title="Hour" gms-yaxis-title="Posts" gms-data="heatdata" style="min-width:530px;min-height:400px;"></div>
-	
-	<h4>Users:</h4>
+	<div gms-linegraph gms-title="User growth in <b>{{group.name}}</b>" gms-xaxis-title="Date" gms-yaxis-title="Number of Users" gms-data="joinDateData" style="min-width:530px;min-height:400px;"></div> 
+    <h4>Users:</h4>
 	<ul>
 		<li ng-repeat="user in group.users"><a ng-href="#/user?userid={{user.user_id}}&groupid={{group.group_id}}">{{user.name}}</a></li>
 	</ul>

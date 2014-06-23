@@ -107,7 +107,11 @@ angular.module('myApp.directives', []).
                         }
                     },
                     xAxis: {
-                        type: 'category',
+                        type: 'datetime',
+                        //type: 'category',
+                        dateTimeLabelFormats: {
+                            day: '%e of %b %Y'
+                        },
                         title: {
                             text: attrs.gmsXaxisTitle
                         }
@@ -131,7 +135,9 @@ angular.module('myApp.directives', []).
                         $scope.chart.series[0].remove(true);
                     }
                     $scope.chart.addSeries({
-                        data: chartData
+                        data: chartData,
+                        pointInterval: 24 * 3600 * 1000 // one day
+                        //pointStart: Date.UTC(1970, 0, 1)
                     }, false);
                     $scope.chart.setTitle({text:title}, '', false);
                     $scope.chart.redraw();
