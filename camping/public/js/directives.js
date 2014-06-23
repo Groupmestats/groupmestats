@@ -224,22 +224,16 @@ angular.module('myApp.directives', []).
 					chart: {
 						type: 'heatmap',
 						renderTo: element[0],
+						inverted: true
 					},
-					plotOptions: {
-					   line: {
-						   allowPointSelect: true,
-						   animation: {
-							   duration: 2000
-						   },
-						   cursor: 'pointer',
-						   dataLabels: {
-							   enabled: false
-						   },
-						   showInLegend: false
-						}
+					legend: {
+						enabled: false
 					},
 					tooltip: {
-						pointFormat: '<b>{point.value}</b><br/>',
+						formatter: function () {
+							return this.series.xAxis.categories[this.point.x] + ' ' + this.point.y +
+							'<br/><b>' + this.point.value + '</b>'
+							},
 						shared: true
 					},
 					colorAxis: {
@@ -248,19 +242,17 @@ angular.module('myApp.directives', []).
 						maxColor: '#0000FF'
 					},
 					xAxis:{
-						labels: {
-							align: 'left',
-							x: 5,
-							format: '{value:%b %e}' // long month
-						}
+						categories: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 					},
 					yAxis:
 					{
-						reversed: true,
 						min:0,
 						max:23,
 						minPadding: 0,
-						maxPadding: 0
+						maxPadding: 0,
+						title: {
+							text: 'Hour'
+						}
 					},
 					series: []
 				});
@@ -271,10 +263,8 @@ angular.module('myApp.directives', []).
 						$scope.chart.series[0].remove(true);
 					}
 					$scope.chart.addSeries({
-						turboThreshold: 100000,
 						data: chartData,
-						borderWidth: 0,
-						colsize: 24 * 36e5 -5 // one day
+						borderWidth: 0
 					}, false);
 					$scope.chart.setTitle({text:title}, '', false);
 					$scope.chart.redraw();
