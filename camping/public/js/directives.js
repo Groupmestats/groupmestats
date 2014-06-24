@@ -107,7 +107,8 @@ angular.module('myApp.directives', []).
                         }
                     },
                     xAxis: {
-                        type: 'datetime',
+                        type: attrs.gmsCategory,
+                        //type: 'datetime',
                         //type: 'category',
                         dateTimeLabelFormats: {
                             day: '%e of %b %Y'
@@ -136,7 +137,7 @@ angular.module('myApp.directives', []).
                     }
                     $scope.chart.addSeries({
                         data: chartData,
-                        pointInterval: 24 * 3600 * 1000 // one day
+                        //pointInterval: 24 * 3600 * 1000 // one day
                         //pointStart: Date.UTC(1970, 0, 1)
                     }, false);
                     $scope.chart.setTitle({text:title}, '', false);
@@ -145,6 +146,7 @@ angular.module('myApp.directives', []).
 
             }
         };
+
     }).directive('gmsBargraph', function() {
         return{
             scope: {
@@ -164,6 +166,9 @@ angular.module('myApp.directives', []).
                     chart: {
                         type: 'column',
                         renderTo: element[0],
+                    },
+                    legend: {
+                        enabled: false
                     },
                     plotOptions: {
                        line: {

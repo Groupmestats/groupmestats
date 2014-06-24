@@ -542,7 +542,7 @@ module GroupStats::Controllers
         i = 0
         result = Array.new 
         temp_result.each do | element |
-            result.push([element[0].to_i, i])
+            result.push([1000*element[0].to_i, i])
             i += 1
         end
         headers['Content-Type'] = "application/json"
