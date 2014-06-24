@@ -60,11 +60,6 @@ angular.module('myApp.controllers', [])
 		
 		$http({method: 'GET', url: '/rest/heatdata', params: {groupid : $routeParams.groupid}}).
 				success(function(data, status, headers, config) {
-					angular.forEach(data,function(value, key){
-						var parts = value[0].split('-');
-						  // new Date(year, month [, day [, hours[, minutes[, seconds[, ms]]]]])
-						value[0] = new Date(parts[0], parts[1]-1, parts[2]).getTime(); // Note: months are 0-based
-					});
 					$scope.heatdata = data
 				}).
 				error(function(data, status, headers, config) {
