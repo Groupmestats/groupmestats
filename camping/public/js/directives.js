@@ -107,7 +107,12 @@ angular.module('myApp.directives', []).
                         }
                     },
                     xAxis: {
-                        type: 'category',
+                        type: attrs.gmsCategory,
+                        //type: 'datetime',
+                        //type: 'category',
+                        dateTimeLabelFormats: {
+                            day: '%e of %b %Y'
+                        },
                         title: {
                             text: attrs.gmsXaxisTitle
                         }
@@ -131,7 +136,9 @@ angular.module('myApp.directives', []).
                         $scope.chart.series[0].remove(true);
                     }
                     $scope.chart.addSeries({
-                        data: chartData
+                        data: chartData,
+                        //pointInterval: 24 * 3600 * 1000 // one day
+                        //pointStart: Date.UTC(1970, 0, 1)
                     }, false);
                     $scope.chart.setTitle({text:title}, '', false);
                     $scope.chart.redraw();
@@ -139,6 +146,7 @@ angular.module('myApp.directives', []).
 
             }
         };
+
     }).directive('gmsBargraph', function() {
         return{
             scope: {
@@ -158,6 +166,9 @@ angular.module('myApp.directives', []).
                     chart: {
                         type: 'column',
                         renderTo: element[0],
+                    },
+                    legend: {
+                        enabled: false
                     },
                     plotOptions: {
                        line: {
@@ -224,22 +235,16 @@ angular.module('myApp.directives', []).
 					chart: {
 						type: 'heatmap',
 						renderTo: element[0],
+						inverted: true
 					},
-					plotOptions: {
-					   line: {
-						   allowPointSelect: true,
-						   animation: {
-							   duration: 2000
-						   },
-						   cursor: 'pointer',
-						   dataLabels: {
-							   enabled: false
-						   },
-						   showInLegend: false
-						}
+					legend: {
+						enabled: false
 					},
 					tooltip: {
-						pointFormat: '<b>{point.value}</b><br/>',
+						formatter: function () {
+							return this.series.xAxis.categories[this.point.x] + ' ' + this.point.y +
+							'<br/><b>' + this.point.value + '</b>'
+							},
 						shared: true
 					},
 					colorAxis: {
@@ -248,19 +253,17 @@ angular.module('myApp.directives', []).
 						maxColor: '#0000FF'
 					},
 					xAxis:{
-						labels: {
-							align: 'left',
-							x: 5,
-							format: '{value:%b %e}' // long month
-						}
+						categories: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 					},
 					yAxis:
 					{
-						reversed: true,
 						min:0,
 						max:23,
 						minPadding: 0,
-						maxPadding: 0
+						maxPadding: 0,
+						title: {
+							text: 'Hour'
+						}
 					},
 					series: []
 				});
@@ -271,10 +274,8 @@ angular.module('myApp.directives', []).
 						$scope.chart.series[0].remove(true);
 					}
 					$scope.chart.addSeries({
-						turboThreshold: 100000,
 						data: chartData,
-						borderWidth: 0,
-						colsize: 24 * 36e5 -5 // one day
+						borderWidth: 0
 					}, false);
 					$scope.chart.setTitle({text:title}, '', false);
 					$scope.chart.redraw();
