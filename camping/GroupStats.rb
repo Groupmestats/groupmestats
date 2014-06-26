@@ -509,6 +509,80 @@ module GroupStats::Controllers
     end
   end
   
+  class NgramData < R '/rest/ngramdata'
+    def get()
+        if(@input.groupid == nil)
+            @status = 400
+            return 'need group id'
+        end
+        if(@input.search == nil)
+            @status = 400
+            return 'need search terms'
+        end
+        terms = @input.search.split(",")
+        toReturn = { :series => []};
+        $database.results_as_hash = false
+        
+        dateRange = $database.execute("select strftime('%s', created_at), strftime('%s', updated_at) from groups where group_id = ?",
+            @input.groupid);
+        toReturn["startDate"] = dateRange[0][0].to_i * 1000
+        toReturn["endDate"] = dateRange[0][1].to_i * 1000
+        terms.each do |term|
+            chartdata = [];
+            $database.results_as_hash = true
+            #alternate query that doesn't return 0 weeks, but is much faster
+            #result = $database.execute( "select strftime('%s', m.created_at) as time, count(message_id) as messages,
+            #   (select count(message_id) from messages
+            #        where group_id = ?
+            #        and strftime('%W', messages.created_at) = strftime('%W', m.created_at)
+            #        and strftime('%Y', messages.created_at) = strftime('%Y', m.created_at)
+            #        group by strftime('%W', messages.created_at), strftime('%Y', messages.created_at)
+            #        order by messages.created_at asc
+            #   ) as totalmessages
+            # from messages as m
+            #    where group_id = ?
+            #    and text like ?
+            #    group by strftime('%W', m.created_at), strftime('%Y', m.created_at)
+            #    order by m.created_at asc",
+            #    @input.groupid,
+            #    @input.groupid,
+            #    '%'+term+'%')
+                
+            result = $database.execute( "select strftime('%s', m.created_at) as time, count(message_id) as totalmessages,
+                   (select count(message_id) from messages
+                        where group_id = ?
+                        and strftime('%W', messages.created_at) = strftime('%W', m.created_at)
+                        and strftime('%Y', messages.created_at) = strftime('%Y', m.created_at)
+                        and text like ?
+                   ) as messages
+                 from messages as m
+                where group_id = ?
+                group by strftime('%W', m.created_at), strftime('%Y', m.created_at)
+                order by m.created_at asc",
+                @input.groupid,
+                '%'+term+'%',
+                @input.groupid)   
+                
+            result.each do |a|
+                if(a["messages"] == nil)
+                    chartdata.push([a["time"].to_i * 1000, 0])
+                else
+                    chartdata.push([
+                            a["time"].to_i * 1000, #highcharts likes dates in milliseconds
+                            ((a["messages"].to_f / a["totalmessages"])*100).round(3)
+                        ]);
+                end
+            end
+            currseries = {:data => chartdata, :name => term};
+            toReturn[:series].push(currseries);
+        end
+        #todo: enforce user id
+        
+        $database.results_as_hash = false
+        
+        return toReturn.to_json
+    end
+  end
 end
 
 module GroupStats::Views

@@ -272,4 +272,90 @@ angular.module('myApp.directives', []).
 
 			}
 		};
-	});
+	}).directive('gmsNgram', function() {
+        return{
+            scope: {
+                gmsData: '=',
+                gmsTitle: '@'
+            },
+            template: '<div id="container"></div>', 
+            link: function ($scope, element, attrs) {
+                $scope.$watch('gmsData', function(gmsData) {
+                    if(gmsData)
+                    {
+                        drawChart(gmsData, attrs.gmsTitle, element[0]);
+                    }
+                });
+                
+                $scope.chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'line',
+                        renderTo: element[0]
+                    },
+					title: {
+						text: ''
+					},
+					legend: {
+						align: 'right',
+						layout: 'vertical',
+						verticalAlign: 'middle'
+					},
+                    plotOptions: {
+                       line: {
+                           allowPointSelect: false,
+                           animation: {
+                               duration: 2000
+                           },
+                           cursor: 'pointer',
+                           dataLabels: {
+                               enabled: false
+                           },
+						   marker:{
+								enabled:false
+							},
+                           showInLegend: true 
+                        }
+                    },
+                    xAxis: {
+						type: 'datetime',
+                        title: {
+                            text: attrs.gmsXaxisTitle
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+						ceiling: 100,
+						labels: {
+							format: '{value}%'
+						},
+                        title: {
+                            text: attrs.gmsYaxisTitle
+                        },
+                    },
+                    tooltip: {
+                        pointFormat: '<b>{point.y}</b><br/>',
+                        shared: true
+                    },
+                    series: []
+                });
+
+                function drawChart(chartData, title, xaxisTitle, yaxisTitle, element) {
+                    while($scope.chart.series.length > 0)
+					{
+						$scope.chart.series[0].remove(false);
+					}
+					$scope.chart.xAxis[0].setExtremes(chartData.startDate, chartData.endDate);
+					angular.forEach(chartData.series, function(value, key){
+						$scope.chart.addSeries({
+								data: value.data,
+								name: value.name
+							}, false);
+					})
+                    
+                    $scope.chart.setTitle({text:title}, '', false);
+                    $scope.chart.redraw();
+                }
+
+            }
+        };
+    });

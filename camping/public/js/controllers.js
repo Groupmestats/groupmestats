@@ -40,6 +40,8 @@ angular.module('myApp.controllers', [])
 	.controller('GroupController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
 		$scope.days = 0
 		$scope.piechartData = "";
+		$scope.ngramloading = false;
+		
 		$scope.$watch('days', function(newValue, oldValue) {
              requestPostsMostChart();
              requestLikesReceivedChart();
@@ -48,6 +50,11 @@ angular.module('myApp.controllers', [])
              requestWordCloud();
 			 requestTop();
            });
+		   
+		$scope.refreshNgram = function(){
+			$scope.ngramloading = true;
+			requestNgramData()
+		};
 		
 		$http({method: 'GET', url: '/rest/group', params: {groupid : $routeParams.groupid}}).
 				success(function(data, status, headers, config) {
@@ -64,6 +71,17 @@ angular.module('myApp.controllers', [])
 				error(function(data, status, headers, config) {
 
 				});
+
+		function requestNgramData(){
+			$http({method: 'GET', url: '/rest/ngramdata', params: {groupid : $routeParams.groupid, search: $scope.ngramterms}}).
+				success(function(data, status, headers, config) {
+					$scope.ngramdata = data
+					$scope.ngramloading = false;
+				}).
+				error(function(data, status, headers, config) {
+					$scope.ngramloading = false;
+				});
+		}
 		
 		function requestPostsMostChart(){
 			var daysToRequest = $scope.days
