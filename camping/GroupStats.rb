@@ -411,11 +411,31 @@ module GroupStats::Controllers
             return 'need group id'
         end
 
+        #Timezone parsing bullshit
+        if(@input.timezone == nil)
+            @input.timezone = '04:00'
+        else
+            if @input.timezone.to_i < 0
+                if @input.timezone.to_i < 9
+                    @input.timezone = "0#{@input.timezone.to_i.abs}:00"
+                else
+                    @input.timezone = "#{@input.timezone.to_i.abs}:00"
+                end
+            else
+                if @input.timezone.to_i < 9
+                    @input.timezone = "-0#{@input.timezone.to_i.abs}:00"
+                else
+                    @input.timezone = "-#{@input.timezone.to_i.abs}:00"
+                end
+            end
+        end
+
         if !getGroups(@input.groupid)
             return 'nil'
         end
 
-        result = $database.execute( "select strftime('%H', messages.created_at, '-04:00') as time, count(strftime('%H', messages.created_at, '-04:00')) from messages where messages.created_at > datetime('now', ?) AND messages.group_id=? group by strftime('%H', messages.created_at) order by time asc",
+        result = $database.execute( "select strftime('%H', messages.created_at, ? ) as time, count(strftime('%H', messages.created_at, '-04:00')) from messages where messages.created_at > datetime('now', ?) AND messages.group_id=? group by strftime('%H', messages.created_at) order by time asc",
+        @input.timezone,
         "-" + @input.days + " day",
         @input.groupid)
         headers['Content-Type'] = "application/json"
