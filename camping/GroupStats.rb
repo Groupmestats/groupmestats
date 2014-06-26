@@ -518,11 +518,12 @@ module GroupStats::Controllers
         end
         
         $database.results_as_hash = false
-        result = $database.execute( "select strftime('%w',messages.created_at) as date,strftime('%H',messages.created_at) as hour, count(message_id) from messages
+        result = $database.execute( "select strftime('%w',messages.created_at) as date,strftime('%H',messages.created_at, ?) as hour, count(message_id) from messages
                 join groups using(group_id)
                 where group_id = ?
                 group by strftime('%w',messages.created_at), strftime('%H',messages.created_at)
-                order by strftime('%w',messages.created_at) asc, strftime('%H',messages.created_at)", 
+                order by strftime('%w',messages.created_at) asc, strftime('%H',messages.created_at)",
+            parseTimeZone(@input.timezone), 
             @input.groupid)
         #todo: enforce user id
         result.each do |a|

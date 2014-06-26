@@ -57,8 +57,10 @@ angular.module('myApp.controllers', [])
 				error(function(data, status, headers, config) {
 
 				});
-		
-		$http({method: 'GET', url: '/rest/heatdata', params: {groupid : $routeParams.groupid}}).
+		var offset = new Date().getTimezoneOffset();
+        offset = offset / 60;
+
+		$http({method: 'GET', url: '/rest/heatdata', params: {groupid : $routeParams.groupid, timezone: offset}}).
 				success(function(data, status, headers, config) {
 					$scope.heatdata = data
 				}).
