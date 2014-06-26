@@ -90,6 +90,30 @@ module GroupStats::Controllers
       return groups.to_json
   end
 
+  def parseTimeZone(timezone)
+  
+      #Timezone parsing bullshit
+      if(timezone == nil)
+          timezone = '04:00'
+      else
+          if timezone.to_i < 0
+              if timezone.to_i < 9
+                  timezone = "0#{@input.timezone.to_i.abs}:00"
+              else
+                  timezone = "#{@input.timezone.to_i.abs}:00"
+              end
+          else
+              if timezone.to_i < 9
+                  timezone = "-0#{@input.timezone.to_i.abs}:00"
+              else
+                  timezone = "-#{@input.timezone.to_i.abs}:00"
+              end
+          end
+      end
+
+      return timezone
+  end
+
   class GroupList < R '/rest/groupList'
     def get()
         $database.results_as_hash = true
@@ -415,7 +439,8 @@ module GroupStats::Controllers
             return 'nil'
         end
 
-        result = $database.execute( "select strftime('%H', messages.created_at, '-04:00') as time, count(strftime('%H', messages.created_at, '-04:00')) from messages where messages.created_at > datetime('now', ?) AND messages.group_id=? group by strftime('%H', messages.created_at) order by time asc",
+        result = $database.execute( "select strftime('%H', messages.created_at, ? ) as time, count(strftime('%H', messages.created_at, '-04:00')) from messages where messages.created_at > datetime('now', ?) AND messages.group_id=? group by strftime('%H', messages.created_at) order by time asc",
+        parseTimeZone(@input.timezone),
         "-" + @input.days + " day",
         @input.groupid)
         headers['Content-Type'] = "application/json"
@@ -493,11 +518,12 @@ module GroupStats::Controllers
         end
         
         $database.results_as_hash = false
-        result = $database.execute( "select strftime('%w',messages.created_at) as date,strftime('%H',messages.created_at) as hour, count(message_id) from messages
+        result = $database.execute( "select strftime('%w',messages.created_at) as date,strftime('%H',messages.created_at, ?) as hour, count(message_id) from messages
                 join groups using(group_id)
                 where group_id = ?
                 group by strftime('%w',messages.created_at), strftime('%H',messages.created_at)
-                order by strftime('%w',messages.created_at) asc, strftime('%H',messages.created_at)", 
+                order by strftime('%w',messages.created_at) asc, strftime('%H',messages.created_at)",
+            parseTimeZone(@input.timezone), 
             @input.groupid)
         #todo: enforce user id
         result.each do |a|

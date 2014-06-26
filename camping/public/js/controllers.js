@@ -57,8 +57,10 @@ angular.module('myApp.controllers', [])
 				error(function(data, status, headers, config) {
 
 				});
-		
-		$http({method: 'GET', url: '/rest/heatdata', params: {groupid : $routeParams.groupid}}).
+		var offset = new Date().getTimezoneOffset();
+        offset = offset / 60;
+
+		$http({method: 'GET', url: '/rest/heatdata', params: {groupid : $routeParams.groupid, timezone: offset}}).
 				success(function(data, status, headers, config) {
 					$scope.heatdata = data
 				}).
@@ -115,7 +117,11 @@ angular.module('myApp.controllers', [])
             {
                 daysToRequest = 9999999
             }
-            $http({method: 'GET', url: '/rest/dailypostfrequency', params: {days : daysToRequest, groupid : $routeParams.groupid}}).
+
+            var offset = new Date().getTimezoneOffset();
+            offset = offset / 60;
+
+            $http({method: 'GET', url: '/rest/dailypostfrequency', params: {days : daysToRequest, groupid : $routeParams.groupid, timezone: offset}}).
                 success(function(data, status, headers, config) {
                     $scope.dailyFreqData = data
                 }).
