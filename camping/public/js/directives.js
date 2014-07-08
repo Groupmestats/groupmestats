@@ -89,7 +89,7 @@ angular.module('myApp.directives', []).
                                             x: e.pageX,
                                             y: e.pageY
                                         },
-                                        headingText: this.series.data[this.x].name + "'s stats",
+                                        headingText: "Stats",
                                         
                                         maincontentText: '<img src="' + user.avatar_url + '.avatar" style="float:left; padding-right:15px"></img><h3>' + user.name + '</h3>' +
                                             '<br>' +
@@ -98,7 +98,7 @@ angular.module('myApp.directives', []).
                                             '<p><b>Total likes:</b> ' + user.total_likes_received + '</p>' +
                                             '<p><b>Likes to Posts Ratio:</b> ' + user.likes_to_posts_ratio + '</p>' +
                                             '<p><b>Top Post:</b> (' + user.top_post_likes + ') ' + user.top_post + '</p>' +
-                                            '<a href="#/user?userid=' + user.user_id + '&groupid=' + user.group_id + '">More info</a>',
+                                            '<a href="#/user?userid=' + user.user_id + '&groupid=' + user.group_id + '" onclick="javascript:parent.window.hs.close();" >More info</a>',
                                         width: 200
                                     });
                                 }
