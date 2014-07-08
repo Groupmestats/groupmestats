@@ -8,14 +8,22 @@ angular.module('myApp.directives', []).
         return{
             scope: {
                 gmsData: '=',
-                gmsTitle: '@'
+                gmsTitle: '@',
+                gmsUser: '=',
+                userData: '@'
             },
             template: '<div id="container"></div>', 
             link: function ($scope, element, attrs) {
-                $scope.$watch('gmsData', function(gmsData) {
-                    if(gmsData)
+                $scope.$watch('gmsUser', function(gmsUser) {
+                    if(gmsUser)
                     {
-                        drawChart(gmsData, attrs.gmsTitle, element[0]);
+                        $scope.userData = gmsUser;
+                        $scope.$watch('gmsData', function(gmsData) {
+                            if(gmsData)
+                            {
+                                drawChart(gmsData, $scope.userData, attrs.gmsTitle, element[0]);
+                            }
+                        });
                     }
                 });
                 
@@ -59,7 +67,7 @@ angular.module('myApp.directives', []).
                     series: []
                 });
 
-                function drawChart(chartData, title, element) {
+                function drawChart(chartData, userData, title, element) {
                     if($scope.chart.series[0])
                     {
                         $scope.chart.series[0].remove(true);
@@ -67,26 +75,39 @@ angular.module('myApp.directives', []).
                     $scope.chart.addSeries({
                         data: chartData,
                         cursor: 'pointer',
-                            point: {
-                                events: {
-                                    click: function(e) {
-                                        hs.htmlExpand(null, {
-                                    pageOrigin: {
-                                        x: e.pageX,
-                                        y: e.pageY
-                                    },
-                                    headingText: this.series.data[this.x].name + "'s stats",
-                                    maincontentText: 'Testing',
-                                    width: 200
-                                });
+                        point: {
+                            events: {
+                                click: function(e) {
+                                    var user;
+                                    for (var i = 0; i < userData.length; i++) {
+                                            if (userData[i]['name'] == this.series.data[this.x].name) {
+                                                user = userData[i];
+                                            }
                                     }
+                                    hs.htmlExpand(null, {
+                                        pageOrigin: {
+                                            x: e.pageX,
+                                            y: e.pageY
+                                        },
+                                        headingText: this.series.data[this.x].name + "'s stats",
+                                        
+                                        maincontentText: '<img src="' + user.avatar_url + '.avatar" style="float:left; padding-right:15px"></img><h3>' + user.name + '</h3>' +
+                                            '<br>' +
+                                            '<h4>User stats:</h4>' + 
+                                            '<p><b>Total Posts:</b> ' + user.total_posts + '</p>' +
+                                            '<p><b>Total likes:</b> ' + user.total_likes_received + '</p>' +
+                                            '<p><b>Likes to Posts Ratio:</b> ' + user.likes_to_posts_ratio + '</p>' +
+                                            '<p><b>Top Post:</b> (' + user.top_post_likes + ') ' + user.top_post + '</p>' +
+                                            '<a href="#/user?userid=' + user.user_id + '&groupid=' + user.group_id + '">More info</a>',
+                                        width: 200
+                                    });
                                 }
                             }
+                        }
                     }, false);
                     $scope.chart.setTitle({text:title}, '', false);
                     $scope.chart.redraw();
                 }
-
             }
         };
     }).directive('gmsLinegraph', function() {

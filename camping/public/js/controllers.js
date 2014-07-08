@@ -41,14 +41,16 @@ angular.module('myApp.controllers', [])
 		$scope.days = 0
 		$scope.piechartData = "";
 		$scope.ngramloading = false;
-		
-		$scope.$watch('days', function(newValue, oldValue) {
+
+        requestDailyPostFreqChart();
+        requestWeeklyPostFreqChart();
+        requestWordCloud();		
+        requestUser();
+
+        $scope.$watch('days', function(newValue, oldValue) {
              requestGroupJoinRate();
              requestPostsMostChart();
              requestLikesReceivedChart();
-             requestDailyPostFreqChart();
-             requestWeeklyPostFreqChart();
-             requestWordCloud();
 			 requestTop();
            });
 		   
@@ -100,20 +102,32 @@ angular.module('myApp.controllers', [])
 
 				});
 		}
-        function requestGroupJoinRate(){
-            var daysToRequest = $scope.days
-            if(daysToRequest == 0)
-            {
-                daysToRequest = 9999999
-            }
-            $http({method: 'GET', url: '/rest/groupjoinrate', params: {days : daysToRequest, groupid : $routeParams.groupid}}).
-                success(function(data, status, headers, config) {
-                    $scope.joinDateData = data
-                }).
-                error(function(data, status, headers, config) {
+        
+        function requestUser(){
+           $http({method: 'GET', url: '/rest/usergroup', params: {groupid : $routeParams.groupid}}).
+               success(function(data, status, headers, config) {
+                   $scope.userData = data
+               }).
+               error(function(data, status, headers, config) {
 
-                });
+               });
         }
+       
+        function requestGroupJoinRate(){
+           var daysToRequest = $scope.days
+           if(daysToRequest == 0)
+           {
+               daysToRequest = 9999999
+           }
+           $http({method: 'GET', url: '/rest/groupjoinrate', params: {days : daysToRequest, groupid : $routeParams.groupid}}).
+               success(function(data, status, headers, config) {
+                   $scope.joinDateData = data
+               }).
+               error(function(data, status, headers, config) {
+
+               });
+        }
+        
         function requestLikesReceivedChart(){
             var daysToRequest = $scope.days
             if(daysToRequest == 0)
