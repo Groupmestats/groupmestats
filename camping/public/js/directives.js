@@ -61,7 +61,9 @@ angular.module('myApp.directives', []).
                         layout: 'vertical',
                         verticalAlign: 'top',
                         y: 100,
-                        useHTML:true,
+                        itemHoverStyle: {
+                                color: '#00f'
+                        },
                         shadow: true
                     },
                     series: []
