@@ -77,7 +77,7 @@ angular.module('myApp.directives', []).
                             }
                     }
 
-                        return '<img src="' + user.avatar_url + '.avatar" style="float:left; padding-right:15px"></img><h3>' + user.name + '</h3>' +
+                        return '<img src="' + user.avatar_url + '" style="float:left; padding-right:15px"></img><h3>' + user.name + '</h3>' +
                             '<br>' +
                             '<h4>User stats:</h4>' +
                             '<p><b>Total Posts:</b> ' + user.total_posts + '</p>' +
