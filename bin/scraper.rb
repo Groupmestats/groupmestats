@@ -82,7 +82,14 @@ class Scraper
         gm = Groupme.new
         database = SQLite3::Database.new( @database )
         group = gm.get("/groups/#{group_id}/", @token)['response']
-      
+
+        if group['image_url'].nil?
+            group['image_url'] = 'img/groupme.png'
+        elsif group['image_url'].empty?
+            group['image_url'] = 'img/groupme.png'
+        else
+            group['image_url'] = "#{group['image_url']}.avatar"
+        end
         #Adds new group if they don't exist, and updates the group if they do 
         if database.execute( "SELECT * FROM groups WHERE group_id='#{group['group_id']}'").empty? 
             database.execute( "INSERT INTO groups(group_id, name, image, creator, created_at) VALUES (?, ?, ?, ?, datetime('#{group['created_at']}','unixepoch'))",
@@ -99,6 +106,15 @@ class Scraper
        
         #Adds any new members to the group, and updates any members who have made changes 
         group['members'].each do | member |
+
+            if member['image_url'].nil?
+                member['image_url'] = 'img/groupme.png'
+            elsif member['image_url'].empty?
+                member['image_url'] = 'img/groupme.png'
+            else
+                member['image_url'] = "#{member['image_url']}.avatar"
+            end
+
             if database.execute( "SELECT * FROM users WHERE user_id='#{member['user_id']}'").empty?
                 database.execute( "INSERT INTO users(user_id, avatar_url) VALUES (?, ?)", 
                     member['user_id'],
