@@ -58,7 +58,7 @@ angular.module('myApp.controllers', [])
         requestTop();    
         requestDailyPostFreqChart();
         requestWeeklyPostFreqChart();
-        requestWordCloud();		
+        //requestWordCloud();		
         requestUser();
 
         $scope.$watch('days', function(newValue, oldValue) {

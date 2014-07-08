@@ -164,8 +164,12 @@ module GroupStats::Controllers
                 @input.groupid
             )[0][0]
             result.merge!(:total_likes_received => total_likes_received)
-            
-            result.merge!(:likes_to_posts_ratio => total_likes_received.to_f/total_posts.to_f)
+
+            if (total_likes_received.to_f == 0 || total_posts.to_f == 0)
+                result.merge!(:likes_to_posts_ratio => 0)
+            else
+                result.merge!(:likes_to_posts_ratio => total_likes_received.to_f/total_posts.to_f)
+            end
 
             top_post = $database.execute("select count(likes.user_id) as count, messages.text from likes join messages on messages.message_id=likes.message_id WHERE messages.user_id=? and messages.group_id=? and messages.image=='none' group by messages.message_id order by count desc limit 1",
                 userid,
