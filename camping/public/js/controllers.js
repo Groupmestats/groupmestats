@@ -41,15 +41,33 @@ angular.module('myApp.controllers', [])
 		$scope.days = 0
 		$scope.piechartData = "";
 		$scope.ngramloading = false;
-		
-		$scope.$watch('days', function(newValue, oldValue) {
+
+        hs.allowMultipleInstances = false;
+        hs.align = "center";
+        hs.addEventListener(document, 'click', function(e) {
+           e = e || window.event;
+           var target = e.target || e.srcElement;
+
+           // if the target element is not within an expander but there is an expander on the page, close it
+           if (!hs.getExpander(target) && hs.getExpander()) hs.close();
+        });
+
+        requestGroupJoinRate();
+        requestPostsMostChart();
+        requestLikesReceivedChart();
+        requestTop();    
+        requestDailyPostFreqChart();
+        requestWeeklyPostFreqChart();
+        //requestWordCloud();		
+        requestUser();
+
+        $scope.$watch('days', function(newValue, oldValue) {
              requestGroupJoinRate();
              requestPostsMostChart();
              requestLikesReceivedChart();
+			 requestTop();
              requestDailyPostFreqChart();
              requestWeeklyPostFreqChart();
-             requestWordCloud();
-			 requestTop();
            });
 		   
 		$scope.refreshNgram = function(){
@@ -100,20 +118,32 @@ angular.module('myApp.controllers', [])
 
 				});
 		}
-        function requestGroupJoinRate(){
-            var daysToRequest = $scope.days
-            if(daysToRequest == 0)
-            {
-                daysToRequest = 9999999
-            }
-            $http({method: 'GET', url: '/rest/groupjoinrate', params: {days : daysToRequest, groupid : $routeParams.groupid}}).
-                success(function(data, status, headers, config) {
-                    $scope.joinDateData = data
-                }).
-                error(function(data, status, headers, config) {
+        
+        function requestUser(){
+           $http({method: 'GET', url: '/rest/usergroup', params: {groupid : $routeParams.groupid}}).
+               success(function(data, status, headers, config) {
+                   $scope.userData = data
+               }).
+               error(function(data, status, headers, config) {
 
-                });
+               });
         }
+       
+        function requestGroupJoinRate(){
+           var daysToRequest = $scope.days
+           if(daysToRequest == 0)
+           {
+               daysToRequest = 9999999
+           }
+           $http({method: 'GET', url: '/rest/groupjoinrate', params: {days : daysToRequest, groupid : $routeParams.groupid}}).
+               success(function(data, status, headers, config) {
+                   $scope.joinDateData = data
+               }).
+               error(function(data, status, headers, config) {
+
+               });
+        }
+        
         function requestLikesReceivedChart(){
             var daysToRequest = $scope.days
             if(daysToRequest == 0)

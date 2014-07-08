@@ -5,38 +5,45 @@
 
 angular.module('myApp.directives', []).
 	directive('gmsPiechart', function() {
-		return{
-			scope: {
-				gmsData: '=',
-				gmsTitle: '@'
-			},
-            template: '<div id="container"></div>',	
-    		link: function ($scope, element, attrs) {
-            	$scope.$watch('gmsData', function(gmsData) {
-					if(gmsData)
-					{
-						drawChart(gmsData, attrs.gmsTitle, element[0]);
-					}
-				});
-				
-				$scope.chart = new Highcharts.Chart({
-					chart: {
-						type: 'pie',
-						renderTo: element[0],
-					},
-					plotOptions: {
-					   pie: {
-						   allowPointSelect: true,
-						   animation: {
+        return{
+            scope: {
+                gmsData: '=',
+                gmsTitle: '@',
+                gmsUser: '=',
+            },
+            template: '<div id="container"></div>', 
+            link: function ($scope, element, attrs) {
+                $scope.$watch('gmsUser', function(gmsUser) {
+                    if(gmsUser)
+                    {
+                        $scope.userData = gmsUser;
+                        $scope.$watch('gmsData', function(gmsData) {
+                            if(gmsData)
+                            {
+                                drawChart(gmsData, $scope.userData, attrs.gmsTitle, element[0]);
+                            }
+                        });
+                    }
+                });
+                
+                $scope.chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'pie',
+                        renderTo: element[0],
+                    },
+                    plotOptions: {
+                       pie: {
+                           allowPointSelect: true,
+                           animation: {
                                duration: 2000
                            },
                            cursor: 'pointer',
-						   dataLabels: {
-							   enabled: false
-						   },
-						   showInLegend: true
-					    }
-				    },
+                           dataLabels: {
+                               enabled: false
+                           },
+                           showInLegend: true
+                        },
+                    },
                     tooltip: {
                         pointFormat: '<b>{point.y}</b><br/>',
                         shared: true
@@ -54,25 +61,63 @@ angular.module('myApp.directives', []).
                         layout: 'vertical',
                         verticalAlign: 'top',
                         y: 100,
+                        itemHoverStyle: {
+                                color: '#00f'
+                        },
                         shadow: true
                     },
-					series: []
-				});
+                    series: []
+                });
 
-				function drawChart(chartData, title, element) {
-					if($scope.chart.series[0])
-					{
-						$scope.chart.series[0].remove(true);
-					}
-					$scope.chart.addSeries({
-						data: chartData
-					}, false);
-					$scope.chart.setTitle({text:title}, '', false);
-					$scope.chart.redraw();
-				}
+                function userStats(userData, chart) {
+                    var user;
+                    for (var i = 0; i < userData.length; i++) {
+                            if (userData[i]['name'] == chart.series.data[chart.x].name) {
+                                user = userData[i];
+                            }
+                    }
 
-			}
-		};
+                        return '<img src="' + user.avatar_url + '.avatar" style="float:left; padding-right:15px"></img><h3>' + user.name + '</h3>' +
+                            '<br>' +
+                            '<h4>User stats:</h4>' +
+                            '<p><b>Total Posts:</b> ' + user.total_posts + '</p>' +
+                            '<p><b>Total likes:</b> ' + user.total_likes_received + '</p>' +
+                            '<p><b>Likes to Posts Ratio:</b> ' + user.likes_to_posts_ratio + '</p>' +
+                            '<p><b>Top Post:</b> (' + user.top_post_likes + ') ' + user.top_post + '</p>' +
+                            '<a href="#/user?userid=' + user.user_id + '&groupid=' + user.group_id + '" onclick="javascript:parent.window.hs.close();" >More info</a>'
+                }
+
+                function drawChart(chartData, userData, title, element) {
+                    if($scope.chart.series[0])
+                    {
+                        $scope.chart.series[0].remove(true);
+                    }
+                    $scope.chart.addSeries({
+                        data: chartData,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function(e) {
+                                    hs.htmlExpand(null, {
+                                        headingText: "User Stats",
+                                        maincontentText: userStats(userData, this)
+                                    });
+                                },
+                                legendItemClick: function(e) {
+                                    hs.htmlExpand(null, {
+                                        headingText: "User Stats",
+                                        maincontentText: userStats(userData, this)
+                                    });
+                                    return false;
+                                }
+                            }
+                        }
+                    }, false);
+                    $scope.chart.setTitle({text:title}, '', false);
+                    $scope.chart.redraw();
+                }
+            }
+        };
     }).directive('gmsLinegraph', function() {
         return{
             scope: {
