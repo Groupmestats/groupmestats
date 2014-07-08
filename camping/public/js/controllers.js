@@ -43,6 +43,7 @@ angular.module('myApp.controllers', [])
 		$scope.ngramloading = false;
 
         hs.allowMultipleInstances = false;
+        hs.align = "center";
         hs.addEventListener(document, 'click', function(e) {
            e = e || window.event;
            var target = e.target || e.srcElement;
@@ -51,6 +52,10 @@ angular.module('myApp.controllers', [])
            if (!hs.getExpander(target) && hs.getExpander()) hs.close();
         });
 
+        requestGroupJoinRate();
+        requestPostsMostChart();
+        requestLikesReceivedChart();
+        requestTop();    
         requestDailyPostFreqChart();
         requestWeeklyPostFreqChart();
         requestWordCloud();		
@@ -61,6 +66,8 @@ angular.module('myApp.controllers', [])
              requestPostsMostChart();
              requestLikesReceivedChart();
 			 requestTop();
+             requestDailyPostFreqChart();
+             requestWeeklyPostFreqChart();
            });
 		   
 		$scope.refreshNgram = function(){
