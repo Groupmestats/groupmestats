@@ -87,7 +87,7 @@ angular.module('myApp.directives', []).
                                             }
                                     }
                                     hs.htmlExpand(null, {
-                                        headingText: "Stats",
+                                        headingText: "User Stats",
                                         
                                         maincontentText: '<img src="' + user.avatar_url + '.avatar" style="float:left; padding-right:15px"></img><h3>' + user.name + '</h3>' +
                                             '<br>' +
