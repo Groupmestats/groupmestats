@@ -42,6 +42,15 @@ angular.module('myApp.controllers', [])
 		$scope.piechartData = "";
 		$scope.ngramloading = false;
 
+        hs.allowMultipleInstances = false;
+        hs.addEventListener(document, 'click', function(e) {
+           e = e || window.event;
+           var target = e.target || e.srcElement;
+
+           // if the target element is not within an expander but there is an expander on the page, close it
+           if (!hs.getExpander(target) && hs.getExpander()) hs.close();
+        });
+
         requestDailyPostFreqChart();
         requestWeeklyPostFreqChart();
         requestWordCloud();		

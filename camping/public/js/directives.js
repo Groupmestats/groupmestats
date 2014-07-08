@@ -43,7 +43,7 @@ angular.module('myApp.directives', []).
                                enabled: false
                            },
                            showInLegend: true
-                        }
+                        },
                     },
                     tooltip: {
                         pointFormat: '<b>{point.y}</b><br/>',
@@ -99,7 +99,8 @@ angular.module('myApp.directives', []).
                                             '<p><b>Likes to Posts Ratio:</b> ' + user.likes_to_posts_ratio + '</p>' +
                                             '<p><b>Top Post:</b> (' + user.top_post_likes + ') ' + user.top_post + '</p>' +
                                             '<a href="#/user?userid=' + user.user_id + '&groupid=' + user.group_id + '" onclick="javascript:parent.window.hs.close();" >More info</a>',
-                                        width: 200
+                                        //width: 800,
+                                        //height: 600
                                     });
                                 }
                             }
