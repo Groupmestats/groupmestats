@@ -69,6 +69,24 @@ angular.module('myApp.directives', []).
                     series: []
                 });
 
+                function userStats(userData, chart) {
+                    var user;
+                    for (var i = 0; i < userData.length; i++) {
+                            if (userData[i]['name'] == chart.series.data[chart.x].name) {
+                                user = userData[i];
+                            }
+                    }
+
+                        return '<img src="' + user.avatar_url + '.avatar" style="float:left; padding-right:15px"></img><h3>' + user.name + '</h3>' +
+                            '<br>' +
+                            '<h4>User stats:</h4>' +
+                            '<p><b>Total Posts:</b> ' + user.total_posts + '</p>' +
+                            '<p><b>Total likes:</b> ' + user.total_likes_received + '</p>' +
+                            '<p><b>Likes to Posts Ratio:</b> ' + user.likes_to_posts_ratio + '</p>' +
+                            '<p><b>Top Post:</b> (' + user.top_post_likes + ') ' + user.top_post + '</p>' +
+                            '<a href="#/user?userid=' + user.user_id + '&groupid=' + user.group_id + '" onclick="javascript:parent.window.hs.close();" >More info</a>'
+                }
+
                 function drawChart(chartData, userData, title, element) {
                     if($scope.chart.series[0])
                     {
@@ -80,47 +98,15 @@ angular.module('myApp.directives', []).
                         point: {
                             events: {
                                 click: function(e) {
-                                    var user;
-                                    for (var i = 0; i < userData.length; i++) {
-                                            if (userData[i]['name'] == this.series.data[this.x].name) {
-                                                user = userData[i];
-                                            }
-                                    }
                                     hs.htmlExpand(null, {
                                         headingText: "User Stats",
-                                        
-                                        maincontentText: '<img src="' + user.avatar_url + '.avatar" style="float:left; padding-right:15px"></img><h3>' + user.name + '</h3>' +
-                                            '<br>' +
-                                            '<h4>User stats:</h4>' + 
-                                            '<p><b>Total Posts:</b> ' + user.total_posts + '</p>' +
-                                            '<p><b>Total likes:</b> ' + user.total_likes_received + '</p>' +
-                                            '<p><b>Likes to Posts Ratio:</b> ' + user.likes_to_posts_ratio + '</p>' +
-                                            '<p><b>Top Post:</b> (' + user.top_post_likes + ') ' + user.top_post + '</p>' +
-                                            '<a href="#/user?userid=' + user.user_id + '&groupid=' + user.group_id + '" onclick="javascript:parent.window.hs.close();" >More info</a>',
-                                        //width: 800,
-                                        //height: 600
+                                        maincontentText: userStats(userData, this)
                                     });
                                 },
                                 legendItemClick: function(e) {
-                                    var user;
-                                    for (var i = 0; i < userData.length; i++) {
-                                            if (userData[i]['name'] == this.series.data[this.x].name) {
-                                                user = userData[i];
-                                            }
-                                    }
                                     hs.htmlExpand(null, {
-                                        headingText: "Stats",
-
-                                        maincontentText: '<img src="' + user.avatar_url + '.avatar" style="float:left; padding-right:15px"></img><h3>' + user.name + '</h3>' +
-                                            '<br>' +
-                                            '<h4>User stats:</h4>' +
-                                            '<p><b>Total Posts:</b> ' + user.total_posts + '</p>' +
-                                            '<p><b>Total likes:</b> ' + user.total_likes_received + '</p>' +
-                                            '<p><b>Likes to Posts Ratio:</b> ' + user.likes_to_posts_ratio + '</p>' +
-                                            '<p><b>Top Post:</b> (' + user.top_post_likes + ') ' + user.top_post + '</p>' +
-                                            '<a href="#/user?userid=' + user.user_id + '&groupid=' + user.group_id + '" onclick="javascript:parent.window.hs.close();" >More info</a>',
-                                        //width: 800,
-                                        //height: 600
+                                        headingText: "User Stats",
+                                        maincontentText: userStats(userData, this)
                                     });
                                     return false;
                                 }
