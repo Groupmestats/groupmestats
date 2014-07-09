@@ -263,6 +263,11 @@ module GroupStats::Controllers
                 result.merge!(:top_post_likes => top_post[0][0])
                 result.merge!(:top_post => top_post[0][1])
             end
+
+            total_posts_for_group = $database.execute("SELECT count(*) from messages where messages.group_id=? AND messages.user_id != 'system'",
+                @input.groupid
+            )[0][0]
+            result.merge!(:post_percentage => ((total_posts.to_f/total_posts_for_group.to_f) * 100).round(2) )
         else
             top_post = $database.execute("select count(likes.user_id) as count, messages.text from likes join messages on messages.message_id=likes.message_id WHERE messages.user_id=? and messages.image=='none' group by messages.message_id order by count desc limit 1",
                 @input.userid,
