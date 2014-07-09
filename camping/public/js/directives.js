@@ -21,10 +21,9 @@ angular.module('myApp.directives', []).
                             if(gmsData)
                             {
                                 $scope.data = gmsData;
-                                //drawChart(gmsData, $scope.userData, attrs.gmsTitle, element[0]);
                             }
                         });
-                        drawChart($scope.data, $scope.userData, attrs.gmsTitle, element[0]);
+                        drawChart($scope.gmsData, $scope.gmsUser, attrs.gmsTitle, element[0]);
                     }
                 });
                 
@@ -153,7 +152,7 @@ angular.module('myApp.directives', []).
                                 //drawChart(gmsData, $scope.userData, attrs.gmsTitle, element[0]);
                             }
                         });
-                        drawChart($scope.data, $scope.userData, attrs.gmsTitle, element[0]);
+                        drawChart($scope.gmsData, $scope.gmsUser, attrs.gmsTitle, element[0]);
                     }
                 });
                 
