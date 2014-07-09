@@ -20,9 +20,11 @@ angular.module('myApp.directives', []).
                         $scope.$watch('gmsData', function(gmsData) {
                             if(gmsData)
                             {
-                                drawChart(gmsData, $scope.userData, attrs.gmsTitle, element[0]);
+                                $scope.data = gmsData;
+                                //drawChart(gmsData, $scope.userData, attrs.gmsTitle, element[0]);
                             }
                         });
+                        drawChart($scope.data, $scope.userData, attrs.gmsTitle, element[0]);
                     }
                 });
                 

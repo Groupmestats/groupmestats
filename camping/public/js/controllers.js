@@ -53,13 +53,8 @@ angular.module('myApp.controllers', [])
         });
 
         requestGroupJoinRate();
-        requestPostsMostChart();
-        requestLikesReceivedChart();
-        requestTop();    
         requestDailyPostFreqChart();
         requestWeeklyPostFreqChart();
-        //requestWordCloud();		
-        requestUser();
 
         $scope.$watch('days', function(newValue, oldValue) {
              requestGroupJoinRate();
@@ -68,6 +63,7 @@ angular.module('myApp.controllers', [])
 			 requestTop();
              requestDailyPostFreqChart();
              requestWeeklyPostFreqChart();
+             requestUser();
            });
 		   
 		$scope.refreshNgram = function(){
@@ -120,7 +116,12 @@ angular.module('myApp.controllers', [])
 		}
         
         function requestUser(){
-           $http({method: 'GET', url: '/rest/usergroup', params: {groupid : $routeParams.groupid}}).
+            var daysToRequest = $scope.days
+            if(daysToRequest == 0)
+            {
+                daysToRequest = 9999999
+            }
+            $http({method: 'GET', url: '/rest/usergroup', params: {days: daysToRequest, groupid : $routeParams.groupid}}).
                success(function(data, status, headers, config) {
                    $scope.userData = data
                }).
