@@ -45,7 +45,10 @@ angular.module('myApp.directives', []).
                         },
                     },
                     tooltip: {
-                        pointFormat: '<b>{point.y}</b><br/>',
+                        formatter: function() {
+                            return '<b>'+ this.point.name + '</b>: '+ '<br>' +
+                                this.y + '<br>' + roundToTwo(this.percentage) +'%';
+                        },
                         shared: true
                     },
                     legend: {
@@ -68,6 +71,10 @@ angular.module('myApp.directives', []).
                     },
                     series: []
                 });
+
+                function roundToTwo(num) {    
+                    return +(Math.round(num + "e+2")  + "e-2");
+                }
 
                 function userStats(userData, chart) {
                     var user;
