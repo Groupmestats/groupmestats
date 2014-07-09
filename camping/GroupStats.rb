@@ -152,7 +152,7 @@ module GroupStats::Controllers
                 @input.groupid
             )
             result = result[0]
-     
+    
             total_posts = $database.execute("SELECT  count(messages.user_id) as count FROM messages WHERE messages.user_id=? AND messages.group_id=?",
                 userid,
                 @input.groupid
@@ -180,10 +180,15 @@ module GroupStats::Controllers
                 result.merge!(:top_post => top_post[0][1])
             end
 
+            total_posts_for_group = $database.execute("SELECT count(*) from messages where messages.group_id=? AND messages.user_id != 'system'",
+                @input.groupid
+            )[0][0]
+            result.merge!(:post_percentage => ((total_posts.to_f/total_posts_for_group.to_f) * 100).round(2) )
+
             final_results.push(result)
         end
         $database.results_as_hash = false
-        
+
         return final_results.to_json
     end
   end

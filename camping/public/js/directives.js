@@ -46,8 +46,14 @@ angular.module('myApp.directives', []).
                     },
                     tooltip: {
                         formatter: function() {
+                            var user;
+                            for (var i = 0; i < $scope.userData.length; i++) {
+                                if ($scope.userData[i]['name'] == this.series.data[this.point.x].name) {
+                                    user = $scope.userData[i];
+                                }
+                            }
                             return '<b>'+ this.point.name + '</b>: '+ '<br>' +
-                                this.y + '<br>' + roundToTwo(this.percentage) +'%';
+                                this.y + '<br>' + user['post_percentage'] +'%';
                         },
                         shared: true
                     },
@@ -72,8 +78,8 @@ angular.module('myApp.directives', []).
                     series: []
                 });
 
-                function roundToTwo(num) {    
-                    return +(Math.round(num + "e+2")  + "e-2");
+                function roundToFour(num) {    
+                    return +(Math.round(num + "e+4")  + "e-4");
                 }
 
                 function userStats(userData, chart) {
@@ -88,9 +94,9 @@ angular.module('myApp.directives', []).
                             '<br>' +
                             '<h4>User stats:</h4>' +
                             '<p><b>Total Posts:</b> ' + user.total_posts + '</p>' +
+                            '<p><b>Percentage of Total Posts:</b> ' + user.post_percentage + '%</p>' +
                             '<p><b>Total likes:</b> ' + user.total_likes_received + '</p>' +
                             '<p><b>Likes to Posts Ratio:</b> ' + user.likes_to_posts_ratio + '</p>' +
-                            '<p><b>Top Post:</b> (' + user.top_post_likes + ') ' + user.top_post + '</p>' +
                             '<a href="#/user?userid=' + user.user_id + '&groupid=' + user.group_id + '" onclick="javascript:parent.window.hs.close();" >More info</a>'
                 }
 
