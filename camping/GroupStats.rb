@@ -699,13 +699,13 @@ module GroupStats::Controllers
             result = $database.execute( "select strftime('%s', m.created_at) as time, count(message_id) as totalmessages,
                    (select count(message_id) from messages
                         where group_id = ?
-                        and strftime('%W', messages.created_at) = strftime('%W', m.created_at)
+                        and strftime('%m', messages.created_at) = strftime('%m', m.created_at)
                         and strftime('%Y', messages.created_at) = strftime('%Y', m.created_at)
                         and text like ?
                    ) as messages
                  from messages as m
                 where group_id = ?
-                group by strftime('%W', m.created_at), strftime('%Y', m.created_at)
+                group by strftime('%m', m.created_at), strftime('%Y', m.created_at)
                 order by m.created_at asc",
                 @input.groupid,
                 '%'+term+'%',
