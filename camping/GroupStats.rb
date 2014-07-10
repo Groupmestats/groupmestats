@@ -347,7 +347,16 @@ module GroupStats::Controllers
         end
 
         $database.results_as_hash = true
-        result = $database.execute( "select count(likes.user_id) as count, messages.text, user_groups.Name, users.avatar_url from likes join messages on messages.message_id=likes.message_id left join user_groups on user_groups.user_id=messages.user_id left join users on users.user_id=messages.user_id WHERE messages.created_at > datetime('now', ?) AND messages.group_id=? AND user_groups.group_id=? and messages.image=='none' group by messages.message_id order by count desc limit ?",
+        result = $database.execute( "select count(likes.user_id) as count, messages.text, user_groups.Name, users.avatar_url 
+        from likes 
+        join messages on messages.message_id=likes.message_id 
+        left join user_groups on user_groups.user_id=messages.user_id 
+        left join users on users.user_id=messages.user_id 
+            WHERE messages.created_at > datetime('now', ?) 
+            AND messages.group_id=? 
+            AND user_groups.group_id=? and messages.image=='none' 
+        group by messages.message_id 
+        order by count desc limit ?",
         "-" + @input.days + " day",
         @input.groupid,
         @input.groupid,
@@ -450,7 +459,14 @@ module GroupStats::Controllers
             return 'nil'
         end
 
-        result = $database.execute( "select user_groups.Name, count(likes.user_id) as count from user_groups left join likes on messages.message_id=likes.message_id left join messages on messages.user_id=user_groups.user_id where messages.created_at > datetime('now', ?) and messages.group_id=? and user_groups.group_id=? group by messages.user_id order by count desc",
+        result = $database.execute( "select user_groups.Name, count(likes.user_id) as count 
+        from user_groups 
+        left join messages using(user_id)
+        left join likes using(message_id)
+        where messages.created_at > datetime('now', ?) 
+        and messages.group_id=? 
+        and user_groups.group_id=? 
+        group by messages.user_id order by count desc",
         "-" + @input.days + " day",
         @input.groupid,
         @input.groupid)
