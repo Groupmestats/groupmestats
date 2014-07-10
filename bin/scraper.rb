@@ -4,6 +4,7 @@ require 'json'
 require 'time'
 require 'sqlite3'
 require_relative 'groupme'
+require 'pp'
 
 #Scraper class.  This is initialized with a path to the sqlite database and a groupme oauth token
 class Scraper
@@ -33,7 +34,7 @@ class Scraper
         end
 
         if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='messages';").empty?
-            database.execute('CREATE TABLE messages(message_id INT PRIMARY KEY, created_at DATETIME, user_id INT, group_id INT, avatar_url TEXT, text TEXT, image TEXT, FOREIGN KEY(user_id) REFERENCES users(user_id), FOREIGN KEY(group_id) REFERENCES groups(group_id));')
+            database.execute('CREATE TABLE messages(message_id INT PRIMARY KEY, created_at DATETIME, user_id INT, name TEXT, group_id INT, avatar_url TEXT, text TEXT, image TEXT, FOREIGN KEY(user_id) REFERENCES users(user_id), FOREIGN KEY(group_id) REFERENCES groups(group_id));')
         end
 
         if database.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='likes';").empty?
@@ -155,7 +156,8 @@ class Scraper
     def scrapeMessages(searchTime = Time.now.to_i, group_id)
         gm = Groupme.new
         database = SQLite3::Database.new( @database ) 
-        
+
+        count = 0        
         id = 0
         t = Time.now.to_i
         while (Time.now.to_i - t.to_i) < (searchTime + 604800) do
@@ -192,17 +194,19 @@ class Scraper
                            end 
                        end
                        if !message['text'].nil?
-                           database.execute( "INSERT INTO messages(message_id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, datetime('#{message['created_at']}', 'unixepoch'), ?, ?, ?, ?, ?)",
+                           database.execute( "INSERT INTO messages(message_id, created_at, user_id, name, group_id, avatar_url, text, image) VALUES (?, datetime('#{message['created_at']}', 'unixepoch'), ?, ?, ?, ?, ?, ?)",
                            message['id'],
                            message['user_id'],
+                           message['name'],
                            message['group_id'],
                            message['avatar_url'], 
                            message['text'], 
                            image )
                        else
-                           database.execute( "INSERT INTO messages(message_id, created_at, user_id, group_id, avatar_url, text, image) VALUES (?, datetime('#{message['created_at']}', 'unixepoch'), ?, ?, ?, ?, ?)",
+                           database.execute( "INSERT INTO messages(message_id, created_at, user_id, name, group_id, avatar_url, text, image) VALUES (?, datetime('#{message['created_at']}', 'unixepoch'), ?, ?, ?, ?, ?, ?)",
                            message['id'],
                            message['user_id'],
+                           message['name'],
                            message['group_id'],
                            message['avatar_url'], 
                            'none', 
@@ -224,6 +228,9 @@ class Scraper
 
             t = messages['messages'].last['created_at']
             id = messages['messages'].last['id'] 
+
+            count += 20
+            pp count
         end
     end
 
