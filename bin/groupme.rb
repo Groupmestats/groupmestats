@@ -2,10 +2,13 @@
 require 'rubygems'
 require 'json'
 require 'httparty'
+require 'persistent_http'
+require 'persistent_httparty'
 
 #Class that invokes HTTParty.
 class Groupme
     include HTTParty
+    persistent_connection_adapter
 
     base_uri 'https://api.groupme.com/v3//'
     format :json

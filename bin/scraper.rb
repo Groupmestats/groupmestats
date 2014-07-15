@@ -3,8 +3,8 @@ require 'rubygems'
 require 'json'
 require 'time'
 require 'sqlite3'
+
 require_relative 'groupme'
-require 'pp'
 
 #Scraper class.  This is initialized with a path to the sqlite database and a groupme oauth token
 class Scraper
@@ -91,6 +91,8 @@ class Scraper
         else
             group['image_url'] = "#{group['image_url']}.avatar"
         end
+
+        database.transaction
         #Adds new group if they don't exist, and updates the group if they do 
         if database.execute( "SELECT * FROM groups WHERE group_id='#{group['group_id']}'").empty? 
             database.execute( "INSERT INTO groups(group_id, name, image, creator, created_at) VALUES (?, ?, ?, ?, datetime('#{group['created_at']}','unixepoch'))",
@@ -134,6 +136,8 @@ class Scraper
                     member['nickname'] )
             end
         end
+
+        database.commit
     end
 
     def scrapeNewMessages(group_id)
@@ -157,9 +161,11 @@ class Scraper
         gm = Groupme.new
         database = SQLite3::Database.new( @database ) 
 
-        count = 0        
         id = 0
         t = Time.now.to_i
+       
+        database.transaction
+        
         while (Time.now.to_i - t.to_i) < (searchTime + 604800) do
 
             if id == 0
@@ -169,6 +175,7 @@ class Scraper
             end
 
             if messages.nil?
+                break
                 return false
             end
 
@@ -228,10 +235,9 @@ class Scraper
 
             t = messages['messages'].last['created_at']
             id = messages['messages'].last['id'] 
-
-            count += 20
-            pp count
         end
+
+        database.commit
     end
 
     private :scrapeMessages
