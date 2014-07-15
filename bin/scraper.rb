@@ -157,9 +157,11 @@ class Scraper
         gm = Groupme.new
         database = SQLite3::Database.new( @database ) 
 
-        count = 0        
         id = 0
         t = Time.now.to_i
+       
+       database.transaction
+        
         while (Time.now.to_i - t.to_i) < (searchTime + 604800) do
 
             if id == 0
@@ -169,6 +171,7 @@ class Scraper
             end
 
             if messages.nil?
+                break
                 return false
             end
 
@@ -228,10 +231,9 @@ class Scraper
 
             t = messages['messages'].last['created_at']
             id = messages['messages'].last['id'] 
-
-            count += 20
-            pp count
         end
+    
+        database.commit
     end
 
     private :scrapeMessages
