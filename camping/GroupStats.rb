@@ -630,6 +630,64 @@ module GroupStats::Controllers
         return result.to_json
     end
   end
+  
+  class VolumData < R '/rest/volumedata'
+    def get()
+        if(@input.groupid == nil)
+            @status = 400
+            return 'need group id'
+        end
+        
+        groupBy = '%m';
+        if(@input.byWeek == "true")
+            groupBy = '%W';
+        end
+        
+        byUser = (@input.byUser == "true")
+        
+        $database.results_as_hash = false
+        if(byUser)
+            result = $database.execute( "select time, cast(numMessage as real)/count(user_id) as count
+                from (select strftime('%s',created_at) as time, count(message_id) as numMessage, group_id
+                            from messages where group_id = ?
+                            group by strftime(?, created_at), strftime('%Y', created_at)
+                            order by strftime('%s', created_at)
+                )
+                left join user_groups using(group_id)
+                left join (select user_id, min(created_at) as firstpost from messages join users using(user_id) where messages.group_id = ? group by user_id)
+                using (user_id)
+                where strftime('%s',firstpost) <= time
+                group by time",
+                @input.groupid,
+                groupBy,
+                @input.groupid)
+        else
+            result = $database.execute( "select strftime('%s',created_at) as time, count(message_id)
+                from messages where group_id = ?
+                group by strftime(?, created_at), strftime('%Y', created_at)
+                order by strftime('%s', created_at)",
+                @input.groupid,
+                groupBy)
+        end
+        
+        
+        #todo: enforce user id
+        result.each do |a|
+            curr = DateTime.strptime(a[0].to_s,'%s')
+            if(@input.byWeek == "true")
+                a[0] = (curr.to_date - curr.wday).to_time.to_i * 1000 #convert to sunday
+            else
+                a[0] = (curr.to_date - (curr.day-1)).to_time.to_i * 1000 #convert to beginning of month
+            end
+            
+            if(byUser)
+                a[1] = a[1].round(1)
+            end
+        end
+        $database.results_as_hash = false
+        return result.to_json
+    end
+  end
 
   class GroupJoinRate < R '/rest/groupjoinrate'
     def get()

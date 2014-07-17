@@ -55,7 +55,7 @@ angular.module('myApp.controllers', [])
         requestGroupJoinRate();
         requestDailyPostFreqChart();
         requestWeeklyPostFreqChart();
-
+		
         $scope.$watch('days', function(newValue, oldValue) {
              requestGroupJoinRate();
              requestPostsMostChart();

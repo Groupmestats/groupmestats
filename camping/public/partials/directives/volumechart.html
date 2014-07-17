@@ -1,0 +1,14 @@
+<h4 style="text-align:center">Posting Volume</h4>
+View by:
+<div class="btn-group">
+  <button type="button" class="btn btn-default" ng-class="{active : !byWeek}" ng-click="setByWeek(false)">Month</button>
+  <button type="button" class="btn btn-default" ng-class="{active : byWeek}" ng-click="setByWeek(true)">Week</button>
+</div>
+&nbsp;
+<div class="btn-group">
+  <button type="button" class="btn btn-default" ng-class="{active : !byUser}" ng-click="setMessagesByUser(false)">Total Messages</button>
+  <button type="button" class="btn btn-default" ng-class="{active : byUser}" ng-click="setMessagesByUser(true)">Messages per user</button>
+</div>
+
+<br/><br/>
+<div id="container"></div>
