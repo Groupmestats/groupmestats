@@ -1,3 +1,5 @@
+require 'rubygems' 
+require 'bundler/setup'
 require 'pp'
 require 'sqlite3'
 require 'json'

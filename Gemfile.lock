@@ -1,18 +1,33 @@
 GEM
-  remote: http://rubygem.org/
+  remote: https://rubygems.org/
   specs:
+    camping (2.1.532)
+      mab (>= 0.0.3)
+      rack (>= 1.0)
+    gene_pool (1.4.1)
+      thread_safe
     httparty (0.13.1)
       json (~> 1.8)
       multi_xml (>= 0.5.2)
     json (1.8.1)
+    mab (0.0.3)
     multi_xml (0.5.5)
+    persistent_http (2.0.0)
+      gene_pool (>= 1.3)
+    persistent_httparty (0.1.1)
+      httparty (~> 0.9)
+      persistent_http
+    rack (1.5.2)
     sqlite3 (1.3.9)
+    thread_safe (0.3.4)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler
-  httparty
-  json
-  sqlite3
+  camping (= 2.1.532)
+  httparty (= 0.13.1)
+  json (= 1.8.1)
+  persistent_http (= 2.0.0)
+  persistent_httparty (= 0.1.1)
+  sqlite3 (= 1.3.9)
