@@ -138,7 +138,7 @@ angular.module('myApp.controllers', [])
            }
            $http({method: 'GET', url: '/rest/groupjoinrate', params: {days : daysToRequest, groupid : $routeParams.groupid}}).
                success(function(data, status, headers, config) {
-                   $scope.joinDateData = data
+                   $scope.joinDateData = data[0]
                }).
                error(function(data, status, headers, config) {
 

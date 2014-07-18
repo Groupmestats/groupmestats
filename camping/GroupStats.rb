@@ -709,7 +709,7 @@ module GroupStats::Controllers
         end
 
         #$database.results_as_hash = true
-        temp_result = $database.execute( "SELECT strftime('%s', MIN(m.created_at)) First_Post
+        temp_result = $database.execute( "SELECT strftime('%s', MIN(m.created_at)) First_Post, ug.name
             FROM messages m       
                  INNER JOIN user_groups ug
                        ON m.group_id = ug.group_id
@@ -723,13 +723,16 @@ module GroupStats::Controllers
 
         i = 0
         result = Array.new 
+        categories = Array.new
         temp_result.each do | element |
             result.push([1000*element[0].to_i, i])
+            categories.push(element[1])
             i += 1
         end
+        toReturn = [:data => result, :categories => categories]
         headers['Content-Type'] = "application/json"
         $database.results_as_hash = false
-        return result.to_json
+        return toReturn.to_json
     end
   end
   
