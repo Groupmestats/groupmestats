@@ -279,20 +279,21 @@ angular.module('myApp.directives', []).
                 
                 $scope.chart = new Highcharts.Chart({
                     chart: {
-                        type: 'line',
+                        type: 'scatter',
                         renderTo: element[0],
                     },
                     plotOptions: {
-                       line: {
+                       scatter: {
                            allowPointSelect: true,
                            animation: {
-                               duration: 2000
+                               duration: 1000
                            },
                            cursor: 'pointer',
                            dataLabels: {
                                enabled: false
                            },
-                           showInLegend: false 
+                           showInLegend: false,
+						   lineWidth:2
                         }
                     },
                     xAxis: {
