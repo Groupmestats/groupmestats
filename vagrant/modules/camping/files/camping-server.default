@@ -1,0 +1,3 @@
+GROUPSTATS_FILE=/srv/groupme/camping/GroupStats.rb
+GROUPSTATS_CONFIG=/srv/groupme/camping/web.yaml
+USER=root

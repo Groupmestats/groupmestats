@@ -1,0 +1,55 @@
+<VirtualHost *:80>
+    RewriteEngine on
+    RewriteCond %{SERVER_PORT} !^443$
+    RewriteRule ^/(.*) https://%{HTTP_HOST}/$1 [NC,R=301,L]
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerAdmin webmaster@localhost
+
+
+    DocumentRoot /app/groupme_stats/camping/public
+    RewriteEngine on
+
+    ServerName groupmestats.com
+    RewriteEngine On
+
+    ProxyPreserveHost On
+
+    ProxyPass / http://groupmestats.com:3301/
+    ProxyPassReverse / http://groupmestats.com:3301/
+
+    #Fix for Apache bug 39499
+    SetEnv force-proxy-request-1.0 1
+    SetEnv proxy-nokeepalive 1
+
+    <Directory />
+	Options FollowSymLinks
+	AllowOverride None
+    </Directory>
+    <Directory /var/www/>
+	Options Indexes FollowSymLinks MultiViews
+	AllowOverride None
+	Order allow,deny
+	allow from all
+    </Directory>
+    ScriptAlias /cgi-bin/ /usr/lib/cgi-bin/
+    <Directory "/usr/lib/cgi-bin">
+	AllowOverride None
+	Options +ExecCGI -MultiViews +SymLinksIfOwnerMatch
+	Order allow,deny
+	Allow from all
+    </Directory>
+
+    SSLEngine on
+    SSLProxyEngine on
+    SSLCertificateFile /etc/ssl/apache2/server.crt
+    SSLCertificateKeyFile /etc/ssl/apache2/server.key
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+
+	# Possible values include: debug, info, notice, warn, error, crit,
+	# alert, emerg.
+	LogLevel warn
+
+	CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
