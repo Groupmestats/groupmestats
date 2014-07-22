@@ -32,6 +32,9 @@ angular.module('myApp.directives', []).
                         type: 'pie',
                         renderTo: element[0],
                     },
+		    credits: {
+      			enabled: false
+  		    },
                     plotOptions: {
                        pie: {
                            allowPointSelect: true,
@@ -161,6 +164,9 @@ angular.module('myApp.directives', []).
                         type: 'pie',
                         renderTo: element[0],
                     },
+		    credits: {
+		        enabled: false
+		    },
                     plotOptions: {
                        pie: {
                            allowPointSelect: true,
@@ -282,6 +288,9 @@ angular.module('myApp.directives', []).
                         type: 'scatter',
                         renderTo: element[0],
                     },
+                    credits: {
+                        enabled: false
+                    },
                     plotOptions: {
                        scatter: {
                            allowPointSelect: true,
@@ -379,6 +388,9 @@ angular.module('myApp.directives', []).
                         type: 'column',
                         renderTo: element[0],
                     },
+                    credits: {
+                        enabled: false
+                    },
                     legend: {
                         enabled: false
                     },
@@ -449,6 +461,9 @@ angular.module('myApp.directives', []).
 						renderTo: element[0],
 						inverted: true
 					},
+				        credits: {
+                       			    enabled: false
+                    			},
 					legend: {
 						enabled: false
 					},
@@ -514,6 +529,9 @@ angular.module('myApp.directives', []).
                     chart: {
                         type: 'line',
                         renderTo: element[0]
+                    },
+                    credits: {
+                        enabled: false
                     },
 					title: {
 						text: ''
@@ -628,6 +646,9 @@ angular.module('myApp.directives', []).
                     chart: {
                         type: 'column',
                         renderTo: element.find( "div" )[2] //this sucksssssss
+                    },
+                    credits: {
+                        enabled: false
                     },
 					title: {
 						text: ''
