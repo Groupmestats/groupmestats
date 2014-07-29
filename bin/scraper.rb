@@ -3,6 +3,7 @@ require 'rubygems'
 require 'json'
 require 'time'
 require 'sqlite3'
+require 'pp'
 
 require_relative 'groupme'
 
@@ -92,19 +93,15 @@ class Scraper
             group['image_url'] = "#{group['image_url']}.avatar"
         end
 
-        database.transaction
+        group_info = Hash.new
+        user_info = Hash.new
+        user_group_info = Hash.new
+       
         #Adds new group if they don't exist, and updates the group if they do 
         if database.execute( "SELECT * FROM groups WHERE group_id='#{group['group_id']}'").empty? 
-            database.execute( "INSERT INTO groups(group_id, name, image, creator, created_at) VALUES (?, ?, ?, ?, datetime('#{group['created_at']}','unixepoch'))",
-                group['group_id'],
-                group['name'],
-                group['image_url'],
-                group['creator_user_id'] )
+            group_info[group['group_id']] = [group['created_at'], group['name'], group['image_url'], group['creator_user_id'], false ]
         else
-            database.execute( "UPDATE groups SET name=?, image=?, creator=?, created_at=datetime('#{group['created_at']}','unixepoch') WHERE group_id='#{group['group_id']}'",
-                group['name'],
-                group['image_url'],
-                group['creator_user_id'] )
+            group_info[group['group_id']] = [group['created_at'], group['name'], group['image_url'], group['creator_user_id'], true ]
         end
        
         #Adds any new members to the group, and updates any members who have made changes 
@@ -119,24 +116,56 @@ class Scraper
             end
 
             if database.execute( "SELECT * FROM users WHERE user_id='#{member['user_id']}'").empty?
-                database.execute( "INSERT INTO users(user_id, avatar_url) VALUES (?, ?)", 
-                    member['user_id'],
-                    member['image_url'] )
+                user_info[member['user_id'] ] = [member['image_url'], false ]
             else
-                database.execute( "UPDATE users SET avatar_url=? WHERE user_id='#{member['user_id']}'",
-                    member['image_url'] )
+                user_info[member['user_id'] ] = [member['image_url'], true ]
             end
             if database.execute( "SELECT * FROM user_groups WHERE user_id='#{member['user_id']}' AND group_id='#{group['group_id']}'").empty?
-                database.execute( "INSERT INTO user_groups(user_id, group_id, name) VALUES (?, ?, ?)",
-                    member['user_id'],
-                    group['group_id'],
-                    member['nickname'] )
+                user_group_info[member['user_id']] = [group['group_id'], member['nickname'], false]
             else
-                database.execute( "UPDATE user_groups SET name=? WHERE user_id='#{member['user_id']}' AND group_id='#{group['group_id']}'",
-                    member['nickname'] )
+                  user_group_info[member['user_id']] = [group['group_id'], member['nickname'], true]
             end
         end
 
+        database.transaction
+        group_info.each do | key, value |
+            if value[4]
+                database.execute( "UPDATE groups SET name=?, image=?, creator=?, created_at=datetime('#{value[0]}','unixepoch') WHERE group_id='#{key}'",
+                    key,
+                    value[1],
+                    value[2],
+                    value[3] ) 
+            else    
+                database.execute( "INSERT INTO groups(group_id, name, image, creator, created_at) VALUES (?, ?, ?, ?, datetime('#{value[0]}','unixepoch'))",
+                    key,
+                    value[1],
+                    value[2],
+                    value[3] )
+            end
+        end
+        
+        user_info.each do | key, value |
+            if value[1]
+                database.execute( "UPDATE users SET avatar_url=? WHERE user_id='#{key}'",
+                    value[0] )
+            else
+                database.execute( "INSERT INTO users(user_id, avatar_url) VALUES (?, ?)",
+                    key,
+                    value[0] )
+            end 
+        end
+
+        user_group_info.each do | key, value |
+            if value[2]
+                database.execute( "UPDATE user_groups SET name=? WHERE user_id='#{key}' AND group_id='#{value[0]}'",
+                    value[1] )
+            else
+                database.execute( "INSERT INTO user_groups(user_id, group_id, name) VALUES (?, ?, ?)",
+                    key,
+                    value[0],
+                    value[1] )
+            end
+        end
         database.commit
     end
 
@@ -164,8 +193,9 @@ class Scraper
         id = 0
         t = Time.now.to_i
        
-        database.transaction
-        
+        scraped_messages = Hash.new        
+        scraped_likes = Array.new
+
         while (Time.now.to_i - t.to_i) < (searchTime + 604800) do
 
             if id == 0
@@ -194,40 +224,22 @@ class Scraper
                        if !message['favorited_by'].nil?
                            if message['favorited_by'].length != 0
                                message['favorited_by'].each do | user |
-                                   database.execute( "INSERT INTO likes(message_id, user_id) VALUES (?, ?)",
-                                   message['id'], 
-                                   user )
+                                   scraped_likes.push([message['id'], user])
                                end
                            end 
                        end
                        if !message['text'].nil?
-                           database.execute( "INSERT INTO messages(message_id, created_at, user_id, name, group_id, avatar_url, text, image) VALUES (?, datetime('#{message['created_at']}', 'unixepoch'), ?, ?, ?, ?, ?, ?)",
-                           message['id'],
-                           message['user_id'],
-                           message['name'],
-                           message['group_id'],
-                           message['avatar_url'], 
-                           message['text'], 
-                           image )
+                           scraped_messages[ message['id'] ] = [ message['created_at'], message['user_id'], message['name'], message['group_id'], message['avatar_url'], message['text'], image ]
                        else
-                           database.execute( "INSERT INTO messages(message_id, created_at, user_id, name, group_id, avatar_url, text, image) VALUES (?, datetime('#{message['created_at']}', 'unixepoch'), ?, ?, ?, ?, ?, ?)",
-                           message['id'],
-                           message['user_id'],
-                           message['name'],
-                           message['group_id'],
-                           message['avatar_url'], 
-                           'none', 
-                           image )
+                           scraped_messages[ message['id'] ] = [ message['created_at'], message['user_id'], message['name'], message['group_id'], message['avatar_url'], 'none', image ]
                        end
                    end
                 end    
                 #For likes, we want to scan all posts a week back from the search time
                 if ((Time.now.to_i - t.to_i) < (searchTime.to_i + 604800) )
                    message['favorited_by'].each do | likedMembers |
-                       if database.execute("SELECT count(user_id) FROM likes WHERE message_id=#{message['id']} AND user_id=#{likedMembers}")[0][0] == 0
-                           database.execute("INSERT INTO likes(message_id, user_id) VALUES (?, ?)",
-                           message['id'], 
-                           likedMembers ) 
+                       if (database.execute("SELECT count(user_id) FROM likes WHERE message_id=#{message['id']} AND user_id=#{likedMembers}")[0][0] == 0 && database.execute("SELECT updated_at FROM groups WHERE group_id=#{message['group_id']}").empty?)
+                           scraped_likes.push([message['id'], likedMembers])
                        end 
                    end
                 end
@@ -237,6 +249,22 @@ class Scraper
             id = messages['messages'].last['id'] 
         end
 
+        database.transaction
+        scraped_messages.each do | key, value |
+            database.execute(  "INSERT INTO messages(message_id, created_at, user_id, name, group_id, avatar_url, text, image) VALUES (?, datetime('#{value[0]}', 'unixepoch'), ?, ?, ?, ?, ?, ?)",
+                key,
+                value[1],
+                value[2],
+                value[3],
+                value[4],
+                value[5],
+                value[6] )
+        end  
+        scraped_likes.each do | likes |
+            database.execute("INSERT INTO likes(message_id, user_id) VALUES (?, ?)",
+                likes[0],
+                likes[1] )
+        end        
         database.commit
     end
 
