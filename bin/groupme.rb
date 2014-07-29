@@ -8,8 +8,12 @@ require 'persistent_httparty'
 #Class that invokes HTTParty.
 class Groupme
     include HTTParty
-    persistent_connection_adapter
+    persistent_connection_adapter( :name => 'my_cool_rest_client',
+                                  :pool_size => 1000,
+                                  :idle_timeout => 10,
+                                  :keep_alive => 30 )
 
+    #persistent_connection_adapter
     base_uri 'https://api.groupme.com/v3//'
     format :json
 
