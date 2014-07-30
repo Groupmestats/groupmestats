@@ -199,9 +199,9 @@ class Scraper
         while (Time.now.to_i - t.to_i) < (searchTime + 604800) do
 
             if id == 0
-                messages = gm.get("groups/#{group_id}/messages", @token)['response']
+                messages = gm.get("groups/#{group_id}/messages", @token, "limit=100")['response']
             else
-                messages = gm.get("groups/#{group_id}/messages", @token, "before_id=#{id}")['response']
+                messages = gm.get("groups/#{group_id}/messages", @token, "limit=100&before_id=#{id}")['response']
             end
 
             if messages.nil?
