@@ -3,3 +3,4 @@ camping/web.yaml
 *.yaml
 *.db
 *test*
+public/js/google-analytics.js
