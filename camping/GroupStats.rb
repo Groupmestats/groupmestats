@@ -8,7 +8,7 @@ require 'camping/session'
 require 'set'
 require 'erb'
 require_relative '../bin/scraper.rb'
-
+require 'pp'
 Camping.goes :GroupStats
 
 module GroupStats
@@ -327,7 +327,6 @@ module GroupStats::Controllers
         end
 
         @state.scraper.scrapeNewMessages(@input.groupid)
-        return true
     end
   end
 

@@ -13,7 +13,6 @@ class Groupme
                                   :idle_timeout => 10,
                                   :keep_alive => 30 )
 
-    #persistent_connection_adapter
     base_uri 'https://api.groupme.com/v3//'
     format :json
 

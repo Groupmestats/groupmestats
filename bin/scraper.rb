@@ -3,7 +3,6 @@ require 'rubygems'
 require 'json'
 require 'time'
 require 'sqlite3'
-require 'pp'
 
 require_relative 'groupme'
 
