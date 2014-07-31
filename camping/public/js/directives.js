@@ -573,7 +573,8 @@ angular.module('myApp.directives', []).
 						maxPadding: 0,
 						title: {
 							text: 'Hour'
-						}
+						},
+						gridLineWidth:0
 					},
 					series: []
 				});
