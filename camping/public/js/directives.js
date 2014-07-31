@@ -552,7 +552,10 @@ angular.module('myApp.directives', []).
 							return this.series.xAxis.categories[this.point.x] + ' ' + this.point.y +
 							'<br/><b>' + this.point.value + '</b>'
 							},
-						shared: true
+						shared: true,
+						positioner: function (labelWidth, labelHeight, point) {
+							return { x: point.plotX - labelWidth + 60, y: point.plotY + labelHeight/2 };
+						}
 					},
 					colorAxis: {
 						min: '0',
