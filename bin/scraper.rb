@@ -3,6 +3,7 @@ require 'rubygems'
 require 'json'
 require 'time'
 require 'sqlite3'
+require 'pp'
 
 require_relative 'groupme'
 
@@ -263,7 +264,8 @@ class Scraper
             database.execute("INSERT INTO likes(message_id, user_id) VALUES (?, ?)",
                 likes[0],
                 likes[1] )
-        end        
+        end 
+        pp "TESTING"       
         database.commit
     end
 
