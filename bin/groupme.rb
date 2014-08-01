@@ -4,6 +4,7 @@ require 'json'
 require 'httparty'
 require 'persistent_http'
 require 'persistent_httparty'
+require 'logger'
 
 #Class that invokes HTTParty.
 class Groupme
@@ -15,6 +16,10 @@ class Groupme
 
     base_uri 'https://api.groupme.com/v3//'
     format :json
+
+    def initialize(logger)
+        @logger = logger
+    end
 
     def get(query, token, args=nil)
         if args.nil?
@@ -32,12 +37,13 @@ class Groupme
                 return 'nil'
             end
             while retry_attempts < 3 do
-                puts "Could not connect to groupme.com.  Will retry in 60 seconds"
+                @logger.error "Could not connect to groupme.com.  Will retry in 60 seconds"
                 sleep(60)
                 self.class.get(query)
                 retry_attempts += 1
             end
             if retry_attempts >= 3
+                @logger.error "Could not connect to groupme"
                 abort('Could not connect to groupme')
             end
         end
