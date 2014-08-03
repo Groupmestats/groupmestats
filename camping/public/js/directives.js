@@ -563,7 +563,8 @@ angular.module('myApp.directives', []).
 						maxColor: '#0000FF'
 					},
 					xAxis:{
-						categories: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+						categories: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+						max:6
 					},
 					yAxis:
 					{
