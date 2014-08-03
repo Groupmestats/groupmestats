@@ -139,6 +139,7 @@ class Scraper
                     value[3] ) 
             else    
                 database.execute( "INSERT INTO groups(group_id, name, image, creator, created_at) VALUES (?, ?, ?, ?, datetime('#{value[0]}','unixepoch'))",
+		    key,
                     value[1],
                     value[2],
                     value[3] )
