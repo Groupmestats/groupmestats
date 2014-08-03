@@ -136,7 +136,6 @@ class Scraper
         group_info.each do | key, value |
             if value[4]
                 database.execute( "UPDATE groups SET name=?, image=?, creator=?, created_at=datetime('#{value[0]}','unixepoch') WHERE group_id='#{key}'",
-                    key,
                     value[1],
                     value[2],
                     value[3] ) 
