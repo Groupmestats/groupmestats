@@ -56,9 +56,9 @@ module GroupStats::Controllers
         puts('authenticating');
     
         logging_path = '/var/log/camping-server/groupstats.log'
-        @state.logger = Logger.new(logging_path)
+        #@state.logger = Logger.new(logging_path)
         @state.token = @input.access_token
-        @state.scraper = Scraper.new($database_path, @state.token, logging_path)
+        @state.scraper = Scraper.new($database_path, @state.token)
         @state.user_id = @state.scraper.getUser
         puts('@state.token = ' + @state.token );
 
