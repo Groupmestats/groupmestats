@@ -215,7 +215,7 @@ angular.module('myApp.controllers', [])
 			{
 				daysToRequest = 9999999
 			}
-			$http({method: 'GET', url: '/rest/toppost', params: {days : daysToRequest, groupid : $routeParams.groupid, num: 5}}).
+			$http({method: 'GET', url: '/rest/toppost', params: {days : daysToRequest, groupid : $routeParams.groupid, numpost: 10, numimage: 9}}).
 				success(function(data, status, headers, config) {
 					$scope.topPosts = data
 				}).
