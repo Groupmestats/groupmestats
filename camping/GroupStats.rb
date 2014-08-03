@@ -1,6 +1,5 @@
 require 'rubygems' 
 require 'bundler/setup'
-require 'pp'
 require 'sqlite3'
 require 'json'
 require 'yaml'
@@ -8,7 +7,7 @@ require 'camping/session'
 require 'set'
 require 'erb'
 require_relative '../bin/scraper.rb'
-require 'pp'
+require 'logger'
 Camping.goes :GroupStats
 
 module GroupStats
@@ -55,8 +54,11 @@ module GroupStats::Controllers
   class Authenticate < R '/authenticate'
     def get
         puts('authenticating');
+    
+        logging_path = '/var/log/camping-server/groupstats.log'
+        @state.logger = Logger.new(logging_path)
         @state.token = @input.access_token
-        @state.scraper = Scraper.new($database_path, @state.token)
+        @state.scraper = Scraper.new($database_path, @state.token, logging_path)
         @state.user_id = @state.scraper.getUser
         puts('@state.token = ' + @state.token );
 
