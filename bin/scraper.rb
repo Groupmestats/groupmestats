@@ -4,7 +4,6 @@ require 'json'
 require 'time'
 require 'sqlite3'
 require 'logger'
-require 'pp'
 
 require_relative 'groupme'
 
@@ -19,7 +18,6 @@ class Scraper
         @database = database
         @token = token
 
-        pp "TESTING: #{logger}"
         @logger = Logger.new(logger)
  
         begin
@@ -141,7 +139,6 @@ class Scraper
                     value[3] ) 
             else    
                 database.execute( "INSERT INTO groups(group_id, name, image, creator, created_at) VALUES (?, ?, ?, ?, datetime('#{value[0]}','unixepoch'))",
-                    key,
                     value[1],
                     value[2],
                     value[3] )
