@@ -350,7 +350,7 @@ module GroupStats::Controllers
         end
 
         $database.results_as_hash = true
-        result = $database.execute( "select count(likes.user_id) as count, messages.text, user_groups.Name, users.avatar_url 
+        topPosts = $database.execute( "select count(likes.user_id) as count, messages.text, user_groups.Name, users.avatar_url 
         from likes 
         join messages on messages.message_id=likes.message_id 
         left join user_groups on user_groups.user_id=messages.user_id 
@@ -363,10 +363,26 @@ module GroupStats::Controllers
         "-" + @input.days + " day",
         @input.groupid,
         @input.groupid,
-        @input.num)
+        @input.numpost)
+        
+        topImages = $database.execute( "select count(likes.user_id) as count, messages.image, user_groups.Name, users.avatar_url 
+        from likes 
+        join messages on messages.message_id=likes.message_id 
+        left join user_groups on user_groups.user_id=messages.user_id 
+        left join users on users.user_id=messages.user_id 
+            WHERE messages.created_at > datetime('now', ?) 
+            AND messages.group_id=? 
+            AND user_groups.group_id=? and messages.text=='none' 
+        group by messages.message_id 
+        order by count desc limit ?",
+        "-" + @input.days + " day",
+        @input.groupid,
+        @input.groupid,
+        @input.numimage)
+        
         headers['Content-Type'] = "application/json"
         $database.results_as_hash = false
-        return result.to_json
+        return { :posts => topPosts, :images => topImages }.to_json
     end
   end
 

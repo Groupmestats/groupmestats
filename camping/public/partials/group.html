@@ -9,8 +9,16 @@
 	  <button type="button" class="btn btn-default" ng-click="setDays(1)">Day</button>
 	</div>
 	
-	<h4>Top 5 posts:</h4>
-	<p ng-repeat="post in topPosts"><b>{{post.name}}</b> ({{post.count}}): {{post.text}}</p>
+	<div class="row">
+		<div class="col-md-5">
+			<h4>Top posts:</h4>
+			<p ng-repeat="post in topPosts.posts"><b>{{post.name}}</b> ({{post.count}}): {{post.text}}</p>
+		</div>
+		<div class="col-md-7">
+			<h4>Top images:</h4>
+			<span style="float:left; padding:5px" ng-repeat="post in topPosts.images"><b>{{post.name}}</b> ({{post.count}}): <br/><a href="{{post.image}}" target="_blank"><img style="width:200px; height:200px" src="{{post.image}}.preview"></img></a></span>
+		</div>
+	</div>
 	
 	<div gms-posts-piechart gms-title="Total Posts by User" gms-legend-title="Users" gms-user="userData" gms-data="postsMostData" style="min-width:530px;min-height:400px;"></div> 
     <div gms-likes-piechart gms-title="Total Likes Received by User" gms-legend-title="Users" gms-user="userData" gms-data="likesReceivedData" style="min-width:530px;min-height:400px;"></div>
