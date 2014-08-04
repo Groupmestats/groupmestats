@@ -535,12 +535,33 @@ module GroupStats::Controllers
             return 'nil'
         end
         
-        result = $database.execute( "SELECT user_groups.Name, count(messages.user_id) as count FROM user_groups left join messages on messages.user_id = user_groups.user_id WHERE messages.created_at > datetime('now', ?) AND messages.group_id=? AND user_groups.group_id=? group by messages.user_id order by count desc",
+        topPosters = $database.execute( "SELECT user_groups.Name, count(messages.user_id) as count
+            FROM user_groups
+            left join messages using(user_id)
+            WHERE messages.created_at > datetime('now', ?)
+            AND messages.group_id=?
+            AND user_groups.group_id=?
+            group by messages.user_id order by count desc",
         "-" + @input.days + " day",
         @input.groupid,
         @input.groupid)
+        
+        likesGotten = $database.execute( "select user_groups.Name, count(likes.user_id) as count
+        from user_groups 
+        left join messages using(user_id)
+        left join likes using(message_id)
+        where messages.created_at > datetime('now', ?) 
+        and messages.group_id=? 
+        and user_groups.group_id=? 
+        group by messages.user_id
+        order by (select count(messages.user_id) from messages where user_id = user_groups.user_id and group_id = ?) desc",
+        "-" + @input.days + " day",
+        @input.groupid,
+        @input.groupid,
+        @input.groupid)
+        
         headers['Content-Type'] = "application/json"
-        return result.to_json
+        return { "posters" => topPosters, "likesGotten" => likesGotten }.to_json
     end
   end
 

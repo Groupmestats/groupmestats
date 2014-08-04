@@ -29,12 +29,11 @@ angular.module('myApp.directives', []).
                 
                 $scope.chart = new Highcharts.Chart({
                     chart: {
-                        type: 'pie',
-                        renderTo: element[0],
+                        renderTo: element[0]
                     },
-		    credits: {
-      			enabled: false
-  		    },
+					credits: {
+						enabled: false
+					},
                     plotOptions: {
                        pie: {
                            allowPointSelect: true,
@@ -51,19 +50,6 @@ angular.module('myApp.directives', []).
                         series: {
                             slicedOffset: 0,
                         }
-                    },
-                    tooltip: {
-                        formatter: function() {
-                            var user;
-                            for (var i = 0; i < $scope.userData.length; i++) {
-                                if ($scope.userData[i]['name'] == this.series.data[this.point.x].name) {
-                                    user = $scope.userData[i];
-                                }
-                            }
-                            return '<b>'+ this.point.name + '</b>: '+ '<br>' +
-                                this.y + ' posts<br>' + user['post_percentage'] +'% of posts';
-                        },
-                        shared: true
                     },
                     legend: {
                         align: 'right',
@@ -119,7 +105,43 @@ angular.module('myApp.directives', []).
                         $scope.chart.series[0].remove(true);
                     }
                     $scope.chart.addSeries({
-                        data: chartData,
+						type: 'pie',
+						name: 'testname1',
+						center: ["35%", "50%"],
+						showInLegend:true,
+                        data: chartData.posters,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function(e) {
+                                    hs.htmlExpand(null, {
+                                        headingText: "User Stats",
+                                        maincontentText: userStats(userData, this)
+                                    });
+                                },
+                                legendItemClick: function(e) {
+                                    hs.htmlExpand(null, {
+                                        headingText: "User Stats",
+                                        maincontentText: userStats(userData, this)
+                                    });
+                                    return false;
+                                }
+                            }
+                        },
+						tooltip: {
+							formatter: function() {
+								return "yess"
+							},
+							shared: true
+						}
+                    }, false);
+					
+					$scope.chart.addSeries({
+						type: 'pie',
+						name: 'testname2',
+						center: ["65%", "50%"],
+						showInLegend:false,
+                        data: chartData.likesGotten,
                         cursor: 'pointer',
                         point: {
                             events: {
@@ -139,6 +161,7 @@ angular.module('myApp.directives', []).
                             }
                         }
                     }, false);
+					
                     $scope.chart.setTitle({text:title}, '', false);
                     $scope.chart.redraw();
                 }
