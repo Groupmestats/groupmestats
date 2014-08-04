@@ -16,7 +16,7 @@
 		</div>
 		<div class="col-md-7">
 			<h4>Top images:</h4>
-			<span style="float:left; padding:5px" ng-repeat="post in topPosts.images"><b>{{post.name}}</b> ({{post.count}}): <br/><a href="{{post.image}}" target="_blank"><img style="width:200px; height:200px" src="{{post.image}}.preview"></img></a></span>
+			<span style="float:left; padding:5px" ng-repeat="post in topPosts.images"><b>{{post.name}}</b> ({{post.count}}): <br/><a href="{{post.image}}" target="_blank"><img style="width:200px; height:200px" src="{{post.image}}.preview"></img></a><br><p style="max-width:200px;">{{post.text}}</p></br></span>
 		</div>
 	</div>
 	
