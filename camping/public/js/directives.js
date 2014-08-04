@@ -48,6 +48,9 @@ angular.module('myApp.directives', []).
                            showInLegend: true,
                            size: '60%'
                         },
+                        series: {
+                            slicedOffset: 0,
+                        }
                     },
                     tooltip: {
                         formatter: function() {
@@ -186,6 +189,9 @@ angular.module('myApp.directives', []).
                            showInLegend: true, 
                            size: '60%',
                         },
+                        series: {
+                            slicedOffset: 0,
+                        }
                     },
                     tooltip: {
                         formatter: function() {
