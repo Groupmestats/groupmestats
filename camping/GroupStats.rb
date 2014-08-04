@@ -40,7 +40,6 @@ module GroupStats::Controllers
 
   class Index < R '/'
     def get 
-        puts('AT INDEX @state.token nil ? ' +  String(@state.token == nil ));
         if(@state.token == nil)
             client_id = $client_id
             template_path = File.join(File.expand_path(File.dirname(__FILE__)), 'authenticate.html')
@@ -53,14 +52,14 @@ module GroupStats::Controllers
   
   class Authenticate < R '/authenticate'
     def get
-        puts('authenticating');
-    
         logging_path = '/var/log/camping-server/groupstats.log'
-        #@state.logger = Logger.new(logging_path)
+        $logger = Logger.new(logging_path)
         @state.token = @input.access_token
-        @state.scraper = Scraper.new($database_path, @state.token)
+        @state.scraper = Scraper.new($database_path, @state.token, logging_path)
         @state.user_id = @state.scraper.getUser
-        puts('@state.token = ' + @state.token );
+        
+        $logger.info "authenticating"
+        $logger.info "@state.token = #{@state.token}"
 
         @state.groups = Array.new
         refreshGroupList()
@@ -86,6 +85,7 @@ module GroupStats::Controllers
   end
 
   def refreshGroupList()
+      $logger.info "Refreshing Grouplist for @state.token = #{@state.token}"
       groups = @state.scraper.getGroups
       groups.each do | group |
           @state.scraper.populateGroup(group['group_id'].to_i)
@@ -120,6 +120,7 @@ module GroupStats::Controllers
 
   class GroupList < R '/rest/groupList'
     def get()
+        $logger.info "Loading Grouplist from the database for @state.token = #{@state.token}"
         $database.results_as_hash = true
         result = $database.execute( "SELECT groups.group_id, groups.name, groups.image, groups.updated_at 
             FROM groups join user_groups on groups.group_id = user_groups.group_id 
@@ -151,6 +152,7 @@ module GroupStats::Controllers
             @input.groupid
         )
         
+        $logger.info "Pulling total posts, total likes, top posts, and top images in #(@input.groupid} for @state.token = #{@state.token}"
         users.each do | userid |
             result = Hash.new
             $database.results_as_hash = true
@@ -216,13 +218,15 @@ module GroupStats::Controllers
         
         result = Hash.new
         $database.results_as_hash = true
-        if ifGroup 
+        if ifGroup
+            $logger.info "Grabbing user-data for userid #{@input.userid} in #{@input.groupid} for @state.token = #{@state.token}" 
             result = $database.execute("SELECT * from users join user_groups using(user_id) where user_id = ? and group_id = ?",
                 @input.userid,
                 @input.groupid
             )
             result = result[0]
         else
+            $logger.info "Grabbing global user-data for userid #{@input.userid} for @state.token = #{@state.token}"
             result = @state.scraper.getUserInfo
             result = result['response']
         end

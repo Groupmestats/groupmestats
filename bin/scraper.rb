@@ -9,14 +9,14 @@ require_relative 'groupme'
 
 #Scraper class.  This is initialized with a path to the sqlite database and a groupme oauth token
 class Scraper
-    $logger = Logger.new('/var/log/camping-server/groupstats.log')
-    $time = Time.now.to_i
-    $gm = Groupme.new($logger)
-
+    
     #Constructor that takes a path to the sqlite database and a groupme oauth token
-    def initialize(database, token)
+    def initialize(database, token, logging_path)
         @database = database
         @token = token
+
+        $logger = Logger.new(logging_path)
+        $gm = Groupme.new(logging_path)
  
         begin
             database = SQLite3::Database.new( @database )

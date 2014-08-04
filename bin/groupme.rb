@@ -17,8 +17,8 @@ class Groupme
     base_uri 'https://api.groupme.com/v3//'
     format :json
 
-    def initialize(logger)
-        @logger = logger
+    def initialize(logging_path)
+        #$logger = Logger.new(logging_path)
     end
 
     def get(query, token, args=nil)
@@ -37,13 +37,13 @@ class Groupme
                 return 'nil'
             end
             while retry_attempts < 3 do
-                @logger.error "Could not connect to groupme.com.  Will retry in 60 seconds"
+                #$logger.error "Could not connect to groupme.com.  Will retry in 60 seconds"
                 sleep(60)
                 self.class.get(query)
                 retry_attempts += 1
             end
             if retry_attempts >= 3
-                @logger.error "Could not connect to groupme"
+                #$logger.error "Could not connect to groupme"
                 abort('Could not connect to groupme')
             end
         end
