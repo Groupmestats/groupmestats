@@ -558,9 +558,8 @@ module GroupStats::Controllers
             return 'nil'
         end
 
-        result = $database.execute( "select strftime('%H', messages.created_at, ? ) as time, count(strftime('%H', messages.created_at, '-04:00')) from messages where messages.created_at > datetime('now', ?) AND messages.group_id=? group by strftime('%H', messages.created_at) order by time asc",
+        result = $database.execute( "select strftime('%H', messages.created_at, ? ) as time, count(strftime('%H', messages.created_at, '-04:00')) from messages where messages.group_id=? group by strftime('%H', messages.created_at) order by time asc",
         parseTimeZone(@input.timezone),
-        "-" + @input.days + " day",
         @input.groupid)
         headers['Content-Type'] = "application/json"
        
@@ -599,8 +598,7 @@ module GroupStats::Controllers
             return 'nil'
         end
 
-        result = $database.execute( "select strftime('%w', messages.created_at) as time, count(strftime('%w', messages.created_at)) from messages where messages.created_at > datetime('now', ?) AND messages.group_id=? group by strftime('%w', messages.created_at) order by time asc",
-        "-" + @input.days + " day",
+        result = $database.execute( "select strftime('%w', messages.created_at) as time, count(strftime('%w', messages.created_at)) from messages where messages.group_id=? group by strftime('%w', messages.created_at) order by time asc",
         @input.groupid)
         headers['Content-Type'] = "application/json"
 
