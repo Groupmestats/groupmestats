@@ -45,7 +45,8 @@ angular.module('myApp.directives', []).
                            dataLabels: {
                                enabled: false
                            },
-                           showInLegend: true
+                           showInLegend: true,
+                           size: '60%'
                         },
                     },
                     tooltip: {
@@ -73,7 +74,12 @@ angular.module('myApp.directives', []).
                         borderWidth: 2,
                         layout: 'vertical',
                         verticalAlign: 'top',
-                        y: 100,
+                        width: 100,
+                        itemStyle: {
+                            width: 50 
+                        },
+                        y: 70,
+                        x: -50,
                         itemHoverStyle: {
                                 color: '#00f'
                         },
@@ -177,7 +183,8 @@ angular.module('myApp.directives', []).
                            dataLabels: {
                                enabled: false
                            },
-                           showInLegend: true
+                           showInLegend: true, 
+                           size: '60%',
                         },
                     },
                     tooltip: {
@@ -205,7 +212,12 @@ angular.module('myApp.directives', []).
                         borderWidth: 2,
                         layout: 'vertical',
                         verticalAlign: 'top',
-                        y: 100,
+                        width: 100,
+                        itemStyle: {
+                            width: 50
+                        },
+                        y: 70,
+                        x: -50,
                         itemHoverStyle: {
                                 color: '#00f'
                         },
