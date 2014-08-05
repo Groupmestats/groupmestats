@@ -534,7 +534,7 @@ module GroupStats::Controllers
             return 'nil'
         end
 
-        result = $database.execute( "select strftime('%H', messages.created_at, ? ) as time, count(strftime('%H', messages.created_at, '-04:00')) from messages where messages.group_id=? group by strftime('%H', messages.created_at) order by time asc",
+        result = $database.execute( "select strftime('%H', messages.created_at, ? ) as time, count(strftime('%H', messages.created_at, '-04:00')) from messages where messages.group_id=? and messages.user_id != 'system' group by strftime('%H', messages.created_at) order by time asc",
         parseTimeZone(@input.timezone),
         @input.groupid)
         headers['Content-Type'] = "application/json"
@@ -574,7 +574,7 @@ module GroupStats::Controllers
             return 'nil'
         end
 
-        result = $database.execute( "select strftime('%w', messages.created_at) as time, count(strftime('%w', messages.created_at)) from messages where messages.group_id=? group by strftime('%w', messages.created_at) order by time asc",
+        result = $database.execute( "select strftime('%w', messages.created_at) as time, count(strftime('%w', messages.created_at)) from messages where messages.group_id=? and messages.user_id != 'system' group by strftime('%w', messages.created_at) order by time asc",
         @input.groupid)
         headers['Content-Type'] = "application/json"
 
@@ -614,6 +614,7 @@ module GroupStats::Controllers
         result = $database.execute( "select strftime('%w',messages.created_at) as date,strftime('%H',messages.created_at, ?) as hour, count(message_id) from messages
                 join groups using(group_id)
                 where group_id = ?
+		and messages.user_id != 'system'
                 group by strftime('%w',messages.created_at), strftime('%H',messages.created_at)
                 order by strftime('%w',messages.created_at) asc, strftime('%H',messages.created_at)",
             parseTimeZone(@input.timezone), 
@@ -654,6 +655,7 @@ module GroupStats::Controllers
                 left join (select user_id, min(created_at) as firstpost from messages join users using(user_id) where messages.group_id = ? group by user_id)
                 using (user_id)
                 where strftime('%s',firstpost) <= time
+		and messages.user_id != 'system'
                 group by time",
                 @input.groupid,
                 groupBy,
@@ -661,6 +663,7 @@ module GroupStats::Controllers
         else
             result = $database.execute( "select strftime('%s',created_at) as time, count(message_id)
                 from messages where group_id = ?
+		and messages.user_id != 'system'
                 group by strftime(?, created_at), strftime('%Y', created_at)
                 order by strftime('%s', created_at)",
                 @input.groupid,
@@ -779,6 +782,7 @@ module GroupStats::Controllers
                    ) as messages
                  from messages as m
                 where group_id = ?
+		and messages.user_id != 'system'
                 group by strftime('%m', m.created_at), strftime('%Y', m.created_at)
                 order by m.created_at asc",
                 @input.groupid,
