@@ -234,7 +234,7 @@ class Scraper
                        if !message['text'].nil?
                            scraped_messages[ message['id'] ] = [ message['created_at'], message['user_id'], message['name'], message['group_id'], message['avatar_url'], message['text'], image ]
                        else
-                           scraped_messages[ message['id'] ] = [ message['created_at'], message['user_id'], message['name'], message['group_id'], message['avatar_url'], 'none', image ]
+                           scraped_messages[ message['id'] ] = [ message['created_at'], message['user_id'], message['name'], message['group_id'], message['avatar_url'], '', image ]
                        end
                    end
                 end    
