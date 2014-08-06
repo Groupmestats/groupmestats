@@ -568,7 +568,8 @@ module GroupStats::Controllers
             check = true
             result.each do |count|
                 if count[0].to_i == i
-                    count[0] = count[0].to_i
+                    #count[0] = Time.parse("#{count[0].to_i}:00").strftime("%l %P")
+		    count[0] = count[0].to_i
                     check = false
                 end
             end
@@ -579,7 +580,21 @@ module GroupStats::Controllers
             i += 1
         end
 
+	#puts result
         result.sort! {|a,b| a[0] <=> b[0]}
+
+            check = true
+            result.each do |count|
+                    count[0] = Time.parse("#{count[0].to_i}:00").strftime("%l %P")
+                    #count[0] = count[0].to_i
+                    check = false
+            end
+
+            if check == true
+                result.push([i,0])
+            end
+            i += 1
+	puts result
         return result.to_json
     end
   end
