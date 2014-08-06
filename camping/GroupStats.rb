@@ -89,6 +89,19 @@ module GroupStats::Controllers
       end
   end
 
+  def scrapeAll()
+      $logger.info "Scraping all groups for user #{@state.token}"
+      groups = @state.scraper.getGroups
+
+      groups.each do |group|
+	  if !getGroups(group['group_id'])
+              return 'nil'
+          end
+          
+	  thr = Thread.new { @state.scraper.scrapeNewMessages(group['group_id']) }
+      end
+  end
+
   def refreshGroupList()
       $logger.info "Refreshing Grouplist for @state.token = #{@state.token}"
       groups = @state.scraper.getGroups
@@ -140,6 +153,12 @@ module GroupStats::Controllers
   class RefreshGroupList < R '/rest/refreshGroupList'
     def get()
         return refreshGroupList()
+    end
+  end
+
+  class ScrapeAll < R '/rest/scrapeall'
+    def get()
+        return scrapeAll()
     end
   end
 
