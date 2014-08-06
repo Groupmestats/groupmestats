@@ -39,7 +39,7 @@ def GroupStats.create
 	$logging_path = '/var/log/camping-server/groupstats.log'
         $logger = Logger.new($logging_path)
     rescue
-	abort('Log file now found.  Exiting...')
+	abort('Log file not found.  Exiting...')
     end
 end
 
