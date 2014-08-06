@@ -39,7 +39,7 @@ def GroupStats.create
 	$logging_path = '/var/log/camping-server/groupstats.log'
         $logger = Logger.new($logging_path)
     rescue
-	abort('Log file now found.  Exiting...')
+	abort('Log file not found.  Exiting...')
     end
 end
 
@@ -86,6 +86,19 @@ module GroupStats::Controllers
           return true
       else
           return false
+      end
+  end
+
+  def scrapeAll()
+      $logger.info "Scraping all groups for user #{@state.token}"
+      groups = @state.scraper.getGroups
+
+      groups.each do |group|
+	  if !getGroups(group['group_id'])
+              return 'nil'
+          end
+          
+	  thr = Thread.new { @state.scraper.scrapeNewMessages(group['group_id']) }
       end
   end
 
@@ -140,6 +153,12 @@ module GroupStats::Controllers
   class RefreshGroupList < R '/rest/refreshGroupList'
     def get()
         return refreshGroupList()
+    end
+  end
+
+  class ScrapeAll < R '/rest/scrapeall'
+    def get()
+        return scrapeAll()
     end
   end
 
