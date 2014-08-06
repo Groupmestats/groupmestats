@@ -45,7 +45,7 @@ angular.module('myApp.directives', []).
                                enabled: false
                            },
                            showInLegend: true,
-                           size: '60%'
+                           size: '70%'
                         },
                         series: {
                             slicedOffset: 0,
@@ -60,19 +60,32 @@ angular.module('myApp.directives', []).
                             }
                         },
                         borderColor: 'black',
-                        borderWidth: 2,
+                        borderWidth: 1,
                         layout: 'vertical',
                         verticalAlign: 'top',
-                        width: 100,
+                        width: 150,
                         itemStyle: {
-                            width: 50 
+                            width: 130 
                         },
                         y: 70,
-                        x: -50,
+                        x: 0,
                         itemHoverStyle: {
                                 color: '#00f'
                         },
                         shadow: true
+                    },
+					tooltip: {
+                        formatter: function() {
+                            var user;
+                            for (var i = 0; i < $scope.userData.length; i++) {
+                                if ($scope.userData[i]['name'] == this.series.data[this.point.x].name) {
+                                    user = $scope.userData[i];
+                                }
+                            }
+                            return '<b>'+ this.point.name + '</b>: '+ '<br>' +
+                                this.y + ' posts<br>' + roundToFour(this.percentage) +'% of posts received';
+                        },
+                        shared: true
                     },
                     series: []
                 });
@@ -109,7 +122,7 @@ angular.module('myApp.directives', []).
 						name: 'testname1',
 						center: ["35%", "50%"],
 						showInLegend:true,
-                        data: chartData.posters,
+                        data: chartData,
                         cursor: 'pointer',
                         point: {
                             events: {
@@ -129,13 +142,11 @@ angular.module('myApp.directives', []).
                             }
                         },
 						tooltip: {
-							formatter: function() {
-								return "yess"
-							},
-							shared: true
+							pointFormat: "{point.y} posts",
+							shared: false
 						}
                     }, false);
-					
+					/*
 					$scope.chart.addSeries({
 						type: 'pie',
 						name: 'testname2',
@@ -159,9 +170,13 @@ angular.module('myApp.directives', []).
                                     return false;
                                 }
                             }
-                        }
+                        },
+						tooltip: {
+							pointFormat: "{point.y} likes received",
+							shared: false
+						}
                     }, false);
-					
+					*/
                     $scope.chart.setTitle({text:title}, '', false);
                     $scope.chart.redraw();
                 }

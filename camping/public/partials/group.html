@@ -1,4 +1,5 @@
 <div class="col-md-12">
+
 	<img src="{{group.image}}" style="float:left; padding-right:15px"></img><h3>{{group.name}}</h3>
 	<br/>
 	<div class="btn-group">
@@ -19,8 +20,16 @@
 			<span style="float:left; padding:5px" ng-repeat="post in topPosts.images"><b>{{post.name}}</b> ({{post.count}}): <br/><a href="{{post.image}}" target="_blank"><img style="width:200px; height:200px" src="{{post.image}}.preview"></img></a></span>
 		</div>
 	</div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<div gms-posts-piechart gms-title="Total Posts" gms-legend-title="Users" gms-user="userData" gms-data="postsMostData.posters" style="min-width:530px;min-height:400px;"></div> 
+		</div>
+		<div class="col-md-6">
+			<div gms-posts-piechart gms-title="Total likes Received" gms-legend-title="Users" gms-user="userData" gms-data="postsMostData.likesGotten" style="min-width:530px;min-height:400px;"></div> 
+		</div>
+	</div>
 	
-	<div gms-posts-piechart gms-title="Total Posts by User" gms-legend-title="Users" gms-user="userData" gms-data="postsMostData" style="min-width:530px;min-height:400px;"></div> 
 
     <div gms-daily-posts-linegraph gms-title="Daily Frequency of Posts by Hour (All Time)" gms-xaxis-title="Hour" gms-yaxis-title="Posts" gms-data="dailyFreqData" gms-category='category' style="min-width:530px;min-height:400px;"></div> 
 	<div gms-bargraph gms-title="Weekly Frequency of Posts by Day (All Time)" gms-xaxis-title="Day" gms-yaxis-title="Posts" gms-data="weeklyFreqData" style="min-width:530px;min-height:400px;"></div>
@@ -35,5 +44,5 @@
 	</span>
 	<i>&nbsp;Enter one or more terms seperated by commas (ex: christmas,thanksgiving,magfest)</i>
 	<div gms-ngram gms-xaxis-title="Date, by week" gms-yaxis-title="Posts" gms-data="ngramdata" style="min-width:530px;min-height:400px;"></div>
-	
+
 </div>
