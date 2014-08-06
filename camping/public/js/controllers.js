@@ -26,7 +26,7 @@ angular.module('myApp.controllers', [])
 
 				});
        $scope.refreshGroupList = function(index)
-      {
+       {
           $scope.groupListLoading = true;
           $http({method: 'GET', url: '/rest/refreshGroupList'}).
               success(function(data, status, headers, config) {
@@ -35,7 +35,15 @@ angular.module('myApp.controllers', [])
               error(function(data, status, headers, config) {
                   $scope.groupListLoading = false;
               });
-      }
+       }
+       $scope.scrapeAll = function()
+       {
+          $http({method: 'GET', url: '/rest/scrapeall'}).
+              success(function(data, status, headers, config) {
+              }).
+              error(function(data, status, headers, config) {
+              });
+       }
 }])
 	.controller('GroupController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
 		$scope.days = 0

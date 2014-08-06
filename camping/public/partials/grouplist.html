@@ -3,6 +3,9 @@
   <p>
       <a ng-click="refreshGroupList()">Refresh group list</a>
   </p>
+  <p>
+      <a ng-click="scrapeAll()">Update All Groups</a>
+  </p>
 	<table class="table">
 		<tr ng-repeat="group in groupList">
 			<td><img src="{{group.image}}"/></td>

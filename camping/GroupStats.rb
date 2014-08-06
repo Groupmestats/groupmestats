@@ -34,6 +34,13 @@ def GroupStats.create
     else    
         abort('Did not specify a GroupMe client_id')
     end
+
+    begin
+	$logging_path = '/var/log/camping-server/groupstats.log'
+        $logger = Logger.new($logging_path)
+    rescue
+	abort('Log file not found.  Exiting...')
+    end
 end
 
 module GroupStats::Controllers
@@ -52,10 +59,8 @@ module GroupStats::Controllers
   
   class Authenticate < R '/authenticate'
     def get
-        logging_path = '/var/log/camping-server/groupstats.log'
-        $logger = Logger.new(logging_path)
         @state.token = @input.access_token
-        @state.scraper = Scraper.new($database_path, @state.token, logging_path)
+        @state.scraper = Scraper.new($database_path, @state.token, $logging_path)
         @state.user_id = @state.scraper.getUser
         
         $logger.info "authenticating"
@@ -81,6 +86,19 @@ module GroupStats::Controllers
           return true
       else
           return false
+      end
+  end
+
+  def scrapeAll()
+      $logger.info "Scraping all groups for user #{@state.token}"
+      groups = @state.scraper.getGroups
+
+      groups.each do |group|
+	  if !getGroups(group['group_id'])
+              return 'nil'
+          end
+          
+	  thr = Thread.new { @state.scraper.scrapeNewMessages(group['group_id']) }
       end
   end
 
@@ -135,6 +153,12 @@ module GroupStats::Controllers
   class RefreshGroupList < R '/rest/refreshGroupList'
     def get()
         return refreshGroupList()
+    end
+  end
+
+  class ScrapeAll < R '/rest/scrapeall'
+    def get()
+        return scrapeAll()
     end
   end
 
@@ -369,47 +393,23 @@ module GroupStats::Controllers
         @input.groupid,
         @input.numpost)
         
-        topImages = $database.execute( "select count(likes.user_id) as count, messages.image, user_groups.Name, users.avatar_url 
-        from likes 
-        join messages on messages.message_id=likes.message_id 
-        left join user_groups on user_groups.user_id=messages.user_id 
-        left join users on users.user_id=messages.user_id 
-            WHERE messages.created_at > datetime('now', ?) 
-            AND messages.group_id=? 
-            AND user_groups.group_id=? and messages.text=='none' 
-        group by messages.message_id 
-        order by count desc limit ?",
+        topImages = $database.execute("select count(likes.user_id) as count, messages.text, messages.image, user_groups.Name, users.avatar_url 
+	from likes 
+	join messages on messages.message_id=likes.message_id 
+	left join user_groups on user_groups.user_id=messages.user_id 
+	left join users on users.user_id=messages.user_id 
+	    WHERE messages.created_at > datetime('now', ?) 
+	    AND messages.group_id=? AND user_groups.group_id=? 
+	    AND messages.image!='none' 
+	group by messages.message_id 
+	order by count desc limit ?",
         "-" + @input.days + " day",
         @input.groupid,
         @input.groupid,
-        @input.numimage)
-        
+	@input.numimage) 
         headers['Content-Type'] = "application/json"
         $database.results_as_hash = false
         return { :posts => topPosts, :images => topImages }.to_json
-    end
-  end
-
-  class TopImage < R '/rest/topimage'
-    def get()
-        if(@input.days == nil)
-            @input.days = "9999999999"
-        end
-        if(@input.groupid == nil)
-            @status = 400
-            return 'need group id'
-        end
-
-        if !getGroups(@input.groupid)
-            return 'nil'
-        end
-
-        result = $database.execute("select count(likes.user_id) as count, messages.text, messages.image, user_groups.Name, users.avatar_url from likes join messages on messages.message_id=likes.message_id left join user_groups on user_groups.user_id=messages.user_id left join users on users.user_id=messages.user_id WHERE messages.created_at > datetime('now', ?) AND messages.group_id=? AND user_groups.group_id=? and messages.image!='none' group by messages.message_id order by count desc limit 1",
-        "-" + @input.days + " day",
-        @input.groupid,
-        @input.groupid)
-        headers['Content-Type'] = "application/json"
-        return result.to_json
     end
   end
 
@@ -579,7 +579,7 @@ module GroupStats::Controllers
             return 'nil'
         end
 
-        result = $database.execute( "select strftime('%H', messages.created_at, ? ) as time, count(strftime('%H', messages.created_at, '-04:00')) from messages where messages.group_id=? group by strftime('%H', messages.created_at) order by time asc",
+        result = $database.execute( "select strftime('%H', messages.created_at, ? ) as time, count(strftime('%H', messages.created_at, '-04:00')) from messages where messages.group_id=? and messages.user_id != 'system' group by strftime('%H', messages.created_at) order by time asc",
         parseTimeZone(@input.timezone),
         @input.groupid)
         headers['Content-Type'] = "application/json"
@@ -619,7 +619,7 @@ module GroupStats::Controllers
             return 'nil'
         end
 
-        result = $database.execute( "select strftime('%w', messages.created_at) as time, count(strftime('%w', messages.created_at)) from messages where messages.group_id=? group by strftime('%w', messages.created_at) order by time asc",
+        result = $database.execute( "select strftime('%w', messages.created_at) as time, count(strftime('%w', messages.created_at)) from messages where messages.group_id=? and messages.user_id != 'system' group by strftime('%w', messages.created_at) order by time asc",
         @input.groupid)
         headers['Content-Type'] = "application/json"
 
@@ -659,6 +659,7 @@ module GroupStats::Controllers
         result = $database.execute( "select strftime('%w',messages.created_at) as date,strftime('%H',messages.created_at, ?) as hour, count(message_id) from messages
                 join groups using(group_id)
                 where group_id = ?
+		and messages.user_id != 'system'
                 group by strftime('%w',messages.created_at), strftime('%H',messages.created_at)
                 order by strftime('%w',messages.created_at) asc, strftime('%H',messages.created_at)",
             parseTimeZone(@input.timezone), 
@@ -696,8 +697,10 @@ module GroupStats::Controllers
                             order by strftime('%s', created_at)
                 )
                 left join user_groups using(group_id)
-                left join (select user_id, min(created_at) as firstpost from messages join users using(user_id) where messages.group_id = ? group by user_id)
-                using (user_id)
+                left join (select user_id, min(created_at) as firstpost from messages join users using(user_id) where messages.group_id = ? 
+		and messages.user_id != 'system'
+		group by user_id)
+		using (user_id)
                 where strftime('%s',firstpost) <= time
                 group by time",
                 @input.groupid,
@@ -706,6 +709,7 @@ module GroupStats::Controllers
         else
             result = $database.execute( "select strftime('%s',created_at) as time, count(message_id)
                 from messages where group_id = ?
+		and messages.user_id != 'system'
                 group by strftime(?, created_at), strftime('%Y', created_at)
                 order by strftime('%s', created_at)",
                 @input.groupid,
@@ -824,6 +828,7 @@ module GroupStats::Controllers
                    ) as messages
                  from messages as m
                 where group_id = ?
+		and messages.user_id != 'system'
                 group by strftime('%m', m.created_at), strftime('%Y', m.created_at)
                 order by m.created_at asc",
                 @input.groupid,
