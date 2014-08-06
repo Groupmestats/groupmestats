@@ -34,6 +34,13 @@ def GroupStats.create
     else    
         abort('Did not specify a GroupMe client_id')
     end
+
+    begin
+	$logging_path = '/var/log/camping-server/groupstats.log'
+        $logger = Logger.new($logging_path)
+    rescue
+	abort('Log file now found.  Exiting...')
+    end
 end
 
 module GroupStats::Controllers
@@ -52,10 +59,8 @@ module GroupStats::Controllers
   
   class Authenticate < R '/authenticate'
     def get
-        logging_path = '/var/log/camping-server/groupstats.log'
-        $logger = Logger.new(logging_path)
         @state.token = @input.access_token
-        @state.scraper = Scraper.new($database_path, @state.token, logging_path)
+        @state.scraper = Scraper.new($database_path, @state.token, $logging_path)
         @state.user_id = @state.scraper.getUser
         
         $logger.info "authenticating"
@@ -652,10 +657,11 @@ module GroupStats::Controllers
                             order by strftime('%s', created_at)
                 )
                 left join user_groups using(group_id)
-                left join (select user_id, min(created_at) as firstpost from messages join users using(user_id) where messages.group_id = ? group by user_id)
-                using (user_id)
-                where strftime('%s',firstpost) <= time
+                left join (select user_id, min(created_at) as firstpost from messages join users using(user_id) where messages.group_id = ? 
 		and messages.user_id != 'system'
+		group by user_id)
+		using (user_id)
+                where strftime('%s',firstpost) <= time
                 group by time",
                 @input.groupid,
                 groupBy,
