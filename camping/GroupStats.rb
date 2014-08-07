@@ -585,6 +585,7 @@ module GroupStats::Controllers
         @input.groupid)
         headers['Content-Type'] = "application/json"
        
+	#Need to loop through the returned values, and add 0s for any missing hours
         i = 0
         while (i < 24)
             check = true
@@ -675,6 +676,25 @@ module GroupStats::Controllers
             a[1] = a[1].to_i
             a[0] = a[0].to_i
         end
+
+	# Need to loop through the returned values, and add 0s for any missing day/hour combos
+	i, j = 0, 0
+	while (i < 7)
+	    while (j < 24)
+		check = true 
+		result.each do | count |
+		    if (count[0] == i && count[1] == j)
+		        check = false
+		    end
+		end
+		if check 
+		    result.push([i,j,0])
+		end
+		j += 1
+	    end
+	    i += 1
+	    j = 0
+	end
 
         $database.results_as_hash = false
         return result.to_json
