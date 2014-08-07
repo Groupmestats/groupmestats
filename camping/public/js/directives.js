@@ -23,7 +23,8 @@ angular.module('myApp.directives', []).
                                 $scope.data = gmsData;
                             }
                         });
-                        drawChart($scope.gmsData, $scope.gmsUser, attrs.gmsTitle, element[0]);
+			  WordCloud(document.getElementById('my_canvas'), { list: [['foo', 12], ['bar', 6]] } );
+//                        drawChart($scope.gmsData, $scope.gmsUser, attrs.gmsTitle, element[0]);
                     }
                 });
                 
@@ -624,8 +625,7 @@ angular.module('myApp.directives', []).
 					},
 					yAxis:
 					{
-						min:0,
-						max:23,
+						categories: ['12 am', '1 am', '2 am', '3 am', '4 am', '5 am', '6 am', '7 am', '8 am', '9 am', '10 am', '11 am', '12 pm', '1 pm', '2 pm', '3 pm', '4 pm', '5 pm', '6 pm', '7 pm', '8 pm', '9 pm', '10 pm', '11 pm'],
 						minPadding: 0,
 						maxPadding: 0,
 						title: {

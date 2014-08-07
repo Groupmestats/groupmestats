@@ -1,3 +1,4 @@
+require 'pp'
 require 'rubygems' 
 require 'bundler/setup'
 require 'sqlite3'
@@ -589,7 +590,7 @@ module GroupStats::Controllers
             check = true
             result.each do |count|
                 if count[0].to_i == i
-                    count[0] = count[0].to_i
+		    count[0] = count[0].to_i
                     check = false
                 end
             end
@@ -601,6 +602,11 @@ module GroupStats::Controllers
         end
 
         result.sort! {|a,b| a[0] <=> b[0]}
+
+        result.each do |count|
+            count[0] = Time.parse("#{count[0].to_i}:00").strftime("%l %P")
+        end
+
         return result.to_json
     end
   end
@@ -669,6 +675,7 @@ module GroupStats::Controllers
             a[1] = a[1].to_i
             a[0] = a[0].to_i
         end
+
         $database.results_as_hash = false
         return result.to_json
     end
