@@ -61,8 +61,10 @@ module GroupStats::Controllers
   
   class Authenticate < R '/authenticate'
     def get
+        logging_path = '/var/log/camping-server/groupstats.log'
+        $logger = Logger.new(logging_path)
         @state.token = @input.access_token
-        @state.scraper = Scraper.new($database_path, @state.token, $logging_path)
+        @state.scraper = Scraper.new($database_path, @state.token, logging_path)
         @state.user_id = @state.scraper.getUser
         
         $logger.info "authenticating"
@@ -470,36 +472,6 @@ module GroupStats::Controllers
     end 
   end
 
-  class TotalLikesReceived < R '/rest/totallikesreceived'
-    def get()
-        if(@input.days == nil)
-            @input.days = "9999999999"
-        end
-        if(@input.groupid == nil)
-            @status = 400
-            return 'need group id'
-        end
-
-        if !getGroups(@input.groupid)
-            return 'nil'
-        end
-
-        result = $database.execute( "select user_groups.Name, count(likes.user_id) as count 
-        from user_groups 
-        left join messages using(user_id)
-        left join likes using(message_id)
-        where messages.created_at > datetime('now', ?) 
-        and messages.group_id=? 
-        and user_groups.group_id=? 
-        group by messages.user_id order by count desc",
-        "-" + @input.days + " day",
-        @input.groupid,
-        @input.groupid)
-        headers['Content-Type'] = "application/json"
-        return result.to_json
-    end
-  end
-
   class TotalLikesGiven < R '/rest/totallikesgiven'
     def get()
         if(@input.days == nil)
@@ -856,7 +828,7 @@ module GroupStats::Controllers
                    ) as messages
                  from messages as m
                 where group_id = ?
-		and messages.user_id != 'system'
+                and m.user_id != 'system'
                 group by strftime('%m', m.created_at), strftime('%Y', m.created_at)
                 order by m.created_at asc",
                 @input.groupid,
