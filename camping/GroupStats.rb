@@ -1,4 +1,3 @@
-require 'pp'
 require 'rubygems' 
 require 'bundler/setup'
 require 'sqlite3'
@@ -48,6 +47,8 @@ module GroupStats::Controllers
 
   class Index < R '/'
     def get 
+	@state.scraper = Scraper.new($database_path, @state.token, $logging_path)
+        @state.user_id = @state.scraper.getUser
         if(@state.token == nil)
             client_id = $client_id
             template_path = File.join(File.expand_path(File.dirname(__FILE__)), 'authenticate.html')
