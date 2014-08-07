@@ -69,8 +69,6 @@ angular.module('myApp.controllers', [])
              requestPostsMostChart();
              requestLikesReceivedChart();
 			 requestTop();
-             requestDailyPostFreqChart();
-             requestWeeklyPostFreqChart();
              requestUser();
            });
 		   
