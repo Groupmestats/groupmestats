@@ -66,7 +66,6 @@ angular.module('myApp.controllers', [])
 		
         $scope.$watch('days', function(newValue, oldValue) {
              requestPostsMostChart();
-             requestLikesReceivedChart();
 			 requestTop();
              requestUser();
            });
@@ -148,21 +147,6 @@ angular.module('myApp.controllers', [])
                error(function(data, status, headers, config) {
 
                });
-        }
-        
-        function requestLikesReceivedChart(){
-            var daysToRequest = $scope.days
-            if(daysToRequest == 0)
-            {
-                daysToRequest = 9999999
-            }
-            $http({method: 'GET', url: '/rest/totallikesreceived', params: {days : daysToRequest, groupid : $routeParams.groupid}}).
-                success(function(data, status, headers, config) {
-                    $scope.likesReceivedData = data
-                }).
-                error(function(data, status, headers, config) {
-
-                });
         }
         
         function requestDailyPostFreqChart(){

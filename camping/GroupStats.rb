@@ -470,36 +470,6 @@ module GroupStats::Controllers
     end 
   end
 
-  class TotalLikesReceived < R '/rest/totallikesreceived'
-    def get()
-        if(@input.days == nil)
-            @input.days = "9999999999"
-        end
-        if(@input.groupid == nil)
-            @status = 400
-            return 'need group id'
-        end
-
-        if !getGroups(@input.groupid)
-            return 'nil'
-        end
-
-        result = $database.execute( "select user_groups.Name, count(likes.user_id) as count 
-        from user_groups 
-        left join messages using(user_id)
-        left join likes using(message_id)
-        where messages.created_at > datetime('now', ?) 
-        and messages.group_id=? 
-        and user_groups.group_id=? 
-        group by messages.user_id order by count desc",
-        "-" + @input.days + " day",
-        @input.groupid,
-        @input.groupid)
-        headers['Content-Type'] = "application/json"
-        return result.to_json
-    end
-  end
-
   class TotalLikesGiven < R '/rest/totallikesgiven'
     def get()
         if(@input.days == nil)
