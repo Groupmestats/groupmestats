@@ -800,7 +800,7 @@ module GroupStats::Controllers
                    ) as messages
                  from messages as m
                 where group_id = ?
-		and messages.user_id != 'system'
+                and m.user_id != 'system'
                 group by strftime('%m', m.created_at), strftime('%Y', m.created_at)
                 order by m.created_at asc",
                 @input.groupid,
