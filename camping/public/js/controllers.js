@@ -60,6 +60,7 @@ angular.module('myApp.controllers', [])
            if (!hs.getExpander(target) && hs.getExpander()) hs.close();
         });
 
+	requestGroupStats();
         requestGroupJoinRate();
         requestDailyPostFreqChart();
         requestWeeklyPostFreqChart();
@@ -103,7 +104,15 @@ angular.module('myApp.controllers', [])
 					$scope.ngramloading = false;
 				});
 		}
-		
+		function requestGroupStats() {
+                        $http({method: 'GET', url: '/rest/groupfacts', params: {groupid : $routeParams.groupid}}).
+                                success(function(data, status, headers, config) {
+                                        $scope.groupfacts = data
+                                }).
+                                error(function(data, status, headers, config) {
+
+                                });
+		}		
 		function requestPostsMostChart(){
 			var daysToRequest = $scope.days
 			if(daysToRequest == 0)
