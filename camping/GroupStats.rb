@@ -61,10 +61,9 @@ module GroupStats::Controllers
   
   class Authenticate < R '/authenticate'
     def get
-        logging_path = '/var/log/camping-server/groupstats.log'
-        $logger = Logger.new(logging_path)
+        $logger = Logger.new($logging_path)
         @state.token = @input.access_token
-        @state.scraper = Scraper.new($database_path, @state.token, logging_path)
+        @state.scraper = Scraper.new($database_path, @state.token, $logging_path)
         @state.user_id = @state.scraper.getUser
         
         $logger.info "authenticating"
