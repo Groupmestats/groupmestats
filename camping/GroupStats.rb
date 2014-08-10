@@ -439,8 +439,8 @@ module GroupStats::Controllers
         @input.numpost)
         
         topImages = $database.execute("select count(likes.user_id) as count, messages.text, messages.image, user_groups.Name, users.avatar_url 
-	from likes 
-	join messages on messages.message_id=likes.message_id 
+	from messages
+	left join likes using(message_id)
 	left join user_groups on user_groups.user_id=messages.user_id 
 	left join users on users.user_id=messages.user_id 
 	    WHERE messages.created_at > datetime('now', ?) 
@@ -569,11 +569,12 @@ module GroupStats::Controllers
         and messages.group_id=? 
         and user_groups.group_id=? 
         group by messages.user_id
-        order by (select count(messages.user_id) from messages where user_id = user_groups.user_id and group_id = ?) desc",
+        order by (select count(messages.user_id) from messages where user_id = user_groups.user_id and group_id = ? and messages.created_at > datetime('now', ?)) desc",
         "-" + @input.days + " day",
         @input.groupid,
         @input.groupid,
-        @input.groupid)
+        @input.groupid,
+        "-" + @input.days + " day")
         
         headers['Content-Type'] = "application/json"
         return { "posters" => topPosters, "likesGotten" => likesGotten }.to_json
