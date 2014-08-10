@@ -2,3 +2,5 @@
 groupme:
    database: <DB_PATH>
    client_id: <YOUR GROUPME APP'S CLIENT ID>
+camping-server:
+   log: <LOG FILE LOCATION>
