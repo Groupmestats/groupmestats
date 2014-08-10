@@ -527,11 +527,12 @@ module GroupStats::Controllers
         and messages.group_id=? 
         and user_groups.group_id=? 
         group by messages.user_id
-        order by (select count(messages.user_id) from messages where user_id = user_groups.user_id and group_id = ?) desc",
+        order by (select count(messages.user_id) from messages where user_id = user_groups.user_id and group_id = ? and messages.created_at > datetime('now', ?)) desc",
         "-" + @input.days + " day",
         @input.groupid,
         @input.groupid,
-        @input.groupid)
+        @input.groupid,
+        "-" + @input.days + " day")
         
         headers['Content-Type'] = "application/json"
         return { "posters" => topPosters, "likesGotten" => likesGotten }.to_json
