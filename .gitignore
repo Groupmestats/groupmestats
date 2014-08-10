@@ -5,3 +5,4 @@ camping/web.yaml
 *test*
 public/js/google-analytics.js
 
+*.log
