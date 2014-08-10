@@ -10,6 +10,7 @@ angular.module('myApp.directives', []).
                 gmsData: '=',
                 gmsTitle: '@',
                 gmsUser: '=',
+				gmsTooltiptext: '@'
             },
             template: '<div id="container"></div>', 
             link: function ($scope, element, attrs) {
@@ -23,8 +24,7 @@ angular.module('myApp.directives', []).
                                 $scope.data = gmsData;
                             }
                         });
-			  WordCloud(document.getElementById('my_canvas'), { list: [['foo', 12], ['bar', 6]] } );
-//                        drawChart($scope.gmsData, $scope.gmsUser, attrs.gmsTitle, element[0]);
+                        drawChart($scope.gmsData, $scope.gmsUser, attrs.gmsTitle, element[0]);
                     }
                 });
                 
@@ -84,7 +84,7 @@ angular.module('myApp.directives', []).
                                 }
                             }
                             return '<b>'+ this.point.name + '</b>: '+ '<br>' +
-                                this.y + ' posts<br>' + roundToFour(this.percentage) +'% of posts received';
+                                this.y + ' ' + $scope.gmsTooltiptext + '<br>' + roundToFour(this.percentage) +'%';
                         },
                         shared: true
                     },
@@ -92,7 +92,7 @@ angular.module('myApp.directives', []).
                 });
 
                 function roundToFour(num) {    
-                    return +(Math.round(num + "e+4")  + "e-4");
+                    return +(Math.round(num + "e+2")  + "e-2");
                 }
 
                 function userStats(userData, chart) {
