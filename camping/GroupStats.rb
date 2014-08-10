@@ -397,8 +397,8 @@ module GroupStats::Controllers
         @input.numpost)
         
         topImages = $database.execute("select count(likes.user_id) as count, messages.text, messages.image, user_groups.Name, users.avatar_url 
-	from likes 
-	join messages on messages.message_id=likes.message_id 
+	from messages
+	left join likes using(message_id)
 	left join user_groups on user_groups.user_id=messages.user_id 
 	left join users on users.user_id=messages.user_id 
 	    WHERE messages.created_at > datetime('now', ?) 
