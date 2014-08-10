@@ -139,6 +139,48 @@ module GroupStats::Controllers
       return timezone
   end
 
+  class GroupFacts < R '/rest/groupfacts'
+    def get ()
+	totalimages = $database.execute(" SELECT count(*) AS totalimages
+	    FROM messages 
+	    WHERE messages.group_id = ? 
+	    AND messages.image!='none'",
+	    @input.groupid
+        )[0][0]
+
+	totalposts = $database.execute(" SELECT count(*) AS totalposts
+	    FROM messages 
+	    WHERE messages.group_id = ?
+	    AND messages.user_id!='system'",
+	    @input.groupid
+	)[0][0]
+
+        totalusers = $database.execute(" SELECT count(user_groups.user_id) AS totalusers 
+	    FROM user_groups 
+	    WHERE user_groups.group_id = ?",
+            @input.groupid
+        )[0][0]
+
+	totalavatarchanges = $database.execute(" SELECT count(*) AS totalavatarchanges 
+	    FROM messages 
+	    WHERE messages.group_id = ?
+	    AND messages.user_id='system' 
+	    AND messages.text LIKE '%changed the group''s avatar%'",
+	    @input.groupid
+	)[0][0]
+
+	totalgroupnamechanges = $database.execute(" SELECT count(*) AS totalgroupnamechanges
+            FROM messages
+            WHERE messages.group_id = ?
+            AND messages.user_id='system'
+            AND messages.text LIKE '%changed the group''s name%'",
+            @input.groupid
+        )[0][0]
+
+        return {'totalimages' => totalimages, 'totalposts' => totalposts, 'totalusers' => totalusers, 'totalavatarchanges' => totalavatarchanges, 'totalgroupnamechanges' => totalgroupnamechanges}.to_json
+    end
+  end
+
   class GroupList < R '/rest/groupList'
     def get()
         $logger.info "Loading Grouplist from the database for @state.token = #{@state.token}"
