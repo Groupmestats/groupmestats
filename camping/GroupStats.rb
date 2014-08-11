@@ -360,7 +360,24 @@ module GroupStats::Controllers
             result.merge!(:top_post => top_post[0][1])
         end
         $database.results_as_hash = false
-        
+
+	if ifGroup
+	    groupName = $database.execute("SELECT groups.name 
+		FROM groups 
+		WHERE groups.group_id = ?",
+		@input.groupid
+	    )[0][0]
+	    result.merge!(:groupname => groupName)
+	end
+
+	if !ifGroup
+	    numOfGroups = $database.execute("SELECT count(user_groups.group_id) 
+		FROM user_groups 
+		WHERE user_groups.user_id = ?",
+	    	@input.userid
+	    )[0][0]
+	    result.merge!(:numofgroups => numOfGroups)
+	end        
         return result.to_json
     end
   end
