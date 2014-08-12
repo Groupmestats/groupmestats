@@ -353,13 +353,11 @@ module GroupStats::Controllers
             )[0][0]
             result.merge!(:post_percentage => ((total_posts.to_f/total_posts_for_group.to_f) * 100).round(2) )
         else
-            top_post = $database.execute("select count(likes.user_id) as count, messages.text from likes join messages on messages.message_id=likes.message_id WHERE messages.user_id=? and messages.image=='none' group by messages.message_id order by count desc limit 1",
+            top_post = $database.execute("select count(likes.user_id) as count, messages.text from likes join messages on messages.message_id=likes.message_id WHERE messages.user_id=? and messages.image=='none' group by messages.message_id order by count desc limit 5",
                 @input.userid,
             )
-            result.merge!(:top_post_likes => top_post[0][0])
-            result.merge!(:top_post => top_post[0][1])
+            result.merge!(:top_post => top_post)
         end
-        $database.results_as_hash = false
 
 	if ifGroup
 	    groupName = $database.execute("SELECT groups.name 
@@ -376,7 +374,30 @@ module GroupStats::Controllers
 		WHERE user_groups.user_id = ?",
 	    	@input.userid
 	    )[0][0]
-	    result.merge!(:numofgroups => numOfGroups)
+	    numOfImages = $database.execute("SELECT count(messages.image) 
+		FROM messages 
+		WHERE messages.user_id = ?
+		AND messages.image != 'none'",
+		@input.userid
+	    )[0][0]
+	    numOfAvatars = $database.execute("SELECT messages.avatar_url 
+		FROM messages 
+		WHERE messages.user_id = ? 
+		GROUP BY messages.avatar_url",
+		@input.userid
+	    ).length - 1
+	    topImages = $database.execute("SELECT count(likes.user_id) AS count, messages.text, messages.image
+                FROM likes
+                JOIN messages ON messages.message_id=likes.message_id
+                    WHERE messages.user_id = ?
+                    AND messages.image!='none'
+                GROUP BY messages.message_id
+                ORDER BY count DESC LIMIT 6", 
+		@input.userid,
+	    )
+
+	    $database.results_as_hash = false
+	    result.merge!(:numofgroups => numOfGroups, :numofimages => numOfImages, :numofavatars => numOfAvatars, :topimages => topImages)
 	end        
         return result.to_json
     end
