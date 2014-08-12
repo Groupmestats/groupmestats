@@ -395,10 +395,18 @@ module GroupStats::Controllers
                 ORDER BY count DESC LIMIT 6", 
 		@input.userid,
 	    )
-
 	    $database.results_as_hash = false
-	    result.merge!(:numofgroups => numOfGroups, :numofimages => numOfImages, :numofavatars => numOfAvatars, :topimages => topImages)
-	end        
+	    groupPosts = $database.execute("SELECT groups.name, count(messages.message_id) as count from messages 
+		LEFT JOIN groups ON messages.group_id = groups.group_id 
+		WHERE messages.user_id = ? 
+		GROUP BY messages.group_id
+		ORDER BY count DESC",
+		@input.userid
+	    )
+	    result.merge!(:numofgroups => numOfGroups, :numofimages => numOfImages, :numofavatars => numOfAvatars, :topimages => topImages, :groupposts => groupPosts)
+	end
+	
+	$database.results_as_hash = false        
         return result.to_json
     end
   end
