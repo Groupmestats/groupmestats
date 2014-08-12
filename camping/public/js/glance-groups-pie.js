@@ -9,6 +9,7 @@ angular.module('myApp.directives', []).
                 gmsData: '=',
                 gmsTitle: '@',
                 gmsUser: '=',
+		gmsTooltiptext: '@'
             },
             template: '<div id="container"></div>', 
             link: function ($scope, element, attrs) {
@@ -19,7 +20,6 @@ angular.module('myApp.directives', []).
 				drawChart($scope.data, attrs.gmsTitle, element[0]);
                             }
                         });
-                        //drawChart($scope.data, attrs.gmsTitle, element[0]);
                 
                 $scope.chart = new Highcharts.Chart({
                     chart: {
@@ -40,13 +40,16 @@ angular.module('myApp.directives', []).
                                enabled: false
                            },
                            showInLegend: true,
-                           size: '60%'
                         },
                         series: {
                             slicedOffset: 0,
                         }
                     },
                     tooltip: {
+			formatter: function() {
+			    return '<b>'+ this.point.name + '</b>: '+ '<br>' + this.y + ' ' + $scope.gmsTooltiptext + '<br>' + roundToFour(this.percentage) +'%';
+			},
+			shared: true
                     },
                     legend: {
                         align: 'right',
@@ -60,12 +63,11 @@ angular.module('myApp.directives', []).
                         borderWidth: 2,
                         layout: 'vertical',
                         verticalAlign: 'top',
-                        width: 100,
                         itemStyle: {
                             width: 50 
                         },
                         y: 70,
-                        x: -50,
+                        x: -150,
                         itemHoverStyle: {
                                 color: '#00f'
                         },
