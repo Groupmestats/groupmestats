@@ -403,7 +403,40 @@ module GroupStats::Controllers
 		ORDER BY count DESC",
 		@input.userid
 	    )
-	    result.merge!(:numofgroups => numOfGroups, :numofimages => numOfImages, :numofavatars => numOfAvatars, :topimages => topImages, :groupposts => groupPosts)
+	    $database.results_as_hash = false
+        heatmap = $database.execute( "select strftime('%w',messages.created_at) as date,strftime('%H',messages.created_at, ?) as hour, count(message_id) from messages
+                join groups using(group_id)
+                where user_id = ?
+                and messages.user_id != 'system'
+                group by strftime('%w',messages.created_at), strftime('%H',messages.created_at)
+                order by strftime('%w',messages.created_at) asc, strftime('%H',messages.created_at)",
+            parseTimeZone(@input.timezone),
+            @input.userid)
+        #todo: enforce user id
+        heatmap.each do |a|
+            a[1] = a[1].to_i
+            a[0] = a[0].to_i
+        end
+
+        # Need to loop through the returned values, and add 0s for any missing day/hour combos
+        i, j = 0, 0
+        while (i < 7)
+            while (j < 24)
+                check = true
+                heatmap.each do | count |
+                    if (count[0] == i && count[1] == j)
+                        check = false
+                    end
+                end
+                if check
+                    heatmap.push([i,j,0])
+                end
+                j += 1
+            end
+            i += 1
+            j = 0
+        end
+	    result.merge!(:numofgroups => numOfGroups, :numofimages => numOfImages, :numofavatars => numOfAvatars, :topimages => topImages, :groupposts => groupPosts, :heatmap => heatmap)
 	end
 	
 	$database.results_as_hash = false        
