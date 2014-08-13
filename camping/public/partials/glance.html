@@ -1,9 +1,34 @@
 <div class="col-md-12">
+    <h2>Total Stats (Across all Groups)</h2>
     <img src="{{user.image_url}}.avatar" style="float:left; padding-right:15px"></img><h3>{{user.name}}</h3>
     <br>
-    <h4>User stats:</h4>
+    <p><b>Number of Groups: </b> {{user.numofgroups}}</p>
     <p><b>Total Posts:</b> {{user.total_posts}}</p>
     <p><b>Total likes:</b> {{user.total_likes_received}}</p>
     <p><b>Likes to Posts Ratio:</b> {{user.likes_to_posts_ratio}}</p>
-    <p><b>Top Post:</b> ({{user.top_post_likes}}) {{user.top_post}}</p>
+    <p><b>Total Number of Images Posted:</b> {{user.numofimages}}</p>
+    <p><b>Total User Avatar Changes:</b> {{user.numofavatars}}</p>
+    <div class="row">
+		<div class="col-md-5">
+			<h4>Top posts:</h4>
+			<p ng-repeat="post in user.top_post"><b>({{post.count}}):</b> {{post.text}}</p>
+		</div>
+		<div class="col-md-7">
+			<h4>Top images:</h4>
+			<div class="row">
+				<div class="col-md-4" ng-repeat="post in user.topimages">
+					<b>{{post.name}}</b> ({{post.count}}): <br/>
+					<a href="{{post.image}}" target="_blank">
+						<img class="img-responsive" src="{{post.image}}.preview"></img>
+					</a>
+					<p ng-show="post.text != 'none'" class="imageCaption">{{post.text}}</p>
+					<br/>
+				</div>
+			</div>
+		</div>
+    </div>
+    <div gms-glance-group-piechart gms-title="Total Posts By Group" gms-legend-title="Groups" gms-data="user.groupposts" gms-tooltiptext="posts" style="min-width:530px;min-height:400px;"></div> 
+    <div gms-daily-posts-linegraph gms-title="Daily Frequency of Posts by Hour (All Posts)" gms-xaxis-title="Hour" gms-yaxis-title="Posts" gms-data="user.dailyposts" gms-category='category' style="min-width:530px;min-height:400px;"></div>
+    <div gms-bargraph gms-title="Weekly Frequency of Posts by Day (All Posts)" gms-xaxis-title="Day" gms-yaxis-title="Posts" gms-data="user.weeklyposts" style="min-width:530px;min-height:400px;"></div>
+    <div gms-heatmap gms-title="Heatmap of Posts for Day of the Week/Hour of the Day (All Posts)" gms-xaxis-title="Hour" gms-yaxis-title="Posts" gms-data="user.heatmap" style="min-width:530px;min-height:400px;"></div>
 </div>

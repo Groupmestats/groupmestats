@@ -12,7 +12,7 @@ angular.module('myApp.directives', []).
                 gmsUser: '=',
 				gmsTooltiptext: '@'
             },
-            template: '<div id="container"></div>', 
+            template: '<div id="container"></div>',
             link: function ($scope, element, attrs) {
                 $scope.$watch('gmsUser', function(gmsUser) {
                     if(gmsUser)
@@ -27,7 +27,7 @@ angular.module('myApp.directives', []).
                         drawChart($scope.gmsData, $scope.gmsUser, attrs.gmsTitle, element[0]);
                     }
                 });
-                
+
                 $scope.chart = new Highcharts.Chart({
                     chart: {
                         renderTo: element[0]
@@ -66,7 +66,7 @@ angular.module('myApp.directives', []).
                         verticalAlign: 'top',
                         width: 150,
                         itemStyle: {
-                            width: 130 
+                            width: 130
                         },
                         y: 70,
                         x: 0,
@@ -91,7 +91,7 @@ angular.module('myApp.directives', []).
                     series: []
                 });
 
-                function roundToFour(num) {    
+                function roundToFour(num) {
                     return +(Math.round(num + "e+2")  + "e-2");
                 }
 
@@ -190,7 +190,7 @@ angular.module('myApp.directives', []).
                 gmsTitle: '@',
                 gmsUser: '=',
             },
-            template: '<div id="container"></div>', 
+            template: '<div id="container"></div>',
             link: function ($scope, element, attrs) {
                 $scope.$watch('gmsUser', function(gmsUser) {
                     if(gmsUser)
@@ -206,7 +206,7 @@ angular.module('myApp.directives', []).
                         drawChart($scope.gmsData, $scope.gmsUser, attrs.gmsTitle, element[0]);
                     }
                 });
-                
+
                 $scope.chart = new Highcharts.Chart({
                     chart: {
                         type: 'pie',
@@ -225,7 +225,7 @@ angular.module('myApp.directives', []).
                            dataLabels: {
                                enabled: false
                            },
-                           showInLegend: true, 
+                           showInLegend: true,
                            size: '60%',
                         },
                         series: {
@@ -271,7 +271,7 @@ angular.module('myApp.directives', []).
                     series: []
                 });
 
-                function roundToFour(num) {    
+                function roundToFour(num) {
                     return +(Math.round(num + "e+4")  + "e-4");
                 }
 
@@ -331,7 +331,7 @@ angular.module('myApp.directives', []).
                 gmsTitle: '@',
 				gmsCategoryData: '='
             },
-            template: '<div id="container"></div>', 
+            template: '<div id="container"></div>',
             link: function ($scope, element, attrs) {
                 $scope.$watch('gmsData', function(gmsData) {
                     if(gmsData)
@@ -339,7 +339,7 @@ angular.module('myApp.directives', []).
                         drawChart(gmsData, $scope.gmsTitle, $scope.gmsCategoryData);
                     }
                 });
-                
+
                 $scope.chart = new Highcharts.Chart({
                     chart: {
                         type: 'scatter',
@@ -391,9 +391,9 @@ angular.module('myApp.directives', []).
                     {
                         $scope.chart.series[0].remove(true);
                     }
-					
+
 					var toAdd = chartData;
-					
+
 					if(categories != null)
 					{
 						toAdd = [];
@@ -410,15 +410,15 @@ angular.module('myApp.directives', []).
 							return  Highcharts.dateFormat('%e %b %Y', new Date(this.x)) + '<br/><b>' + this.point.name + '</b>';
 						};
 					};
-					
+
                     $scope.chart.addSeries({
                         data: toAdd,
                         //pointInterval: 24 * 3600 * 1000 // one day
                         //pointStart: Date.UTC(1970, 0, 1)
                     }, false);
-					
-					
-                    $scope.chart.setTitle({text:title}, '', false);
+
+
+                    $scope.chart.setTitle({text:title}, '');
                     $scope.chart.redraw();
                 }
 
@@ -431,7 +431,7 @@ angular.module('myApp.directives', []).
                 gmsTitle: '@',
 				gmsCategoryData: '='
             },
-            template: '<div id="container"></div>', 
+            template: '<div id="container"></div>',
             link: function ($scope, element, attrs) {
                 $scope.$watch('gmsData', function(gmsData) {
                     if(gmsData)
@@ -439,7 +439,7 @@ angular.module('myApp.directives', []).
                         drawChart(gmsData, $scope.gmsTitle, $scope.gmsCategoryData);
                     }
                 });
-                
+
                 $scope.chart = new Highcharts.Chart({
                     chart: {
                         type: 'scatter',
@@ -657,7 +657,7 @@ angular.module('myApp.directives', []).
                 gmsData: '=',
                 gmsTitle: '@'
             },
-            template: '<div id="container"></div>', 
+            template: '<div id="container"></div>',
             link: function ($scope, element, attrs) {
                 $scope.$watch('gmsData', function(gmsData) {
                     if(gmsData)
@@ -665,7 +665,7 @@ angular.module('myApp.directives', []).
                         drawChart(gmsData, attrs.gmsTitle, element[0]);
                     }
                 });
-                
+
                 $scope.chart = new Highcharts.Chart({
                     chart: {
                         type: 'line',
@@ -695,7 +695,7 @@ angular.module('myApp.directives', []).
 						   marker:{
 								enabled:false
 							},
-                           showInLegend: true 
+                           showInLegend: true
                         }
                     },
                     xAxis: {
@@ -733,7 +733,7 @@ angular.module('myApp.directives', []).
 								name: value.name
 							}, false);
 					})
-                    
+
                     $scope.chart.setTitle({text:title}, '', false);
                     $scope.chart.redraw();
                 }
@@ -746,23 +746,23 @@ angular.module('myApp.directives', []).
                 gmsData: '=',
                 gmsTitle: '@'
             },
-            templateUrl: 'partials/directives/volumechart.html', 
+            templateUrl: 'partials/directives/volumechart.html',
             link: function ($scope, element, attrs) {
 				$scope.byWeek = false;
 				$scope.byUser = false;
-				
+
 				$scope.setByWeek = function(val)
 				{
 					$scope.byWeek = val
 					requestVolume();
 				}
-				
+
 				$scope.setMessagesByUser = function(val)
 				{
 					$scope.byUser = val
 					requestVolume();
 				}
-				
+
 				function requestVolume(){
 					$http({method: 'GET', url: '/rest/volumedata', params: {groupid : $routeParams.groupid, byWeek : $scope.byWeek == true, byUser : $scope.byUser == true}}).
 						success(function(data, status, headers, config) {
@@ -772,17 +772,17 @@ angular.module('myApp.directives', []).
 
 						});
 				}
-				
+
                 $scope.$watch('gmsData', function(gmsData) {
                     if(gmsData)
                     {
                         drawChart(gmsData, attrs.gmsTitle, $scope.byWeek == true);
                     }
                 });
-                
+
 				//request
 				requestVolume();
-				
+
                 $scope.chart = new Highcharts.Chart({
                     chart: {
                         type: 'column',
@@ -827,7 +827,7 @@ angular.module('myApp.directives', []).
 					$scope.chart.addSeries({
 							data: chartData
 						}, false);
-                    
+
 					if(byWeek){
 						$scope.chart.tooltip.options.formatter = function() {
 							return  '<b>Week of ' + Highcharts.dateFormat('%e %b %Y', new Date(this.x)) + '</b><br/>' + this.y;
@@ -839,12 +839,98 @@ angular.module('myApp.directives', []).
 							return  '<b>' + Highcharts.dateFormat('%b %Y', new Date(this.x)) + '</b><br/>' + this.y;
 						};
 					}
-					
+
                     $scope.chart.setTitle({text:title}, '', false);
                     $scope.chart.redraw();
                 }
 
             }
         }
-	});
+	}).directive('gmsGlanceGroupPiechart', function() {
+        return{
+            scope: {
+                gmsData: '=',
+                gmsTitle: '@',
+                gmsUser: '=',
+		gmsTooltiptext: '@'
+            },
+            template: '<div id="container"></div>',
+            link: function ($scope, element, attrs) {
+                        $scope.$watch('gmsData', function(gmsData) {
+                            if(gmsData)
+                            {
+                                $scope.data = gmsData;
+				drawChart($scope.data, attrs.gmsTitle, element[0]);
+                            }
+                        });
 
+                $scope.chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'pie',
+                        renderTo: element[0],
+                    },
+		    credits: {
+      			enabled: false
+  		    },
+                    plotOptions: {
+                       pie: {
+                           allowPointSelect: true,
+                           animation: {
+                               duration: 2000
+                           },
+                           cursor: 'pointer',
+                           dataLabels: {
+                               enabled: false
+                           },
+                           showInLegend: true,
+                        },
+                        series: {
+                            slicedOffset: 0,
+                        }
+                    },
+                    tooltip: {
+			formatter: function() {
+			    return '<b>'+ this.point.name + '</b>: '+ '<br>' + this.y + ' ' + $scope.gmsTooltiptext + '<br>' + roundToFour(this.percentage) +'%';
+			},
+			shared: true
+                    },
+                    legend: {
+                        align: 'right',
+                        title: {
+                            text: attrs.gmsLegendTitle,
+                            style: {
+                                fontWeight: 'bold',
+                            }
+                        },
+                        borderColor: 'black',
+                        borderWidth: 2,
+                        layout: 'vertical',
+                        verticalAlign: 'top',
+                        itemStyle: {
+                            width: 50
+                        },
+                        y: 70,
+                        x: -150,
+                        itemHoverStyle: {
+                                color: '#00f'
+                        },
+                        shadow: true
+                    },
+                    series: []
+                });
+
+                function roundToFour(num) {
+                    return +(Math.round(num + "e+4")  + "e-4");
+                }
+
+                function drawChart(chartData, title, element) {
+                    $scope.chart.addSeries({
+                        data: chartData,
+                        cursor: 'pointer',
+                    }, false);
+                    $scope.chart.setTitle({text:title}, '', false);
+                    $scope.chart.redraw();
+                }
+            }
+        };
+    });
