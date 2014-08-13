@@ -59,7 +59,7 @@ class Scraper
 
     #Returns an array of hashes, containing the name and group_id of each group the user belongs to
     def getGroups
-        groups = $gm.get("/groups/", @token)
+        groups = $gm.get("/groups/", @token, "per_page=100")
         group_ids = Array.new
 
         groups['response'].each do |group|
