@@ -418,7 +418,7 @@ angular.module('myApp.directives', []).
                     }, false);
 
 
-                    $scope.chart.setTitle({text:title}, '', false);
+                    $scope.chart.setTitle({text:title}, '');
                     $scope.chart.redraw();
                 }
 
