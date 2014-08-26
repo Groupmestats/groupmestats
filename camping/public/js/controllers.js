@@ -232,8 +232,9 @@ angular.module('myApp.controllers', [])
 
 	}])
     .controller('GlanceController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
-        //var user = $scope.user[index]
-	var offset = new Date().getTimezoneOffset();
+	   
+        // Time zone offset 
+        var offset = new Date().getTimezoneOffset();
         offset = offset / 60;
 
         $http({method: 'GET', url: '/rest/user', params: {timezone: offset}}).
@@ -245,7 +246,12 @@ angular.module('myApp.controllers', [])
                 });
     }])
 	.controller('UserController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
-        $http({method: 'GET', url: '/rest/user',params: {userid : $routeParams.userid, groupid : $routeParams.groupid}}).
+
+        // Time zone offset
+        var offset = new Date().getTimezoneOffset();
+        offset = offset / 60;
+ 
+        $http({method: 'GET', url: '/rest/user',params: {timezone: offset, userid : $routeParams.userid, groupid : $routeParams.groupid}}).
                 success(function(data, status, headers, config) {
                     $scope.user = data
                 }).
