@@ -289,15 +289,14 @@ module GroupStats::Controllers
         $database.results_as_hash = true
         if ifGroup
             $logger.info "Grabbing user-data for userid #{@input.userid} in #{@input.groupid} for @state.token = #{@state.token}" 
-            result = $database.execute("SELECT * 
-            	FROM users 
+            userInfo = $database.execute("SELECT user_groups.name as name, users.avatar_url as avatar_url
+            	FROM users
             	JOIN user_groups USING(user_id) 
             	    WHERE user_id = ? 
             	    AND group_id = ?",
             @input.userid,
             @input.groupid
-            )
-            result = result[0]
+            )[0]
        
             total_posts = $database.execute("SELECT count(messages.user_id) AS count 
             	FROM messages 
@@ -321,24 +320,31 @@ module GroupStats::Controllers
             else
                result.merge!(:likes_to_posts_ratio => total_likes_received.to_f/total_posts.to_f)
             end
-       
+
             top_post = $database.execute("SELECT count(likes.user_id) AS count, messages.text 
-            	FROM likes 
-            	JOIN messages ON messages.message_id=likes.message_id 
-            	    WHERE messages.user_id=? 
-            	    AND messages.group_id=? 
-            	    AND messages.image=='none' 
-            	    GROUP BY messages.message_id 
-            	    ORDER BY count DESC LIMIT 1",
+                FROM likes 
+                JOIN messages ON messages.message_id=likes.message_id 
+                    WHERE messages.user_id=? 
+                    AND messages.group_id=?
+                    AND messages.image=='none' 
+                GROUP BY messages.message_id 
+                ORDER BY count DESC LIMIT 5",
+            @input.userid,
+            @input.groupid,
+            )
+      
+            topImages = $database.execute("SELECT count(likes.user_id) AS count, messages.text, messages.image
+                FROM likes
+                JOIN messages ON messages.message_id=likes.message_id
+                    WHERE messages.user_id = ?
+                    AND messages.group_id = ?
+                    AND messages.image!='none'
+                GROUP BY messages.message_id
+                ORDER BY count DESC LIMIT 6", 
             @input.userid,
             @input.groupid
             )
-
-            if !top_post.empty?
-                result.merge!(:top_post_likes => top_post[0][0])
-                result.merge!(:top_post => top_post[0][1])
-            end
-
+ 
             total_posts_for_group = $database.execute("SELECT count(*) 
             	FROM messages 
             	    WHERE messages.group_id=? 
@@ -352,7 +358,135 @@ module GroupStats::Controllers
 		    @input.groupid
 	        )[0][0]
 
-    	    result.merge!(:total_posts => total_posts, :total_likes_received => total_likes_received, :post_percentage => ((total_posts.to_f/total_posts_for_group.to_f) * 100).round(2), :groupname => groupName)
+            numOfImages = $database.execute("SELECT count(messages.image) 
+                FROM messages 
+                    WHERE messages.user_id = ?
+                    AND messages.group_id = ?
+                    AND messages.image != 'none'",
+            @input.userid,
+            @input.groupid
+            )[0][0]
+
+            $database.results_as_hash = false
+
+            heatmap = $database.execute( "SELECT strftime('%w',messages.created_at) AS date,strftime('%H',messages.created_at, ?) AS hour, count(message_id) 
+                FROM messages
+                JOIN groups USING(group_id)
+                    WHERE user_id = ?
+                    AND messages.group_id = ?
+                    AND messages.user_id != 'system'
+                GROUP BY strftime('%w',messages.created_at), strftime('%H',messages.created_at)
+                ORDER BY strftime('%w',messages.created_at) asc, strftime('%H',messages.created_at)",
+            parseTimeZone(@input.timezone),
+            @input.userid,
+            @input.groupid,
+            )
+            #todo: enforce user id
+            heatmap.each do |a|
+                a[1] = a[1].to_i
+                a[0] = a[0].to_i
+            end
+
+            # Need to loop through the returned values, and add 0s for any missing day/hour combos
+            i, j = 0, 0
+            while (i < 7)
+                while (j < 24)
+                    check = true
+                    heatmap.each do | count |
+                        if (count[0] == i && count[1] == j)
+                            check = false
+                        end
+                    end
+                    if check
+                        heatmap.push([i,j,0])
+                    end
+                    j += 1
+                end
+                i += 1
+                j = 0
+            end
+
+            dailyposts = $database.execute( "SELECT strftime('%H', messages.created_at, ? ) AS time, count(strftime('%H', messages.created_at, '-04:00')) 
+                FROM messages 
+                    WHERE messages.user_id = ?
+                    AND messages.group_id = ? 
+                    AND messages.user_id != 'system' 
+                GROUP BY strftime('%H', messages.created_at) 
+                ORDER BY time ASC",
+            parseTimeZone(@input.timezone),
+            @input.userid,
+            @input.groupid,
+            )
+
+            i = 0
+            while (i < 24)
+                check = true
+                dailyposts.each do |count|
+                    if count[0].to_i == i
+                count[0] = count[0].to_i
+                        check = false
+                    end
+                end
+
+                if check == true
+                    dailyposts.push([i,0])
+                end
+                i += 1
+            end
+
+            dailyposts.sort! {|a,b| a[0] <=> b[0]}
+
+            dailyposts.each do |count|
+                count[0] = Time.parse("#{count[0].to_i}:00").strftime("%l %P")
+            end
+
+            weeklyposts = $database.execute( "SELECT strftime('%w', messages.created_at) AS time, count(strftime('%w', messages.created_at)) 
+                FROM messages 
+                    WHERE messages.user_id = ? 
+                    AND messages.group_id = ?
+                    AND messages.user_id != 'system' 
+                GROUP BY strftime('%w', messages.created_at) 
+                ORDER BY time ASC",
+            @input.userid,
+            @input.groupid,
+            )
+            headers['Content-Type'] = "application/json"
+
+            i = 0
+            while (i < 7)
+                check = true
+                weeklyposts.each do |count|
+                    if count[0].to_i == i
+                        count[0] = count[0].to_i
+                        check = false
+                    end
+                end
+
+                if check == true
+                    weeklyposts.push([i,0])
+                end
+                i += 1
+            end
+
+            weeklyposts.sort! {|a,b| a[0] <=> b[0]}
+            weeklyposts.each do |count|
+                date = Date.new(2014,6,15 + count[0])
+                count[0] = date.strftime("%A")
+            end
+
+    	    result.merge!(
+                :name => userInfo['name'], 
+                :avatar => userInfo['avatar_url'], 
+                :top_post => top_post,
+                :topimages => topImages, 
+                :total_posts => total_posts, 
+                :total_likes_received => total_likes_received, 
+                :post_percentage => ((total_posts.to_f/total_posts_for_group.to_f) * 100).round(2), 
+                :groupname => groupName, 
+                :numofimages => numOfImages,
+                :heatmap => heatmap, 
+                :dailyposts => dailyposts, 
+                :weeklyposts => weeklyposts)
 	
         else
             $logger.info "Grabbing global user-data for userid #{@input.userid} for @state.token = #{@state.token}"
