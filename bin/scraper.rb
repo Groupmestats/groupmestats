@@ -184,7 +184,7 @@ class Scraper
         $logger.info "Scraped messages from #{group['name']}"
 
         database = SQLite3::Database.new( @database )
-        database.execute("UPDATE groups SET updated_at=datetime('#{group['updated_at']}','unixepoch') WHERE group_id='#{group['group_id']}'")
+        database.execute("UPDATE groups SET updated_at=datetime('#{Time.now.to_i}','unixepoch') WHERE group_id='#{group['group_id']}'")
     end
 
     #This will pull all messages for a given period of time and group, and store it in the messages table.  Takes in a time, in epoch seconds.  To search for all messages, entire the current epoch time.
