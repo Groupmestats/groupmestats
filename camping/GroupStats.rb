@@ -333,7 +333,7 @@ module GroupStats::Controllers
             @input.groupid,
             )
       
-            topImages = $database.execute("SELECT count(likes.user_id) AS count, messages.text, messages.image
+            top_images = $database.execute("SELECT count(likes.user_id) AS count, messages.text, messages.image
                 FROM likes
                 JOIN messages ON messages.message_id=likes.message_id
                     WHERE messages.user_id = ?
@@ -352,13 +352,13 @@ module GroupStats::Controllers
             @input.groupid
             )[0][0]
 	
-    	    groupName = $database.execute("SELECT groups.name 
+    	    group_name = $database.execute("SELECT groups.name 
 	        	FROM groups 
 		            WHERE groups.group_id = ?",
 		    @input.groupid
 	        )[0][0]
 
-            numOfImages = $database.execute("SELECT count(messages.image) 
+            num_of_images = $database.execute("SELECT count(messages.image) 
                 FROM messages 
                     WHERE messages.user_id = ?
                     AND messages.group_id = ?
@@ -406,7 +406,7 @@ module GroupStats::Controllers
                 j = 0
             end
 
-            dailyposts = $database.execute( "SELECT strftime('%H', messages.created_at, ? ) AS time, count(strftime('%H', messages.created_at, '-04:00')) 
+            daily_posts = $database.execute( "SELECT strftime('%H', messages.created_at, ? ) AS time, count(strftime('%H', messages.created_at, '-04:00')) 
                 FROM messages 
                     WHERE messages.user_id = ?
                     AND messages.group_id = ? 
@@ -421,7 +421,7 @@ module GroupStats::Controllers
             i = 0
             while (i < 24)
                 check = true
-                dailyposts.each do |count|
+                daily_posts.each do |count|
                     if count[0].to_i == i
                 count[0] = count[0].to_i
                         check = false
@@ -429,18 +429,18 @@ module GroupStats::Controllers
                 end
 
                 if check == true
-                    dailyposts.push([i,0])
+                    daily_posts.push([i,0])
                 end
                 i += 1
             end
 
-            dailyposts.sort! {|a,b| a[0] <=> b[0]}
+            daily_posts.sort! {|a,b| a[0] <=> b[0]}
 
-            dailyposts.each do |count|
+            daily_posts.each do |count|
                 count[0] = Time.parse("#{count[0].to_i}:00").strftime("%l %P")
             end
 
-            weeklyposts = $database.execute( "SELECT strftime('%w', messages.created_at) AS time, count(strftime('%w', messages.created_at)) 
+            weekly_posts = $database.execute( "SELECT strftime('%w', messages.created_at) AS time, count(strftime('%w', messages.created_at)) 
                 FROM messages 
                     WHERE messages.user_id = ? 
                     AND messages.group_id = ?
@@ -455,7 +455,7 @@ module GroupStats::Controllers
             i = 0
             while (i < 7)
                 check = true
-                weeklyposts.each do |count|
+                weekly_posts.each do |count|
                     if count[0].to_i == i
                         count[0] = count[0].to_i
                         check = false
@@ -463,13 +463,13 @@ module GroupStats::Controllers
                 end
 
                 if check == true
-                    weeklyposts.push([i,0])
+                    weekly_posts.push([i,0])
                 end
                 i += 1
             end
 
-            weeklyposts.sort! {|a,b| a[0] <=> b[0]}
-            weeklyposts.each do |count|
+            weekly_posts.sort! {|a,b| a[0] <=> b[0]}
+            weekly_posts.each do |count|
                 date = Date.new(2014,6,15 + count[0])
                 count[0] = date.strftime("%A")
             end
@@ -478,15 +478,15 @@ module GroupStats::Controllers
                 :name => userInfo['name'], 
                 :avatar => userInfo['avatar_url'], 
                 :top_post => top_post,
-                :topimages => topImages, 
+                :top_images => top_images, 
                 :total_posts => total_posts, 
                 :total_likes_received => total_likes_received, 
                 :post_percentage => ((total_posts.to_f/total_posts_for_group.to_f) * 100).round(2), 
-                :groupname => groupName, 
-                :numofimages => numOfImages,
+                :group_name => group_name, 
+                :num_of_images => num_of_images,
                 :heatmap => heatmap, 
-                :dailyposts => dailyposts, 
-                :weeklyposts => weeklyposts)
+                :daily_posts => daily_posts, 
+                :weekly_posts => weekly_posts)
 	
         else
             $logger.info "Grabbing global user-data for userid #{@input.userid} for @state.token = #{@state.token}"
@@ -499,7 +499,6 @@ module GroupStats::Controllers
                      WHERE messages.user_id=?",
              @input.userid
              )[0][0]
-             result.merge!(:total_posts => total_posts)
               
              #"At a Glance" Total Likes
              total_likes_received = $database.execute("SELECT count(likes.user_id) AS count 
@@ -508,7 +507,6 @@ module GroupStats::Controllers
                      WHERE messages.user_id=?",
              @input.userid
              )[0][0]
-             result.merge!(:total_likes_received => total_likes_received)
 
              if (total_likes_received.to_f == 0 || total_posts.to_f == 0)
                  result.merge!(:likes_to_posts_ratio => 0)
@@ -526,17 +524,16 @@ module GroupStats::Controllers
                  ORDER BY count DESC LIMIT 5",
              @input.userid,
              )
-             result.merge!(:top_post => top_post)
                 
              #"At a Glance" Number of groups
-             numOfGroups = $database.execute("SELECT count(user_groups.group_id) 
+             num_of_groups = $database.execute("SELECT count(user_groups.group_id) 
                  FROM user_groups 
                      WHERE user_groups.user_id = ?",
              @input.userid
              )[0][0]
 
              #"At a Glance" Number of images posted
-             numOfImages = $database.execute("SELECT count(messages.image) 
+             num_of_images = $database.execute("SELECT count(messages.image) 
                  FROM messages 
                      WHERE messages.user_id = ?
                      AND messages.image != 'none'",
@@ -544,7 +541,7 @@ module GroupStats::Controllers
              )[0][0]
 
              #"At a Glance" Number of Avatar changes
-             numOfAvatars = $database.execute("SELECT messages.avatar_url 
+             num_of_avatars = $database.execute("SELECT messages.avatar_url 
                  FROM messages 
                      WHERE messages.user_id = ? 
                  GROUP BY messages.avatar_url",
@@ -552,7 +549,7 @@ module GroupStats::Controllers
              ).length - 1
 
              #"At a Glance" Top images
-             topImages = $database.execute("SELECT count(likes.user_id) AS count, messages.text, messages.image
+             top_images = $database.execute("SELECT count(likes.user_id) AS count, messages.text, messages.image
                  FROM likes
                  JOIN messages ON messages.message_id=likes.message_id
                      WHERE messages.user_id = ?
@@ -564,7 +561,7 @@ module GroupStats::Controllers
             
              #"At a Glance" Posts by group
              $database.results_as_hash = false
-             groupPosts = $database.execute("SELECT groups.name, count(messages.message_id) as count from messages 
+             group_posts = $database.execute("SELECT groups.name, count(messages.message_id) as count from messages 
                  LEFT JOIN groups ON messages.group_id = groups.group_id 
                      WHERE messages.user_id = ? 
                  GROUP BY messages.group_id
@@ -609,7 +606,7 @@ module GroupStats::Controllers
              end
  
              #"At a Glance" Posts by hour
-             dailyposts = $database.execute( "SELECT strftime('%H', messages.created_at, ? ) AS time, count(strftime('%H', messages.created_at, '-04:00')) 
+             daily_posts = $database.execute( "SELECT strftime('%H', messages.created_at, ? ) AS time, count(strftime('%H', messages.created_at, '-04:00')) 
                  FROM messages 
                      WHERE messages.user_id=? 
                      AND messages.user_id != 'system' 
@@ -622,7 +619,7 @@ module GroupStats::Controllers
              i = 0
              while (i < 24)
                  check = true
-                 dailyposts.each do |count|
+                 daily_posts.each do |count|
                      if count[0].to_i == i
                  count[0] = count[0].to_i
                          check = false
@@ -630,19 +627,19 @@ module GroupStats::Controllers
                  end
  
                  if check == true
-                     dailyposts.push([i,0])
+                     daily_posts.push([i,0])
                  end
                  i += 1
              end
  
-             dailyposts.sort! {|a,b| a[0] <=> b[0]}
+             daily_posts.sort! {|a,b| a[0] <=> b[0]}
  
-             dailyposts.each do |count|
+             daily_posts.each do |count|
                  count[0] = Time.parse("#{count[0].to_i}:00").strftime("%l %P")
              end
  
              #"At a Glance" Posts by day
-             weeklyposts = $database.execute( "SELECT strftime('%w', messages.created_at) AS time, count(strftime('%w', messages.created_at)) 
+             weekly_posts = $database.execute( "SELECT strftime('%w', messages.created_at) AS time, count(strftime('%w', messages.created_at)) 
                  FROM messages 
                      WHERE messages.user_id=? 
                      AND messages.user_id != 'system' 
@@ -655,7 +652,7 @@ module GroupStats::Controllers
              i = 0
              while (i < 7)
                  check = true
-                 weeklyposts.each do |count|
+                 weekly_posts.each do |count|
                      if count[0].to_i == i
                          count[0] = count[0].to_i
                          check = false
@@ -663,23 +660,34 @@ module GroupStats::Controllers
                  end
  
                  if check == true
-                     weeklyposts.push([i,0])
+                     weekly_posts.push([i,0])
                  end
                  i += 1
              end
  
-             weeklyposts.sort! {|a,b| a[0] <=> b[0]}
-             weeklyposts.each do |count|
+             weekly_posts.sort! {|a,b| a[0] <=> b[0]}
+             weekly_posts.each do |count|
                  date = Date.new(2014,6,15 + count[0])
                  count[0] = date.strftime("%A")
              end
  
              #Add all "At a Glance" stats to a hash and return it
-             result.merge!(:numofgroups => numOfGroups, :numofimages => numOfImages, :numofavatars => numOfAvatars, :topimages => topImages, :groupposts => groupPosts, :heatmap => heatmap, :dailyposts => dailyposts, :weeklyposts => weeklyposts)
+             result.merge!(
+                :total_posts => total_posts,
+                :total_likes_received => total_likes_received,
+                :top_post => top_post,
+                :num_of_groups => num_of_groups, 
+                :num_of_images => num_of_images, 
+                :num_of_avatars => num_of_avatars, 
+                :top_images => top_images, 
+                :group_posts => group_posts, 
+                :heatmap => heatmap, 
+                :daily_posts => daily_posts, 
+                :weekly_posts => weekly_posts)
         end
         
     	$database.results_as_hash = false        
-            return result.to_json
+        return result.to_json
     end
   end
   
