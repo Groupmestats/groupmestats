@@ -316,11 +316,11 @@ module GroupStats::Controllers
             @input.groupid
             )[0][0]
             
-             if (total_likes_received.to_f == 0 || total_posts.to_f == 0)
-                result.merge!(:likes_to_posts_ratio => 0)
-             else
-                result.merge!(:likes_to_posts_ratio => total_likes_received.to_f/total_posts.to_f)
-             end
+            if (total_likes_received.to_f == 0 || total_posts.to_f == 0)
+               result.merge!(:likes_to_posts_ratio => 0)
+            else
+               result.merge!(:likes_to_posts_ratio => total_likes_received.to_f/total_posts.to_f)
+            end
        
             top_post = $database.execute("SELECT count(likes.user_id) AS count, messages.text 
             	FROM likes 
@@ -333,6 +333,7 @@ module GroupStats::Controllers
             @input.userid,
             @input.groupid
             )
+
             if !top_post.empty?
                 result.merge!(:top_post_likes => top_post[0][0])
                 result.merge!(:top_post => top_post[0][1])
@@ -345,204 +346,206 @@ module GroupStats::Controllers
             @input.groupid
             )[0][0]
 	
-	    groupName = $database.execute("SELECT groups.name 
-		FROM groups 
-		WHERE groups.group_id = ?",
-		@input.groupid
-	    )[0][0]
-	    result.merge!(:total_posts => total_posts, :total_likes_received => total_likes_received, :post_percentage => ((total_posts.to_f/total_posts_for_group.to_f) * 100).round(2), :groupname => groupName)
-	else
-	    $logger.info "Grabbing global user-data for userid #{@input.userid} for @state.token = #{@state.token}"
-            result = @state.scraper.getUserInfo
-            result = result['response']
-        
-         #"At a Glance" Total Posts  
-            total_posts = $database.execute("SELECT count(messages.user_id) AS count 
-            	FROM messages 
-            	    WHERE messages.user_id=?",
-            @input.userid
-            )[0][0]
-            result.merge!(:total_posts => total_posts)
-          
-         #"At a Glance" Total Likes
-            total_likes_received = $database.execute("SELECT count(likes.user_id) AS count 
-                FROM likes 
-                LEFT JOIN messages ON messages.message_id=likes.message_id 
-                    WHERE messages.user_id=?",
-            @input.userid
-            )[0][0]
-            result.merge!(:total_likes_received => total_likes_received)
+    	    groupName = $database.execute("SELECT groups.name 
+	        	FROM groups 
+		            WHERE groups.group_id = ?",
+		    @input.groupid
+	        )[0][0]
 
-            if (total_likes_received.to_f == 0 || total_posts.to_f == 0)
-                result.merge!(:likes_to_posts_ratio => 0)
-            else
-                result.merge!(:likes_to_posts_ratio => total_likes_received.to_f/total_posts.to_f)
-            end
-        
-        #"At a Glance" Top Posts
-            top_post = $database.execute("SELECT count(likes.user_id) AS count, messages.text 
-                FROM likes 
-                JOIN messages ON messages.message_id=likes.message_id 
-                    WHERE messages.user_id=? 
-                    AND messages.image=='none' 
-                GROUP BY messages.message_id 
-                ORDER BY count DESC LIMIT 5",
-            @input.userid,
-            )
-            result.merge!(:top_post => top_post)
-            
-        #"At a Glance" Number of groups
-	    numOfGroups = $database.execute("SELECT count(user_groups.group_id) 
-            FROM user_groups 
-                WHERE user_groups.user_id = ?",
-        @input.userid
-	    )[0][0]
-
-        #"At a Glance" Number of images posted
-	    numOfImages = $database.execute("SELECT count(messages.image) 
-            FROM messages 
-                WHERE messages.user_id = ?
-                AND messages.image != 'none'",
-        @input.userid
-	    )[0][0]
-
-        #"At a Glance" Number of Avatar changes
-	    numOfAvatars = $database.execute("SELECT messages.avatar_url 
-            FROM messages 
-                WHERE messages.user_id = ? 
-            GROUP BY messages.avatar_url",
-        @input.userid
-	    ).length - 1
-
-        #"At a Glance" Top images
-	    topImages = $database.execute("SELECT count(likes.user_id) AS count, messages.text, messages.image
-            FROM likes
-            JOIN messages ON messages.message_id=likes.message_id
-                WHERE messages.user_id = ?
-                AND messages.image!='none'
-            GROUP BY messages.message_id
-            ORDER BY count DESC LIMIT 6", 
-		@input.userid,
-	    )
-	    
-        #"At a Glance" Posts by group
-        $database.results_as_hash = false
-	    groupPosts = $database.execute("SELECT groups.name, count(messages.message_id) as count from messages 
-            LEFT JOIN groups ON messages.group_id = groups.group_id 
-                WHERE messages.user_id = ? 
-            GROUP BY messages.group_id
-            ORDER BY count DESC",
-        @input.userid
-	    )
-	    
-        #"At a Glance" Heatmap
-        heatmap = $database.execute( "SELECT strftime('%w',messages.created_at) AS date,strftime('%H',messages.created_at, ?) AS hour, count(message_id) 
-            FROM messages
-            JOIN groups USING(group_id)
-                WHERE user_id = ?
-                AND messages.user_id != 'system'
-            GROUP BY strftime('%w',messages.created_at), strftime('%H',messages.created_at)
-            ORDER BY strftime('%w',messages.created_at) asc, strftime('%H',messages.created_at)",
-        parseTimeZone(@input.timezone),
-        @input.userid
-        )
-        #todo: enforce user id
-        heatmap.each do |a|
-            a[1] = a[1].to_i
-            a[0] = a[0].to_i
-        end
-
-        # Need to loop through the returned values, and add 0s for any missing day/hour combos
-        i, j = 0, 0
-        while (i < 7)
-            while (j < 24)
-                check = true
-                heatmap.each do | count |
-                    if (count[0] == i && count[1] == j)
-                        check = false
-                    end
-                end
-                if check
-                    heatmap.push([i,j,0])
-                end
-                j += 1
-            end
-            i += 1
-            j = 0
-        end
-
-        #"At a Glance" Posts by hour
-        dailyposts = $database.execute( "SELECT strftime('%H', messages.created_at, ? ) AS time, count(strftime('%H', messages.created_at, '-04:00')) 
-            FROM messages 
-                WHERE messages.user_id=? 
-                AND messages.user_id != 'system' 
-            GROUP BY strftime('%H', messages.created_at) 
-            ORDER BY time ASC",
-        parseTimeZone(@input.timezone),
-        @input.userid
-        )
-
-        i = 0
-        while (i < 24)
-            check = true
-            dailyposts.each do |count|
-                if count[0].to_i == i
-            count[0] = count[0].to_i
-                    check = false
-                end
-            end
-
-            if check == true
-                dailyposts.push([i,0])
-            end
-            i += 1
-        end
-
-        dailyposts.sort! {|a,b| a[0] <=> b[0]}
-
-        dailyposts.each do |count|
-            count[0] = Time.parse("#{count[0].to_i}:00").strftime("%l %P")
-        end
-
-        #"At a Glance" Posts by day
-        weeklyposts = $database.execute( "SELECT strftime('%w', messages.created_at) AS time, count(strftime('%w', messages.created_at)) 
-            FROM messages 
-                WHERE messages.user_id=? 
-                AND messages.user_id != 'system' 
-            GROUP BY strftime('%w', messages.created_at) 
-            ORDER BY time ASC",
-        @input.userid
-        )
-        headers['Content-Type'] = "application/json"
-
-        i = 0
-        while (i < 7)
-            check = true
-            weeklyposts.each do |count|
-                if count[0].to_i == i
-                    count[0] = count[0].to_i
-                    check = false
-                end
-            end
-
-            if check == true
-                weeklyposts.push([i,0])
-            end
-            i += 1
-        end
-
-        weeklyposts.sort! {|a,b| a[0] <=> b[0]}
-        weeklyposts.each do |count|
-            date = Date.new(2014,6,15 + count[0])
-            count[0] = date.strftime("%A")
-        end
-
-        #Add all "At a Glance" stats to a hash and return it
-	    result.merge!(:numofgroups => numOfGroups, :numofimages => numOfImages, :numofavatars => numOfAvatars, :topimages => topImages, :groupposts => groupPosts, :heatmap => heatmap, :dailyposts => dailyposts, :weeklyposts => weeklyposts)
-	end
+    	    result.merge!(:total_posts => total_posts, :total_likes_received => total_likes_received, :post_percentage => ((total_posts.to_f/total_posts_for_group.to_f) * 100).round(2), :groupname => groupName)
 	
-	$database.results_as_hash = false        
-        return result.to_json
+        else
+            $logger.info "Grabbing global user-data for userid #{@input.userid} for @state.token = #{@state.token}"
+                result = @state.scraper.getUserInfo
+                result = result['response']
+            
+             #"At a Glance" Total Posts  
+             total_posts = $database.execute("SELECT count(messages.user_id) AS count 
+                 FROM messages 
+                     WHERE messages.user_id=?",
+             @input.userid
+             )[0][0]
+             result.merge!(:total_posts => total_posts)
+              
+             #"At a Glance" Total Likes
+             total_likes_received = $database.execute("SELECT count(likes.user_id) AS count 
+                 FROM likes 
+                 LEFT JOIN messages ON messages.message_id=likes.message_id 
+                     WHERE messages.user_id=?",
+             @input.userid
+             )[0][0]
+             result.merge!(:total_likes_received => total_likes_received)
+
+             if (total_likes_received.to_f == 0 || total_posts.to_f == 0)
+                 result.merge!(:likes_to_posts_ratio => 0)
+             else
+                 result.merge!(:likes_to_posts_ratio => total_likes_received.to_f/total_posts.to_f)
+             end
+            
+             #"At a Glance" Top Posts
+             top_post = $database.execute("SELECT count(likes.user_id) AS count, messages.text 
+                 FROM likes 
+                 JOIN messages ON messages.message_id=likes.message_id 
+                     WHERE messages.user_id=? 
+                     AND messages.image=='none' 
+                 GROUP BY messages.message_id 
+                 ORDER BY count DESC LIMIT 5",
+             @input.userid,
+             )
+             result.merge!(:top_post => top_post)
+                
+             #"At a Glance" Number of groups
+             numOfGroups = $database.execute("SELECT count(user_groups.group_id) 
+                 FROM user_groups 
+                     WHERE user_groups.user_id = ?",
+             @input.userid
+             )[0][0]
+
+             #"At a Glance" Number of images posted
+             numOfImages = $database.execute("SELECT count(messages.image) 
+                 FROM messages 
+                     WHERE messages.user_id = ?
+                     AND messages.image != 'none'",
+             @input.userid
+             )[0][0]
+
+             #"At a Glance" Number of Avatar changes
+             numOfAvatars = $database.execute("SELECT messages.avatar_url 
+                 FROM messages 
+                     WHERE messages.user_id = ? 
+                 GROUP BY messages.avatar_url",
+             @input.userid
+             ).length - 1
+
+             #"At a Glance" Top images
+             topImages = $database.execute("SELECT count(likes.user_id) AS count, messages.text, messages.image
+                 FROM likes
+                 JOIN messages ON messages.message_id=likes.message_id
+                     WHERE messages.user_id = ?
+                     AND messages.image!='none'
+                 GROUP BY messages.message_id
+                 ORDER BY count DESC LIMIT 6", 
+             @input.userid,
+             )
+            
+             #"At a Glance" Posts by group
+             $database.results_as_hash = false
+             groupPosts = $database.execute("SELECT groups.name, count(messages.message_id) as count from messages 
+                 LEFT JOIN groups ON messages.group_id = groups.group_id 
+                     WHERE messages.user_id = ? 
+                 GROUP BY messages.group_id
+                 ORDER BY count DESC",
+             @input.userid
+             )
+            
+             #"At a Glance" Heatmap
+             heatmap = $database.execute( "SELECT strftime('%w',messages.created_at) AS date,strftime('%H',messages.created_at, ?) AS hour, count(message_id) 
+                 FROM messages
+                 JOIN groups USING(group_id)
+                     WHERE user_id = ?
+                     AND messages.user_id != 'system'
+                 GROUP BY strftime('%w',messages.created_at), strftime('%H',messages.created_at)
+                 ORDER BY strftime('%w',messages.created_at) asc, strftime('%H',messages.created_at)",
+             parseTimeZone(@input.timezone),
+             @input.userid
+             )
+             #todo: enforce user id
+             heatmap.each do |a|
+                 a[1] = a[1].to_i
+                 a[0] = a[0].to_i
+             end
+
+             # Need to loop through the returned values, and add 0s for any missing day/hour combos
+             i, j = 0, 0
+             while (i < 7)
+                 while (j < 24)
+                     check = true
+                     heatmap.each do | count |
+                         if (count[0] == i && count[1] == j)
+                             check = false
+                         end
+                     end
+                     if check
+                         heatmap.push([i,j,0])
+                     end
+                     j += 1
+                 end
+                 i += 1
+                 j = 0
+             end
+ 
+             #"At a Glance" Posts by hour
+             dailyposts = $database.execute( "SELECT strftime('%H', messages.created_at, ? ) AS time, count(strftime('%H', messages.created_at, '-04:00')) 
+                 FROM messages 
+                     WHERE messages.user_id=? 
+                     AND messages.user_id != 'system' 
+                 GROUP BY strftime('%H', messages.created_at) 
+                 ORDER BY time ASC",
+             parseTimeZone(@input.timezone),
+             @input.userid
+             )
+ 
+             i = 0
+             while (i < 24)
+                 check = true
+                 dailyposts.each do |count|
+                     if count[0].to_i == i
+                 count[0] = count[0].to_i
+                         check = false
+                     end
+                 end
+ 
+                 if check == true
+                     dailyposts.push([i,0])
+                 end
+                 i += 1
+             end
+ 
+             dailyposts.sort! {|a,b| a[0] <=> b[0]}
+ 
+             dailyposts.each do |count|
+                 count[0] = Time.parse("#{count[0].to_i}:00").strftime("%l %P")
+             end
+ 
+             #"At a Glance" Posts by day
+             weeklyposts = $database.execute( "SELECT strftime('%w', messages.created_at) AS time, count(strftime('%w', messages.created_at)) 
+                 FROM messages 
+                     WHERE messages.user_id=? 
+                     AND messages.user_id != 'system' 
+                 GROUP BY strftime('%w', messages.created_at) 
+                 ORDER BY time ASC",
+             @input.userid
+             )
+             headers['Content-Type'] = "application/json"
+ 
+             i = 0
+             while (i < 7)
+                 check = true
+                 weeklyposts.each do |count|
+                     if count[0].to_i == i
+                         count[0] = count[0].to_i
+                         check = false
+                     end
+                 end
+ 
+                 if check == true
+                     weeklyposts.push([i,0])
+                 end
+                 i += 1
+             end
+ 
+             weeklyposts.sort! {|a,b| a[0] <=> b[0]}
+             weeklyposts.each do |count|
+                 date = Date.new(2014,6,15 + count[0])
+                 count[0] = date.strftime("%A")
+             end
+ 
+             #Add all "At a Glance" stats to a hash and return it
+             result.merge!(:numofgroups => numOfGroups, :numofimages => numOfImages, :numofavatars => numOfAvatars, :topimages => topImages, :groupposts => groupPosts, :heatmap => heatmap, :dailyposts => dailyposts, :weeklyposts => weeklyposts)
+        end
+        
+    	$database.results_as_hash = false        
+            return result.to_json
     end
   end
   
