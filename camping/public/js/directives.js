@@ -669,7 +669,9 @@ angular.module('myApp.directives', []).
                 $scope.chart = new Highcharts.Chart({
                     chart: {
                         type: 'line',
-                        renderTo: element[0]
+                        renderTo: element[0],
+                        borderWidth: 1,
+                        borderColor: '#000000',
                     },
                     credits: {
                         enabled: false
