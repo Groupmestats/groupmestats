@@ -14,19 +14,12 @@ angular.module('myApp.directives', []).
             },
             template: '<div id="container"></div>',
             link: function ($scope, element, attrs) {
-                $scope.$watch('gmsUser', function(gmsUser) {
-                    if(gmsUser)
-                    {
-                        $scope.userData = gmsUser;
                         $scope.$watch('gmsData', function(gmsData) {
                             if(gmsData)
                             {
-                                $scope.data = gmsData;
+                                drawChart(gmsData, attrs.gmsTitle, element[0]);
                             }
                         });
-                        drawChart($scope.gmsData, $scope.gmsUser, attrs.gmsTitle, element[0]);
-                    }
-                });
 
                 $scope.chart = new Highcharts.Chart({
                     chart: {
@@ -76,17 +69,7 @@ angular.module('myApp.directives', []).
                         shadow: true
                     },
 					tooltip: {
-                        formatter: function() {
-                            var user;
-                            for (var i = 0; i < $scope.userData.length; i++) {
-                                if ($scope.userData[i]['name'] == this.series.data[this.point.x].name) {
-                                    user = $scope.userData[i];
-                                }
-                            }
-                            return '<b>'+ this.point.name + '</b>: '+ '<br>' +
-                                this.y + ' ' + $scope.gmsTooltiptext + '<br>' + roundToFour(this.percentage) +'%';
-                        },
-                        shared: true
+                    
                     },
                     series: []
                 });
@@ -113,7 +96,7 @@ angular.module('myApp.directives', []).
                             '<a href="#/user?userid=' + user.user_id + '&groupid=' + user.group_id + '" onclick="javascript:parent.window.hs.close();" >More info</a>'
                 }
 
-                function drawChart(chartData, userData, title, element) {
+                function drawChart(chartData, title, element) {
                     if($scope.chart.series[0])
                     {
                         $scope.chart.series[0].remove(true);
@@ -126,25 +109,30 @@ angular.module('myApp.directives', []).
                         data: chartData,
                         cursor: 'pointer',
                         point: {
-                            events: {
-                                click: function(e) {
-                                    hs.htmlExpand(null, {
-                                        headingText: "User Stats",
-                                        maincontentText: userStats(userData, this)
-                                    });
-                                },
-                                legendItemClick: function(e) {
-                                    hs.htmlExpand(null, {
-                                        headingText: "User Stats",
-                                        maincontentText: userStats(userData, this)
-                                    });
-                                    return false;
-                                }
-                            }
+//                            events: {
+//                                click: function(e) {
+//                                    hs.htmlExpand(null, {
+//                                        headingText: "User Stats",
+//                                        maincontentText: userStats(userData, this)
+//                                    });
+//                                },
+//                                legendItemClick: function(e) {
+//                                    hs.htmlExpand(null, {
+//                                        headingText: "User Stats",
+//                                        maincontentText: userStats(userData, this)
+//                                    });
+//                                    return false;
+//                                }
+//                            }
                         },
 						tooltip: {
-							pointFormat: "{point.y} posts",
-							shared: false
+                            formatter: function() {
+                                return this.y;
+                //return '<b>'+ point.key + '</b>: '+ '<br>' + this.y + ' ' + $scope.//gmsTooltiptext + '<br>' + roundToFour(this.percentage) +'%';
+                            },
+                            //headerFormat: '<b>{point.key}</b><br>',
+							//pointFormat: '{point.y} ' + $scope.gmsTooltiptext + '<br>' + this.y / this.total +'%',
+							shared: true,
 						}
                     }, false);
 					/*
@@ -158,16 +146,16 @@ angular.module('myApp.directives', []).
                         point: {
                             events: {
                                 click: function(e) {
-                                    hs.htmlExpand(null, {
-                                        headingText: "User Stats",
-                                        maincontentText: userStats(userData, this)
-                                    });
+//                                    hs.htmlExpand(null, {
+//                                        headingText: "User Stats",
+//                                        maincontentText: userStats(userData, this)
+//                                    });
                                 },
                                 legendItemClick: function(e) {
-                                    hs.htmlExpand(null, {
-                                        headingText: "User Stats",
-                                        maincontentText: userStats(userData, this)
-                                    });
+//                                    hs.htmlExpand(null, {
+//                                        headingText: "User Stats",
+//                                        maincontentText: userStats(userData, this)
+//                                    });
                                     return false;
                                 }
                             }
@@ -860,7 +848,7 @@ angular.module('myApp.directives', []).
                 gmsData: '=',
                 gmsTitle: '@',
                 gmsUser: '=',
-		gmsTooltiptext: '@'
+		        gmsTooltiptext: '@'
             },
             template: '<div id="container"></div>',
             link: function ($scope, element, attrs) {
@@ -868,7 +856,7 @@ angular.module('myApp.directives', []).
                             if(gmsData)
                             {
                                 $scope.data = gmsData;
-				drawChart($scope.data, attrs.gmsTitle, element[0]);
+				                drawChart($scope.data, attrs.gmsTitle, element[0]);
                             }
                         });
 
