@@ -1,5 +1,4 @@
 <div class="col-md-12">
-
 	<img src="{{group.image}}" style="float:left; padding-right:15px"></img><h3>{{group.name}}</h3>
 	<br/>
 	<div class="btn-group">
@@ -56,14 +55,8 @@
 	<div gms-heatmap gms-title="Heatmap of Posts for Day of the Week/Hour of the Day in {{group.name}}" gms-xaxis-title="Hour" gms-yaxis-title="Posts" gms-data="heatdata" style="min-width:530px;min-height:400px;"></div>
 	<div gms-post-volume-chart gms-title="" gms-xaxis-title="Date" gms-yaxis-title="Number of Posts" gms-data="volumeData" gms-category='datetime' style="min-width:530px;min-height:400px;"></div>
 	<div gms-user-growth-linegraph gms-title="User Growth over Time in {{group.name}}" gms-xaxis-title="Date" gms-yaxis-title="Number of Users" gms-data="joinDateData.data" gms-category-data="joinDateData.categories" gms-category='datetime' style="min-width:530px;min-height:400px;"></div>
-
-	<h4 style="text-align:center">Ngram Viewer</h4>
-	<input type="text" ng-model="ngramterms"></input> <button type="button" class="btn btn-default btn-sm" ng-click="refreshNgram()">Submit</button>
-	<span ng-show="ngramloading">
-		&nbsp;<img src="./img/loading.gif"></img>
-	</span>
-	<i>&nbsp;Enter one or more terms seperated by commas (ex: christmas,thanksgiving,magfest)</i>
-	<div gms-ngram gms-xaxis-title="Date, by week" gms-yaxis-title="Posts" gms-data="ngramdata" style="min-width:530px;min-height:400px;"></div>
+	
+	<div gms-ngram gms-xaxis-title="Date, by week" gms-yaxis-title="Posts" gms-data="ngramdata" style="min-width:530px;"></div>
 
 	<h4>Users:</h4>
 	<ul>

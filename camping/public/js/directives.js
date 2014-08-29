@@ -651,27 +651,33 @@ angular.module('myApp.directives', []).
 
 			}
 		};
-	}).directive('gmsNgram', function() {
+	}).directive('gmsNgram', function($http, $routeParams) {
         return{
             scope: {
                 gmsData: '=',
                 gmsTitle: '@'
             },
-            template: '<div id="container"></div>',
+            templateUrl: 'partials/directives/ngram.html',
             link: function ($scope, element, attrs) {
-                $scope.$watch('gmsData', function(gmsData) {
-                    if(gmsData)
-                    {
-                        drawChart(gmsData, attrs.gmsTitle, element[0]);
-                    }
-                });
+				$scope.showNgramChart = false;
+				
+				$scope.requestNgramData = function(){
+					$scope.ngramloading = true;
+					$http({method: 'GET', url: '/rest/ngramdata', params: {groupid : $routeParams.groupid, search: $scope.ngramterms}}).
+						success(function(data, status, headers, config) {
+							$scope.ngramloading = false;
+							drawChart(data);
+							$scope.showNgramChart = true;
+						}).
+						error(function(data, status, headers, config) {
+							$scope.ngramloading = false;
+						});
+				}
 
                 $scope.chart = new Highcharts.Chart({
                     chart: {
                         type: 'line',
-                        renderTo: element[0],
-                        borderWidth: 1,
-                        borderColor: '#000000',
+                        renderTo: element.find( "div" )[0], //TODO: better way...
                     },
                     credits: {
                         enabled: false
@@ -723,7 +729,7 @@ angular.module('myApp.directives', []).
                     series: []
                 });
 
-                function drawChart(chartData, title, xaxisTitle, yaxisTitle, element) {
+                function drawChart(chartData, title, xaxisTitle, yaxisTitle) {
                     while($scope.chart.series.length > 0)
 					{
 						$scope.chart.series[0].remove(false);

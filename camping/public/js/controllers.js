@@ -45,6 +45,15 @@ angular.module('myApp.controllers', [])
               });
        }
 }])
+	.controller('ScrapeController', ['$scope', '$http', '$routeParams', '$location', function($scope, $http, $routeParams, $location) {
+		$http({method: 'GET', url: '/rest/scrapegroup', params: {groupid : $routeParams.groupid}}).
+			success(function(data, status, headers, config) {
+				$location.path('group');
+			}).
+			error(function(data, status, headers, config) {
+
+			});
+	}])
 	.controller('GroupController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
 		$scope.days = 0
 		$scope.piechartData = "";
@@ -60,58 +69,43 @@ angular.module('myApp.controllers', [])
            if (!hs.getExpander(target) && hs.getExpander()) hs.close();
         });
 
-	requestGroupStats();
-        requestGroupJoinRate();
-        requestDailyPostFreqChart();
-        requestWeeklyPostFreqChart();
+		requestGroupStats();
+		requestGroupJoinRate();
+		requestDailyPostFreqChart();
+		requestWeeklyPostFreqChart();
 		
+		$http({method: 'GET', url: '/rest/group', params: {groupid : $routeParams.groupid}}).
+			success(function(data, status, headers, config) {
+				$scope.group = data
+			}).
+			error(function(data, status, headers, config) {
+
+			});
+		
+		var offset = new Date().getTimezoneOffset();
+		offset = offset / 60;
+		$http({method: 'GET', url: '/rest/heatdata', params: {groupid : $routeParams.groupid, timezone: offset}}).
+			success(function(data, status, headers, config) {
+				$scope.heatdata = data
+			}).
+			error(function(data, status, headers, config) {
+
+			});
+
         $scope.$watch('days', function(newValue, oldValue) {
              requestPostsMostChart();
 			 requestTop();
              requestUser();
            });
-		   
-		$scope.refreshNgram = function(){
-			$scope.ngramloading = true;
-			requestNgramData()
-		};
-		
-		$http({method: 'GET', url: '/rest/group', params: {groupid : $routeParams.groupid}}).
-				success(function(data, status, headers, config) {
-					$scope.group = data
-				}).
-				error(function(data, status, headers, config) {
 
-				});
-		var offset = new Date().getTimezoneOffset();
-        offset = offset / 60;
-
-		$http({method: 'GET', url: '/rest/heatdata', params: {groupid : $routeParams.groupid, timezone: offset}}).
-				success(function(data, status, headers, config) {
-					$scope.heatdata = data
-				}).
-				error(function(data, status, headers, config) {
-
-				});
-
-		function requestNgramData(){
-			$http({method: 'GET', url: '/rest/ngramdata', params: {groupid : $routeParams.groupid, search: $scope.ngramterms}}).
-				success(function(data, status, headers, config) {
-					$scope.ngramdata = data
-					$scope.ngramloading = false;
-				}).
-				error(function(data, status, headers, config) {
-					$scope.ngramloading = false;
-				});
-		}
 		function requestGroupStats() {
-                        $http({method: 'GET', url: '/rest/groupfacts', params: {groupid : $routeParams.groupid}}).
-                                success(function(data, status, headers, config) {
-                                        $scope.groupfacts = data
-                                }).
-                                error(function(data, status, headers, config) {
+			$http({method: 'GET', url: '/rest/groupfacts', params: {groupid : $routeParams.groupid}}).
+				success(function(data, status, headers, config) {
+						$scope.groupfacts = data
+				}).
+				error(function(data, status, headers, config) {
 
-                                });
+				});
 		}		
 		function requestPostsMostChart(){
 			var daysToRequest = $scope.days
