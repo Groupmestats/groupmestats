@@ -70,11 +70,6 @@ angular.module('myApp.controllers', [])
 			 requestTop();
              requestUser();
            });
-		   
-		$scope.refreshNgram = function(){
-			$scope.ngramloading = true;
-			requestNgramData()
-		};
 		
 		$http({method: 'GET', url: '/rest/group', params: {groupid : $routeParams.groupid}}).
 				success(function(data, status, headers, config) {
@@ -94,16 +89,6 @@ angular.module('myApp.controllers', [])
 
 				});
 
-		function requestNgramData(){
-			$http({method: 'GET', url: '/rest/ngramdata', params: {groupid : $routeParams.groupid, search: $scope.ngramterms}}).
-				success(function(data, status, headers, config) {
-					$scope.ngramdata = data
-					$scope.ngramloading = false;
-				}).
-				error(function(data, status, headers, config) {
-					$scope.ngramloading = false;
-				});
-		}
 		function requestGroupStats() {
                         $http({method: 'GET', url: '/rest/groupfacts', params: {groupid : $routeParams.groupid}}).
                                 success(function(data, status, headers, config) {

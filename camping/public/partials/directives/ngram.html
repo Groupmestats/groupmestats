@@ -1,0 +1,11 @@
+<h4 style="text-align:center">Ngram Viewer</h4>
+<input type="text" ng-model="ngramterms"></input> <button type="button" class="btn btn-default btn-sm" ng-click="requestNgramData()">Submit</button>
+<span ng-show="ngramloading">
+	&nbsp;<img src="./img/loading.gif"></img>
+</span>
+<i>&nbsp;Enter one or more terms seperated by commas (ex: christmas,thanksgiving,magfest)</i>
+<br/><br/>
+
+<div ng-show="showNgramChart">
+	<div id="container"></div>
+</div>
