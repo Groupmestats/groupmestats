@@ -20,7 +20,7 @@ class Scraper
  
         begin
             database = SQLite3::Database.new( @database )
-            database.execute(".timeout 500")
+            database.busy_timeout = 500
         rescue
             $logger.error "Invalid database file"
             abort('Invalid database file')
