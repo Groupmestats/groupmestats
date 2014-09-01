@@ -69,7 +69,11 @@ angular.module('myApp.directives', []).
                         shadow: true
                     },
 					tooltip: {
-                    
+                        formatter: function() {
+                            return '<b>'+ this.point.name +'</b>:<br> '+ '<b>' + this.point.y + '</b> ' +  $scope.gmsTooltiptext + '<br><b>' + roundToFour(this.percentage) +'</b>% of ' + $scope.gmsTooltiptext;
+                        },
+                        shared: true,
+                        useHTML: true,
                     },
                     series: []
                 });
@@ -127,7 +131,7 @@ angular.module('myApp.directives', []).
                         },
 						tooltip: {
                             formatter: function() {
-                                return this.y;
+                                //return this.y;
                 //return '<b>'+ point.key + '</b>: '+ '<br>' + this.y + ' ' + $scope.//gmsTooltiptext + '<br>' + roundToFour(this.percentage) +'%';
                             },
                             //headerFormat: '<b>{point.key}</b><br>',
