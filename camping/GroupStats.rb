@@ -207,74 +207,74 @@ module GroupStats::Controllers
     end
   end
 
-  class UserGroup < R '/rest/usergroup'
-    def get()
-        if(@input.days == nil)
-            @input.days = "9999999999"
-        end
-        if(@input.groupid == nil)
-            return false
-        end
-        
-        final_results = Array.new
-        users = $database.execute("select user_groups.user_id from user_groups where user_groups.group_id=?",
-            @input.groupid
-        )
-        
-        $logger.info "Pulling total posts, total likes, top posts, and top images in #(@input.groupid} for @state.token = #{@state.token}"
-        users.each do | userid |
-            result = Hash.new
-            $database.results_as_hash = true
-            result = $database.execute("SELECT * from users join user_groups using(user_id) where user_id = ? and group_id = ?",
-                userid,
-                @input.groupid,
-            )
-            result = result[0]
-    
-            total_posts = $database.execute("SELECT  count(messages.user_id) as count FROM messages WHERE messages.user_id=? AND messages.created_at > datetime('now', ?) AND messages.group_id=?",
-                userid,
-                "-" + @input.days + " day",
-                @input.groupid
-            )[0][0]
-            result.merge!(:total_posts => total_posts)
-            
-            total_likes_received = $database.execute("select count(likes.user_id) as count from likes left join messages on messages.message_id=likes.message_id where messages.created_at > datetime('now', ?) AND messages.user_id=? AND messages.group_id=?",
-                "-" + @input.days + " day",
-                userid,
-                @input.groupid
-            )[0][0]
-            result.merge!(:total_likes_received => total_likes_received)
-
-            if (total_likes_received.to_f == 0 || total_posts.to_f == 0)
-                result.merge!(:likes_to_posts_ratio => 0)
-            else
-                result.merge!(:likes_to_posts_ratio => total_likes_received.to_f/total_posts.to_f)
-            end
-
-            top_post = $database.execute("select count(likes.user_id) as count, messages.text from likes join messages on messages.message_id=likes.message_id WHERE messages.user_id=? and messages.group_id=? and messages.image=='none' AND messages.created_at > datetime('now', ?) group by messages.message_id order by count desc limit 1",
-                userid,
-                @input.groupid,
-                "-" + @input.days + " day"
-            )
-            if !top_post.empty?
-                result.merge!(:top_post_likes => top_post[0][0])
-                result.merge!(:top_post => top_post[0][1])
-            end
-
-            total_posts_for_group = $database.execute("SELECT count(*) from messages where messages.group_id=? AND messages.user_id != 'system' AND messages.created_at > datetime('now', ?)",
-                @input.groupid,
-                "-" + @input.days + " day"
-            )[0][0]
-            result.merge!(:post_percentage => ((total_posts.to_f/total_posts_for_group.to_f) * 100).round(2) )
-
-            final_results.push(result)
-        end
-        $database.results_as_hash = false
-
-        return final_results.to_json
-    end
-  end
-
+#  class UserGroup < R '/rest/usergroup'
+#    def get()
+#        if(@input.days == nil)
+#            @input.days = "9999999999"
+#        end
+#        if(@input.groupid == nil)
+#            return false
+#        end
+#        
+#        final_results = Array.new
+#        users = $database.execute("select user_groups.user_id from user_groups where user_groups.group_id=?",
+#            @input.groupid
+#        )
+#        
+#        $logger.info "Pulling total posts, total likes, top posts, and top images in #(@input.groupid} for @state.token = #{@state.token}"
+#        users.each do | userid |
+#            result = Hash.new
+#            $database.results_as_hash = true
+#            result = $database.execute("SELECT * from users join user_groups using(user_id) where user_id = ? and group_id = ?",
+#                userid,
+#                @input.groupid,
+#            )
+#            result = result[0]
+#    
+#            total_posts = $database.execute("SELECT  count(messages.user_id) as count FROM messages WHERE messages.user_id=? AND messages.created_at > datetime('now', ?) AND messages.group_id=?",
+#                userid,
+#                "-" + @input.days + " day",
+#                @input.groupid
+#            )[0][0]
+#            result.merge!(:total_posts => total_posts)
+#            
+#            total_likes_received = $database.execute("select count(likes.user_id) as count from likes left join messages on messages.message_id=likes.message_id where messages.created_at > datetime('now', ?) AND messages.user_id=? AND messages.group_id=?",
+#                "-" + @input.days + " day",
+#                userid,
+#                @input.groupid
+#            )[0][0]
+#            result.merge!(:total_likes_received => total_likes_received)
+#
+#            if (total_likes_received.to_f == 0 || total_posts.to_f == 0)
+#                result.merge!(:likes_to_posts_ratio => 0)
+#            else
+#                result.merge!(:likes_to_posts_ratio => total_likes_received.to_f/total_posts.to_f)
+#            end
+#
+#            top_post = $database.execute("select count(likes.user_id) as count, messages.text from likes join messages on messages.message_id=likes.message_id WHERE messages.user_id=? and messages.group_id=? and messages.image=='none' AND messages.created_at > datetime('now', ?) group by messages.message_id order by count desc limit 1",
+#                userid,
+#                @input.groupid,
+#                "-" + @input.days + " day"
+#            )
+#            if !top_post.empty?
+#                result.merge!(:top_post_likes => top_post[0][0])
+#                result.merge!(:top_post => top_post[0][1])
+#            end
+#
+#            total_posts_for_group = $database.execute("SELECT count(*) from messages where messages.group_id=? AND messages.user_id != 'system' AND messages.created_at > datetime('now', ?)",
+#                @input.groupid,
+#                "-" + @input.days + " day"
+#            )[0][0]
+#            result.merge!(:post_percentage => ((total_posts.to_f/total_posts_for_group.to_f) * 100).round(2) )
+#
+#            final_results.push(result)
+#        end
+#        $database.results_as_hash = false
+#
+#        return final_results.to_json
+#    end
+#  end
+#
   class User < R '/rest/user'
     def get()
         ifGroup = true

@@ -95,7 +95,7 @@ angular.module('myApp.controllers', [])
         $scope.$watch('days', function(newValue, oldValue) {
              requestPostsMostChart();
 			 requestTop();
-             requestUser();
+             //requestUser();
            });
 
 		function requestGroupStats() {
@@ -122,21 +122,21 @@ angular.module('myApp.controllers', [])
 				});
 		}
         
-        function requestUser(){
-            var daysToRequest = $scope.days
-            if(daysToRequest == 0)
-            {
-                daysToRequest = 9999999
-            }
-            $http({method: 'GET', url: '/rest/usergroup', params: {days: daysToRequest, groupid : $routeParams.groupid}}).
-               success(function(data, status, headers, config) {
-                   $scope.userData = data
-               }).
-               error(function(data, status, headers, config) {
-
-               });
-        }
-       
+//        function requestUser(){
+//            var daysToRequest = $scope.days
+//            if(daysToRequest == 0)
+//            {
+//                daysToRequest = 9999999
+//            }
+//            $http({method: 'GET', url: '/rest/usergroup', params: {days: daysToRequest, groupid : $routeParams.groupid}}).
+//               success(function(data, status, headers, config) {
+//                   $scope.userData = data
+//               }).
+//               error(function(data, status, headers, config) {
+//
+//               });
+//        }
+//       
         function requestGroupJoinRate(){
            var daysToRequest = $scope.days
            if(daysToRequest == 0)
