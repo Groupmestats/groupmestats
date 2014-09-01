@@ -70,7 +70,7 @@ angular.module('myApp.directives', []).
                     },
 					tooltip: {
                         formatter: function() {
-                            return '<b>'+ this.point.name +'</b>:<br> '+ '<b>' + this.point.y + '</b> ' +  $scope.gmsTooltiptext + '<br><b>' + roundToFour(this.percentage) +'</b>% of ' + $scope.gmsTooltiptext;
+                            return '<small>'+ this.point.name +'</small><br><b> '+ this.point.y + '</b> ' + $scope.gmsTooltiptext + '<br><b>' + roundToFour(this.percentage) +'</b>% of ' + $scope.gmsTooltiptext;
                         },
                         shared: true,
                         useHTML: true,
@@ -130,13 +130,6 @@ angular.module('myApp.directives', []).
 //                            }
                         },
 						tooltip: {
-                            formatter: function() {
-                                //return this.y;
-                //return '<b>'+ point.key + '</b>: '+ '<br>' + this.y + ' ' + $scope.//gmsTooltiptext + '<br>' + roundToFour(this.percentage) +'%';
-                            },
-                            //headerFormat: '<b>{point.key}</b><br>',
-							//pointFormat: '{point.y} ' + $scope.gmsTooltiptext + '<br>' + this.y / this.total +'%',
-							shared: true,
 						}
                     }, false);
 					/*
@@ -165,8 +158,6 @@ angular.module('myApp.directives', []).
                             }
                         },
 						tooltip: {
-							pointFormat: "{point.y} likes received",
-							shared: false
 						}
                     }, false);
 					*/
@@ -225,17 +216,6 @@ angular.module('myApp.directives', []).
                         }
                     },
                     tooltip: {
-                        formatter: function() {
-                            var user;
-                            for (var i = 0; i < $scope.userData.length; i++) {
-                                if ($scope.userData[i]['name'] == this.series.data[this.point.x].name) {
-                                    user = $scope.userData[i];
-                                }
-                            }
-                            return '<b>'+ this.point.name + '</b>: '+ '<br>' +
-                                this.y + ' likes<br>' + roundToFour(this.percentage) +'% of likes received';
-                        },
-                        shared: true
                     },
                     legend: {
                         align: 'right',
@@ -356,8 +336,6 @@ angular.module('myApp.directives', []).
                     },
                     xAxis: {
                         type: attrs.gmsCategory,
-                        //type: 'datetime',
-                        //type: 'category',
                         dateTimeLabelFormats: {
                             day: '%e of %b %Y'
                         },
@@ -472,10 +450,10 @@ angular.module('myApp.directives', []).
                         },
                     },
                     tooltip: {
-			headerFormat: '<small>{point.x}</small><br/>',
-			pointFormat: '<b>{point.y}</b> Posts<br/>',
-			shared: true,
-            		useHTML: true,
+			            headerFormat: '<small>{point.x}</small><br/>',
+                        pointFormat: '<b>{point.y}</b> Posts<br/>',
+                        shared: true,
+            		    useHTML: true,
                     },
                     series: []
                 });
@@ -549,7 +527,7 @@ angular.module('myApp.directives', []).
                         },
                     },
                     tooltip: {
-                        pointFormat: '<b>{point.y}</b><br/>',
+                        pointFormat: '<b>{point.y}</b> posts<br/>',
                         shared: true
                     },
                     series: []
@@ -599,7 +577,7 @@ angular.module('myApp.directives', []).
 					tooltip: {
 						formatter: function () {
 							return this.series.xAxis.categories[this.point.x] + ' ' + this.point.y +
-							'<br/><b>' + this.point.value + '</b>'
+							'<br/><b>' + this.point.value + '</b> posts'
 							},
 						shared: true,
 						positioner: function (labelWidth, labelHeight, point) {
@@ -715,7 +693,7 @@ angular.module('myApp.directives', []).
                         },
                     },
                     tooltip: {
-                        pointFormat: '<b>{point.y}</b><br/>',
+                        pointFormat: '<b>{point.y}</b> posts<br/>',
                         shared: true
                     },
                     series: []
@@ -830,13 +808,13 @@ angular.module('myApp.directives', []).
 
 					if(byWeek){
 						$scope.chart.tooltip.options.formatter = function() {
-							return  '<b>Week of ' + Highcharts.dateFormat('%e %b %Y', new Date(this.x)) + '</b><br/>' + this.y;
+							return  '<b>Week of ' + Highcharts.dateFormat('%e %b %Y', new Date(this.x)) + '</b><br/><b>' + this.y + ' </b>posts';
 						};
 					}
 					else
 					{
 						$scope.chart.tooltip.options.formatter = function() {
-							return  '<b>' + Highcharts.dateFormat('%b %Y', new Date(this.x)) + '</b><br/>' + this.y;
+							return  '<b>' + Highcharts.dateFormat('%b %Y', new Date(this.x)) + '</b><br/><b>' + this.y + ' </b>posts';
 						};
 					}
 
@@ -890,7 +868,7 @@ angular.module('myApp.directives', []).
                     },
                     tooltip: {
 			formatter: function() {
-			    return '<b>'+ this.point.name + '</b>: '+ '<br>' + this.y + ' ' + $scope.gmsTooltiptext + '<br>' + roundToFour(this.percentage) +'%';
+			    return '<b>'+ this.point.name + '</b>: '+ '<br><b>' + this.y + '</b> ' + $scope.gmsTooltiptext + '<br><b>' + roundToFour(this.percentage) +'</b>% of ' + $scope.gmsTooltiptext;
 			},
 			shared: true
                     },
