@@ -2,7 +2,7 @@
 
 /* Controllers */
 
-angular.module('myApp.controllers', [])
+angular.module('gmStats.controllers', [])
 	.controller('GroupListController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
 		$scope.scrapeGroup = function(index)
 		{

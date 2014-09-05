@@ -1,13 +1,15 @@
 'use strict';
 
+angular.module('visualizations',[]);
 
-// Declare app level module which depends on filters, and services
-angular.module('myApp', [
+//main app module
+angular.module('gmStats', [
   'ngRoute',
-  'myApp.filters',
-  'myApp.services',
-  'myApp.directives',
-  'myApp.controllers'
+  'gmStats.filters',
+  'gmStats.services',
+  'gmStats.directives',
+  'gmStats.controllers',
+  'visualizations'
 ]).
 config(['$routeProvider', function($routeProvider) {
   $routeProvider.when('/home', {templateUrl: 'partials/grouplist.html', controller: 'GroupListController'});
