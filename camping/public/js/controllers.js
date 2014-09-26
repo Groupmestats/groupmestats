@@ -3,7 +3,15 @@
 /* Controllers */
 
 angular.module('gmStats.controllers', [])
-	.controller('GroupListController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
+	.controller('GroupListController', ['$scope', '$http', '$routeParams', '$location', function($scope, $http, $routeParams, $location) {
+		$scope.scraping = false;
+		
+		$scope.setScraping = function(groupId)
+		{
+			$scope.scraping = true;
+			$location.url = "./#/group?groupid=" + groupId
+		}
+		
 		$scope.scrapeGroup = function(index)
 		{
 			var group = $scope.groupList[index]
@@ -45,15 +53,6 @@ angular.module('gmStats.controllers', [])
               });
        }
 }])
-	.controller('ScrapeController', ['$scope', '$http', '$routeParams', '$location', function($scope, $http, $routeParams, $location) {
-		$http({method: 'GET', url: '/rest/scrapegroup', params: {groupid : $routeParams.groupid}}).
-			success(function(data, status, headers, config) {
-				$location.path('group');
-			}).
-			error(function(data, status, headers, config) {
-
-			});
-	}])
 	.controller('GroupController', ['$scope', '$http', '$routeParams', function($scope, $http, $routeParams) {
 		$scope.days = 0
 		$scope.piechartData = "";
