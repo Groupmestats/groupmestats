@@ -1,17 +1,19 @@
-<div class="col-md-8" ng-show="groupListLoading"><p>Refreshing your list of groups...</p></div>
-<div class="col-md-8" ng-show="!groupListLoading">
-  <p>
-      <a ng-click="refreshGroupList()">Refresh group list</a>
-  </p>
-	<table class="table">
-		<tr ng-repeat="group in groupList">
-			<td><img src="{{group.image}}"/></td>
-			<td><a ng-href="./#/loadGroup?groupid={{group.group_id}}">{{group.name}}</a></td>
-			<td><i>Last updated {{group.updated_at}}<i></td>
-			<td>
-				<a ng-show="!group.loading" ng-click="scrapeGroup($index)">Update</a>
-				<span ng-show="group.loading">Loading...</span>
-			</td>
-		</tr>
-	</table>
+<div show-loading="scraping">
+	<div class="col-md-8" ng-show="groupListLoading"><p>Refreshing your list of groups...</p></div>
+	<div class="col-md-8" ng-show="!groupListLoading">
+	  <p>
+		  <a ng-click="refreshGroupList()">Refresh group list</a>
+	  </p>
+		<table class="table">
+			<tr ng-repeat="group in groupList">
+				<td><img src="{{group.image}}"/></td>
+				<td><a ng-click="setScraping(group.group_id)">{{group.name}}</a></td>
+				<td><i>Last updated {{group.updated_at}}<i></td>
+				<td>
+					<a ng-show="!group.loading" ng-click="scrapeGroup($index)">Update</a>
+					<span ng-show="group.loading">Loading...</span>
+				</td>
+			</tr>
+		</table>
+	</div>
 </div>
