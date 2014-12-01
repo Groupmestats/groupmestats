@@ -51,16 +51,16 @@ class Scraper
 
     #Returns the user_id
     def getUser
-        return $gm.get("/users/me/", @token)['response']['id']
+        return $gm.get("/users/me", @token)['response']['id']
     end
 
     def getUserInfo
-        return $gm.get("/users/me/", @token)
+        return $gm.get("/users/me", @token)
     end
 
     #Returns an array of hashes, containing the name and group_id of each group the user belongs to
     def getGroups
-        groups = $gm.get("/groups/", @token, "per_page=100")
+        groups = $gm.get("/groups", @token, "per_page=100")
         group_ids = Array.new
 
         groups['response'].each do |group|
@@ -76,7 +76,7 @@ class Scraper
     #Returns the last time the group was updated
     def getLastUpdate(group_id)
         database = SQLite3::Database.new( @database )
-        group = $gm.get("/groups/#{group_id}/", @token)['response']
+        group = $gm.get("/groups/#{group_id}", @token)['response']
 
         return group['updated_at']
     end
@@ -84,7 +84,7 @@ class Scraper
     #For a given group, it adds the group and users, if new.  Otherwise, it just updates them
     def populateGroup(group_id)
         database = SQLite3::Database.new( @database )
-        group = $gm.get("/groups/#{group_id}/", @token)['response']
+        group = $gm.get("/groups/#{group_id}", @token)['response']
 
         if group['image_url'].nil?
             group['image_url'] = 'img/groupme.png'
@@ -171,6 +171,7 @@ class Scraper
     end
 
     def scrapeNewMessages(group_id)
+        puts "scrap enew messages " + group_id
         database = SQLite3::Database.new( @database )
 
         if database.execute( "SELECT * FROM groups WHERE group_id='#{group_id}'").empty?
@@ -181,7 +182,7 @@ class Scraper
             scrapeMessages(Time.now.to_i - update_time[0][0].to_i, group_id)
         end
         
-        group = $gm.get("groups/#{group_id}/", @token)['response']
+        group = $gm.get("/groups/#{group_id}", @token)['response']
         $logger.info "Scraped messages from #{group['name']}"
 
         database = SQLite3::Database.new( @database )
@@ -203,9 +204,9 @@ class Scraper
         while (Time.now.to_i - t.to_i) < (searchTime + 604800) do
 
             if id == 0
-                messages = $gm.get("groups/#{group_id}/messages", @token, "limit=100")['response']
+                messages = $gm.get("/groups/#{group_id}/messages", @token, "limit=100")['response']
             else
-                messages = $gm.get("groups/#{group_id}/messages", @token, "limit=100&before_id=#{id}")['response']
+                messages = $gm.get("/groups/#{group_id}/messages", @token, "limit=100&before_id=#{id}")['response']
             end
 
             if messages.nil?

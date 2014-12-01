@@ -9,7 +9,7 @@ angular.module('gmStats.controllers', [])
 		$scope.setScraping = function(groupId)
 		{
 			$scope.scraping = true;
-			$location.url = "./#/group?groupid=" + groupId
+			$location.path("/group").search({groupid: groupId})
 		}
 		
 		$scope.scrapeGroup = function(index)
