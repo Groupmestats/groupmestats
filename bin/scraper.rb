@@ -110,9 +110,9 @@ class Scraper
                 t = messages['messages'].last['created_at']
                 id = messages['messages'].last['id']
             end
-
-            t2 = Time.new
-            $logger.info "Scrape time for group id #{group_id} was: #{(t2-t1).to_s} seconds"
         end
+
+        t2 = Time.new
+        $logger.info "Scrape time for group id #{group_id} was: #{(t2-t1).to_s} seconds"
     end
 end
