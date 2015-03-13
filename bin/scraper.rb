@@ -71,47 +71,48 @@ class Scraper
             messages['messages'].each do | message |
                 t = Time.at(message['created_at'])
                 if ((Time.now.to_i - t.to_i) < searchTime)
-                       image = "none"
-                       liked_users = ""
-                       num_likes = 0
-                       if !message['attachments'].empty?
-                           if message['attachments'][0]['type'] == "image"
-                              image = message['attachments'][0]['url']
-                           end
-                       end
+                   image = "none"
+                   liked_users = ""
+                   num_likes = 0
 
-                       name = group['members'].detect { |u| u['user_id'] == message['user_id'] }
-                       if name.nil?
-                           name = Hash.new
-                           name['nickname'] = 'system'
+                   if !message['attachments'].empty?
+                       if message['attachments'][0]['type'] == "image"
+                          image = message['attachments'][0]['url']
                        end
-
-                       if message['text'].nil?
-                           message['test'] = ''
-                       end
-                       document = {
-                           :timestamp => Time.at(message['created_at']).to_datetime,
-                           :created_at => message['created_at'],
-                           :user_id => message['user_id'],
-                           :user => name['nickname'],
-                           :group_id => message['group_id'],
-                           :group_name => group['name'],
-                           :avatar_url => message['avatar_url'],
-                           :message => message['text'],
-                           :image => image,
-                           :favorited_by => message['favorited_by'],
-                           :number_of_likes => message['favorited_by'].size
-                       }
-
-                       $elk.indexDocument('group-messages', 'message', document)
                    end
 
-            t = messages['messages'].last['created_at']
-            id = messages['messages'].last['id']
-        end
+                   name = group['members'].detect { |u| u['user_id'] == message['user_id'] }
+                   if name.nil?
+                       name = Hash.new
+                       name['nickname'] = 'system'
+                   end
 
-        t2 = Time.new
-        $logger.info "Scrape time for group id #{group_id} was: #{(t2-t1).to_s} seconds"
+                   if message['text'].nil?
+                       message['test'] = ''
+                   end
+                   document = {
+                       :timestamp => Time.at(message['created_at']).to_datetime,
+                       :created_at => message['created_at'],
+                       :user_id => message['user_id'],
+                       :user => name['nickname'],
+                       :group_id => message['group_id'],
+                       :group_name => group['name'],
+                       :avatar_url => message['avatar_url'],
+                       :message => message['text'],
+                       :image => image,
+                       :favorited_by => message['favorited_by'],
+                       :number_of_likes => message['favorited_by'].size
+                   }
+
+                   $elk.indexDocument('group-messages', 'message', document)
+               end
+
+                t = messages['messages'].last['created_at']
+                id = messages['messages'].last['id']
+            end
+
+            t2 = Time.new
+            $logger.info "Scrape time for group id #{group_id} was: #{(t2-t1).to_s} seconds"
         end
     end
 end
