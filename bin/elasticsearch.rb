@@ -15,10 +15,12 @@ class Elasticsearch
     base_uri 'http://localhost:9200//'
     format :json
 
+    # Indexes a document into Elasticsearch
     def indexDocument(index, type, document)
         self.class.put("#{index}/#{type}/#{document[:created_at]}/", :body => document.to_json)
     end
 
+    # Returns the newest message in a group
     def getNewestDocument(index, type, group_id)
 
         # Elasticsearch query to find the newest document, based of 'timestamp'
@@ -39,6 +41,7 @@ class Elasticsearch
         return self.class.get("#{index}/#{type}/_search", :body => query.to_json)
     end
 
+    # Returns the oldest message in a group
     def getOldestDocument(index, type, group_id)
 
         # Elasticsearch query to find the oldest document, based of 'timestamp'
@@ -59,10 +62,11 @@ class Elasticsearch
         return self.class.get("#{index}/#{type}/_search", :body => query.to_json)
     end
 
+    # Initialization of the group index
     def createGroupIndex(index)
         self.class.put(index)
 
-        #A 'mapping' of property values for our message data
+        # A 'mapping' of property values for our message data
         mapping = { 
             'message' => { 
                 'properties' => { 

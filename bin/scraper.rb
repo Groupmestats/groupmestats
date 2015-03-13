@@ -9,7 +9,7 @@ require_relative 'elasticsearch'
 
 class Scraper
 
-    #Constructor that takes a path to the sqlite database and a groupme oauth token
+    # Constructor that takes a path to the sqlite database and a groupme oauth token
     def initialize(token, logging_path)
         @token = token
 
@@ -21,11 +21,13 @@ class Scraper
         $elk.createGroupIndex('group-messages')
     end
 
-    #Returns the user_id
+    # Returns the user_id
     def getUser
         return $gm.get("/users/me", @token)['response']['id']
     end
 
+    # Pulls only new messages from the last 'scrape' from groupme, and 
+    # indexes them into elasticsearch
     def scrapeNewMessages(group_id)
         #Calculate the time delta between the present and the last seen document
 
@@ -46,6 +48,8 @@ class Scraper
         $logger.info "Scraped messages from #{group['name']}"
     end
 
+    # Scrapes all messages for a time interval.  Default is all messages
+    # Indexes them into elasticsearch
     def scrapeMessages(searchTime = Time.now.to_i, group_id)
         id = 0
         t = Time.now.to_i
