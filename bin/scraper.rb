@@ -34,6 +34,7 @@ class Scraper
         if $elk.getNewestDocument('group-messages', 'message', group_id)['status'] == 400
             scrapeMessages(group_id)
         else
+            pp $elk.getNewestDocument('group-messages', 'message', group_id)
             last_message_time = $elk.getNewestDocument('group-messages', 'message', group_id)['hits']['hits']
 
             if last_message_time.empty?

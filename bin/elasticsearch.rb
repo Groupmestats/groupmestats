@@ -73,7 +73,15 @@ class Elasticsearch
                     'user' => { 
                         'type' => 'string', 
                         'index' => 'not_analyzed' 
-                    } 
+                    },
+                    'image' => {
+                        'type' => 'string',
+                        'index' => 'not_analyzed'
+                    },
+                    'avatar_url' => {
+                        'type' => 'string',
+                        'index' => 'not_analyzed'
+                    },
                 } 
             } 
         }
