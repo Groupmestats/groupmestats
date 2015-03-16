@@ -64,7 +64,7 @@ class Scraper
                 :group_id => group_id
             }
 
-            $elk.indexDocument('group-messages', 'user', document, member['id'])
+            $elk.indexDocument('users', 'user', document, member['id'])
         end
     end
 
