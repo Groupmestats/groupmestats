@@ -16,8 +16,8 @@ class Elasticsearch
     format :json
 
     # Indexes a document into Elasticsearch
-    def indexDocument(index, type, document)
-        self.class.put("#{index}/#{type}/#{document[:created_at]}/", :body => document.to_json)
+    def indexDocument(index, type, document, id)
+        self.class.post("#{index}/#{type}/#{id}", :body => document.to_json)
     end
 
     # Returns the newest message in a group

@@ -34,7 +34,6 @@ class Scraper
         if $elk.getNewestDocument('group-messages', 'message', group_id)['status'] == 400
             scrapeMessages(group_id)
         else
-            pp $elk.getNewestDocument('group-messages', 'message', group_id)
             last_message_time = $elk.getNewestDocument('group-messages', 'message', group_id)['hits']['hits']
 
             if last_message_time.empty?
@@ -47,6 +46,26 @@ class Scraper
 
         group = $gm.get("groups/#{group_id}", @token)['response']
         $logger.info "Scraped messages from #{group['name']}"
+    end
+
+    def scrapeUsersForGroup(group_id)
+        members = $gm.get("groups/#{group_id}", @token)['response']['members']
+
+        members.each do | member |
+            document = {
+                :id => member['id'],
+                :user_id => member['user_id'],
+                :nickname => member['nickname'],
+                :muted => member['muted'],
+                :image_url => member['image_url'],
+                :autokicked => member['autokicked'],
+                :app_installed => member['app_installed'],
+                :guid => member['guid'],
+                :group_id => group_id
+            }
+
+            $elk.indexDocument('group-messages', 'user', document, member['id'])
+        end
     end
 
     # Scrapes all messages for a time interval.  Default is all messages
@@ -105,7 +124,7 @@ class Scraper
                        :number_of_likes => message['favorited_by'].size
                    }
 
-                   $elk.indexDocument('group-messages', 'message', document)
+                   $elk.indexDocument('group-messages', 'message', document, message['id'])
                end
 
                 t = messages['messages'].last['created_at']
