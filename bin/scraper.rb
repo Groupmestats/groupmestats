@@ -48,10 +48,25 @@ class Scraper
         $logger.info "Scraped messages from #{group['name']}"
     end
 
+    # Given a group_id, pull users from groupme and index them into elasticsearch
     def scrapeUsersForGroup(group_id)
         members = $gm.get("groups/#{group_id}", @token)['response']['members']
 
+        if $elk.getUsersForGroup(group_id)['status'] != 404
+            indexed_members = $elk.getUsersForGroup(group_id)['hits']['hits']
+        end
+
         members.each do | member |
+            if !indexed_members.nil?
+                indexed_members.each do | index_member |
+                    if index_member['_source']['user_id'] ==
+                        member['user_id']
+                        if member['nickname'] != index_member['_source']['nickname']
+                            updateNameInGroup(group_id, member['user_id'], member['nickname'])
+                        end
+                    end
+                end
+            end
             document = {
                 :id => member['id'],
                 :user_id => member['user_id'],
@@ -65,6 +80,16 @@ class Scraper
             }
 
             $elk.indexDocument('users', 'user', document, member['id'])
+        end
+    end
+
+    # Updated every message in a group to reflect a user's name change
+    def updateNameInGroup(group_id, user_id, nickname)
+        messages = $elk.getAllMessagesForUser('group-messages', group_id, user_id)['hits']['hits']
+
+        messages.each do | message |
+            message['_source']['user'] = nickname
+            $elk.indexDocument('group-messages', 'message', message['_source'], message['_id']).response
         end
     end
 

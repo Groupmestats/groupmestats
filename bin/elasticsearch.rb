@@ -88,4 +88,34 @@ class Elasticsearch
 
         self.class.put("#{index}/_mapping/message", :body => mapping.to_json)
     end
+
+    # Given a group_id, searches for all users in a group
+    def getUsersForGroup(group_id)
+        self.class.get("users/user/_search?q=group_id:#{group_id}")
+    end
+
+    # Given an index, group_id, and a useR_id, return all messages a user
+    # has posted in a group
+    def getAllMessagesForUser(index, group_id, user_id)
+        query = {
+            "size" => 100000,
+            "query" => {
+                "bool" => {
+                    "must" => [
+                        { 
+                            "term" => { 
+                                "user_id" => "#{user_id}" 
+                            }
+                        },
+                        {
+                            "term" => { 
+                                "group_id" => "#{group_id}" 
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+        self.class.get("#{index}/message/_search", :body => query.to_json)
+    end
 end
