@@ -52,7 +52,7 @@ module GroupStats::Controllers
             template_path = File.join(File.expand_path(File.dirname(__FILE__)), 'authenticate.html')
             return ERB.new(File.read(template_path)).result(binding)
         else
-	    @state.scraper = Scraper.new($database_path, @state.token, $logging_path)
+	    @state.scraper = Scraper.new(@state.token, $logging_path)
             @state.user_id = @state.scraper.getUser
             File.open(File.join(File.expand_path(File.dirname(__FILE__)), 'index.html') )
         end
@@ -63,7 +63,7 @@ module GroupStats::Controllers
     def get
         $logger = Logger.new($logging_path)
         @state.token = @input.access_token
-        @state.scraper = Scraper.new($database_path, @state.token, $logging_path)
+        @state.scraper = Scraper.new(@state.token, $logging_path)
         @state.user_id = @state.scraper.getUser
         
         $logger.info "authenticating"
