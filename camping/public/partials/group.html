@@ -1,20 +1,12 @@
 <div class="col-md-12">
 	<img src="{{group.image}}" style="float:left; padding-right:15px"></img><h3>{{group.name}}</h3>
 	<br/>
-	<div class="btn-group">
-	  <button type="button" class="btn btn-default" ng-click="setDays(0)">All</button>
-	  <button type="button" class="btn btn-default" ng-click="setDays(365)">Year</button>
-	  <button type="button" class="btn btn-default" ng-click="setDays(30)">Month</button>
-	  <button type="button" class="btn btn-default" ng-click="setDays(7)">Week</button>
-	  <button type="button" class="btn btn-default" ng-click="setDays(1)">Day</button>
-	</div>
-
-    <br><br/>
 	<p><b>Total Posts:</b>  {{groupfacts.totalposts}}</p>
 	<p><b>Total Images:</b>  {{groupfacts.totalimages}}</p>
 	<p><b>Total Users:</b>  {{groupfacts.totalusers}}</p>
 	<p><b>Total Group Name Changes:</b>  {{groupfacts.totalgroupnamechanges}}</p>
 	<p><b>Total Group Avatar Changes:</b>  {{groupfacts.totalavatarchanges}}</p>
+	<time-selector></time-selector><br/>
 	<div class="row">
 		<div class="col-md-5">
 			<h4>Top posts:</h4>
@@ -39,7 +31,7 @@
 
 		</div>
 	</div>
-
+	<time-selector></time-selector>
 	<div class="row">
 		<div class="col-md-6">
 			<div gms-posts-piechart gms-title="Total Posts in {{group.name}}" gms-legend-title="Users" gms-user="userData" gms-data="postsMostData.posters" gms-tooltiptext="posts" style="min-width:530px;min-height:400px;"></div>
