@@ -23,7 +23,7 @@ class Scraper
 
     # Returns the user_id
     def getUser
-        return $gm.get("/users/me", @token)['response']['id']
+        return $gm.get("users/me", @token)['response']['id']
     end
 
     # Pulls only new messages from the last 'scrape' from groupme, and 
