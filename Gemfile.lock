@@ -19,8 +19,6 @@ GEM
       httparty (~> 0.9)
       persistent_http
     rack (1.5.2)
-    sqlite3 (1.3.9)
-    sqlite3 (1.3.9-x86-mingw32)
     thread_safe (0.3.4)
 
 PLATFORMS
@@ -34,4 +32,6 @@ DEPENDENCIES
   logger (= 1.2.8)
   persistent_http (= 2.0.0)
   persistent_httparty (= 0.1.1)
-  sqlite3 (= 1.3.9)
+
+BUNDLED WITH
+   1.10.5

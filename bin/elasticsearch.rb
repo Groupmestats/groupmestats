@@ -12,7 +12,7 @@ class Elasticsearch
     def initialize
     end
 
-    base_uri 'http://localhost:9200//'
+    base_uri 'http://192.168.1.240:9200//'
     format :json
 
     # Indexes a document into Elasticsearch
