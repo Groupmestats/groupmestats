@@ -1,3 +1,12 @@
-{{groupfacts.group_id}}
-{{groupfactsGroupId}}
-<iframe ng-src="{{groupfactsUrl}}" height="1200" width="1170"></iframe>
+<div class="col-md-12">
+	<img src="{{group.image}}" style="float:left; padding-right:15px"></img><h3>{{group.name}}</h3>
+	<br/>
+	<div class="btn-group">
+	  <button type="button" class="btn btn-default" ng-click="setDays(0)">All</button>
+	  <button type="button" class="btn btn-default" ng-click="setDays('1y')">Year</button>
+	  <button type="button" class="btn btn-default" ng-click="setDays('30d')">Month</button>
+	  <button type="button" class="btn btn-default" ng-click="setDays('7d')">Week</button>
+	  <button type="button" class="btn btn-default" ng-click="setDays('24h')">Day</button>
+	</div>
+        <iframe ng-src="{{groupfactsUrl}}" height="1200" width="1170"></iframe>
+</div>
