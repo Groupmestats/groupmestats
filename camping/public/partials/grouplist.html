@@ -10,8 +10,6 @@
 				<td><a ng-click="setScraping(group.group_id)">{{group.name}}</a></td>
 				<td><i>Last updated {{group.updated_at}}<i></td>
 				<td>
-					<a ng-show="!group.loading" ng-click="scrapeGroup($index)">Update</a>
-					<span ng-show="group.loading">Loading...</span>
 				</td>
 			</tr>
 		</table>

@@ -18,5 +18,17 @@ angular.module('gmStats.directives', [])
         //loadingContainer.appendChild(spinner.el);
       }
     }
+})
+.directive('timeSelector', function() {
+  return {
+    restrict: 'E',
+    replace: false,
+    templateUrl: 'partials/directives/timeselect.html',
+    link: function(scope, element, attrs) {
+      //var spinner = new Spinner().spin();
+      //var loadingContainer = element.find('.my-loading-spinner-container')[0];
+      //loadingContainer.appendChild(spinner.el);
+    }
+  }
 });
 

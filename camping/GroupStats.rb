@@ -1,6 +1,5 @@
 require 'rubygems' 
 require 'bundler/setup'
-require 'sqlite3'
 require 'json'
 require 'yaml'
 require 'camping/session'
@@ -22,13 +21,6 @@ def GroupStats.create
         abort('Configuration file not found.  Exiting...')
     end
 
-    begin
-        $database_path = $config['groupme']['database']
-        $database = SQLite3::Database.new( $database_path )
-    rescue Errno::ENOENT => e
-        abort('Did not specify a valid database file')
-    end
-    
     if !$config['groupme']['client_id'].nil?
         $client_id = $config['groupme']['client_id']
     else    
@@ -52,8 +44,8 @@ module GroupStats::Controllers
             template_path = File.join(File.expand_path(File.dirname(__FILE__)), 'authenticate.html')
             return ERB.new(File.read(template_path)).result(binding)
         else
-	    @state.scraper = Scraper.new($database_path, @state.token, $logging_path)
-            @state.user_id = @state.scraper.getUser
+	    @state.scraper = Scraper.new(@state.token, $logging_path)
+            #@state.user_id = @state.scraper.getUser
             File.open(File.join(File.expand_path(File.dirname(__FILE__)), 'index.html') )
         end
     end
@@ -63,7 +55,7 @@ module GroupStats::Controllers
     def get
         $logger = Logger.new($logging_path)
         @state.token = @input.access_token
-        @state.scraper = Scraper.new($database_path, @state.token, $logging_path)
+        @state.scraper = Scraper.new(@state.token, $logging_path)
         @state.user_id = @state.scraper.getUser
         
         $logger.info "authenticating"
@@ -71,7 +63,7 @@ module GroupStats::Controllers
 
         @state.groups = Array.new
         refreshGroupList()
-        updateStateGroupList(@state.scraper.getGroups)
+        #updateStateGroupList(@state.scraper.getGroups)
 
         return redirect Index
     end
@@ -107,12 +99,12 @@ module GroupStats::Controllers
 
   def refreshGroupList()
       $logger.info "Refreshing Grouplist for @state.token = #{@state.token}"
-      groups = @state.scraper.getGroups
-      groups.each do | group |
-          @state.scraper.populateGroup(group['group_id'].to_i)
-      end
-      updateStateGroupList(groups)
-      return groups.to_json
+      #groups = @state.scraper.getGroups
+      #groups.each do | group |
+          #@state.scraper.populateGroup(group['group_id'].to_i)
+      #end
+      #updateStateGroupList(groups)
+      #return groups.to_json
   end
 
   def parseTimeZone(timezone)
@@ -141,57 +133,24 @@ module GroupStats::Controllers
 
   class GroupFacts < R '/rest/groupfacts'
     def get ()
-	totalimages = $database.execute(" SELECT count(*) AS totalimages
-	    FROM messages 
-	    WHERE messages.group_id = ? 
-	    AND messages.image!='none'",
-	    @input.groupid
-        )[0][0]
+	@state.token = '3ee22b60c1830131a29f12c45db03ee6'
+        $logging_path = 'test.log'
+        @state.scraper = Scraper.new(@state.token, $logging_path)
 
-	totalposts = $database.execute(" SELECT count(*) AS totalposts
-	    FROM messages 
-	    WHERE messages.group_id = ?
-	    AND messages.user_id!='system'",
-	    @input.groupid
-	)[0][0]
-
-        totalusers = $database.execute(" SELECT count(user_groups.user_id) AS totalusers 
-	    FROM user_groups 
-	    WHERE user_groups.group_id = ?",
-            @input.groupid
-        )[0][0]
-
-	totalavatarchanges = $database.execute(" SELECT count(*) AS totalavatarchanges 
-	    FROM messages 
-	    WHERE messages.group_id = ?
-	    AND messages.user_id='system' 
-	    AND messages.text LIKE '%changed the group''s avatar%'",
-	    @input.groupid
-	)[0][0]
-
-	totalgroupnamechanges = $database.execute(" SELECT count(*) AS totalgroupnamechanges
-            FROM messages
-            WHERE messages.group_id = ?
-            AND messages.user_id='system'
-            AND messages.text LIKE '%changed the group''s name%'",
-            @input.groupid
-        )[0][0]
-
-        return {'totalimages' => totalimages, 'totalposts' => totalposts, 'totalusers' => totalusers, 'totalavatarchanges' => totalavatarchanges, 'totalgroupnamechanges' => totalgroupnamechanges}.to_json
+        group = @state.scraper.getGroup(@input.groupid)
+	#group = {'group_id' => '3180471'}
+        return group.to_json
     end
   end
 
   class GroupList < R '/rest/groupList'
     def get()
-        $logger.info "Loading Grouplist from the database for @state.token = #{@state.token}"
-        $database.results_as_hash = true
-        result = $database.execute( "SELECT groups.group_id, groups.name, groups.image, groups.updated_at 
-            FROM groups join user_groups on groups.group_id = user_groups.group_id 
-            where user_groups.user_id = ?", 
-            @state.user_id
-        )
-        $database.results_as_hash = false
-        return result.to_json
+	@state.token = '3ee22b60c1830131a29f12c45db03ee6'
+	$logging_path = 'test.log'
+	@state.scraper = Scraper.new(@state.token, $logging_path)
+
+	groups = @state.scraper.getGroups
+	return groups.to_json
     end
   end
 
@@ -693,31 +652,12 @@ module GroupStats::Controllers
   
   class Group < R '/rest/group'
     def get()
-        if !getGroups(@input.groupid)
-            return 'nil'
-        end
- 
-        $database.results_as_hash = true
-        result = $database.execute( "SELECT groups.group_id, groups.name, groups.image, groups.updated_at 
-            FROM groups join user_groups on groups.group_id = user_groups.group_id 
-            where user_groups.user_id = ? and groups.group_id = ?", 
-            @state.user_id,
-            @input.groupid
-        )
-        if(result.length == 0)
-            @status = 400
-            return "";
-        end
-        
-        users = $database.execute( "select user_id, user_groups.name from users
-            join user_groups using(user_id)
-            join groups using (group_id)
-            where groups.group_id = ?", 
-            @input.groupid
-            )
-        result[0].merge!(:users => users);
-        $database.results_as_hash = false
-        return result[0].to_json
+        @state.token = '3ee22b60c1830131a29f12c45db03ee6'
+        $logging_path = 'test.log'
+        @state.scraper = Scraper.new(@state.token, $logging_path)
+
+        group = @state.scraper.getGroup(@input.groupid)
+        return group.to_json
     end
   end
   
@@ -727,7 +667,7 @@ module GroupStats::Controllers
             return 'nil'
         end
 
-        @state.scraper.scrapeNewMessages(@input.groupid)
+        #@state.scraper.scrapeNewMessages(@input.groupid)
     end
   end
 

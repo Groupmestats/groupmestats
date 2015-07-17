@@ -14,7 +14,7 @@ class Groupme
                                   :idle_timeout => 10,
                                   :keep_alive => 30 )
 
-    base_uri 'https://api.groupme.com/v3'
+    base_uri 'https://api.groupme.com/v3//'
     format :json
 
     def initialize(logging_path)
