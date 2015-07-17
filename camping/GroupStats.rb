@@ -137,8 +137,8 @@ module GroupStats::Controllers
         $logging_path = 'test.log'
         @state.scraper = Scraper.new(@state.token, $logging_path)
 
-        #group = @state.scraper.getGroup(@input.groupid)
-	group = {'group_id' => '3180471'}
+        group = @state.scraper.getGroup(@input.groupid)
+	#group = {'group_id' => '3180471'}
         return group.to_json
     end
   end
