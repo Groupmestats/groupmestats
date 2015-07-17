@@ -18,12 +18,31 @@ class Scraper
         $elk = Elasticsearch.new
 
         #Create group index, if not already created
-        $elk.createGroupIndex('group-messages')
+#        $elk.createGroupIndex('group-messages')
     end
 
     # Returns the user_id
     def getUser
         return $gm.get("users/me", @token)['response']['id']
+    end
+
+    # Returns the user's current groups
+    def getGroups
+	return_result = []
+	groups = $gm.get("groups", @token)['response']
+	groups.each do | group |
+	    image = group['image_url'] + '.avatar'
+	    hash = { 'name' => group['name'], 'group_id' => group['group_id'], 'image' => image }
+	    return_result.push(hash)
+	end
+	return return_result
+    end
+
+    def getGroup(group_id)
+	group = $gm.get("groups/#{group_id}", @token)['response']
+        image = group['image_url'] + '.avatar'
+	return_result = { 'name' => group['name'], 'group_id' => group['group_id'], 'image' => image }
+	return return_result
     end
 
     # Pulls only new messages from the last 'scrape' from groupme, and 

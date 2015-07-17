@@ -105,6 +105,7 @@ angular.module('gmStats.controllers', [])
 				error(function(data, status, headers, config) {
 
 				});
+			return data
 		}		
 		function requestPostsMostChart(){
 			var daysToRequest = $scope.days
