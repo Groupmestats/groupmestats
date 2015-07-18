@@ -54,11 +54,10 @@ class Scraper
             scrapeMessages(group_id)
         else
             last_message_time = $elk.getNewestDocument('group-messages', 'message', group_id)['hits']['hits']
-
             if last_message_time.empty?
                 scrapeMessages(group_id)
             else
-                searchTime = Time.now.to_i - last_message_time[0]['_id'].to_i
+                searchTime = Time.now.to_i - last_message_time[0]['_source']['created_at'].to_i
                 scrapeMessages(searchTime, group_id)
             end
         end
