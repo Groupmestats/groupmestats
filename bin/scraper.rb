@@ -38,6 +38,12 @@ class Scraper
 	return return_result
     end
 
+    def getFirstPostTime(group_id)
+	firstTime = Time.at($elk.getFirstPostTime('group-messages', 'message', group_id)['hits']['hits'][0]['_source']['created_at'])
+	return { 'first_time' => firstTime.strftime("%Y-%m-%dT%H:%M:%S.%LZ"),
+		 'current_time' => Time.now.strftime("%Y-%m-%dT%H:%M:%S.%LZ") }
+    end
+
     def getGroup(group_id)
 	group = $gm.get("groups/#{group_id}", @token)['response']
         image = group['image_url'] + '.avatar'

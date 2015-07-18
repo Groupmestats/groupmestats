@@ -41,6 +41,20 @@ class Elasticsearch
         return self.class.get("#{index}/#{type}/_search", :body => query.to_json)
     end
 
+    def getFirstPostTime(index, type, group_id)
+	query = {
+  	    "sort" => [
+		{ "created_at" => {"order" => "sac"}}
+   	    ],
+  	    "query" => {
+    		"term" => { "group_id" => "#{group_id}" }
+  	    },
+  	    "size" => 1
+	}
+
+        return self.class.get("#{index}/#{type}/_search", :body => query.to_json)
+    end
+
     # Returns the oldest message in a group
     def getOldestDocument(index, type, group_id)
 
