@@ -39,7 +39,7 @@ class Scraper
     end
 
     def getFirstPostTime(group_id)
-	firstTime = Time.at($elk.getFirstPostTime('group-messages', 'message', group_id)['hits']['hits'][0]['_source']['created_at'])
+	firstTime = Time.at($elk.getFirstPostTime("group-messages-#{group_id}", 'message', group_id)['hits']['hits'][0]['_source']['created_at'])
 	return { 'first_time' => firstTime.strftime("%Y-%m-%dT%H:%M:%S.%LZ"),
 		 'current_time' => Time.now.strftime("%Y-%m-%dT%H:%M:%S.%LZ") }
     end
@@ -56,10 +56,11 @@ class Scraper
     def scrapeNewMessages(group_id)
         #Calculate the time delta between the present and the last seen document
 
-        if $elk.getNewestDocument('group-messages', 'message', group_id)['status'] == 400
+	$elk.createGroupIndex("group-messages-#{group_id}", group_id)
+        if $elk.getNewestDocument("group-messages-#{group_id}", 'message', group_id)['status'] == 400
             scrapeMessages(group_id)
         else
-            last_message_time = $elk.getNewestDocument('group-messages', 'message', group_id)['hits']['hits']
+            last_message_time = $elk.getNewestDocument("group-messages-#{group_id}", 'message', group_id)['hits']['hits']
             if last_message_time.empty?
                 scrapeMessages(group_id)
             else
@@ -109,11 +110,11 @@ class Scraper
 
     # Updated every message in a group to reflect a user's name change
     def updateNameInGroup(group_id, user_id, nickname)
-        messages = $elk.getAllMessagesForUser('group-messages', group_id, user_id)['hits']['hits']
+        messages = $elk.getAllMessagesForUser("group-messages-#{group_id}", group_id, user_id)['hits']['hits']
 
         messages.each do | message |
             message['_source']['user'] = nickname
-            $elk.indexDocument('group-messages', 'message', message['_source'], message['_id']).response
+            $elk.indexDocument("group-messages-#{group_id}", 'message', message['_source'], message['_id']).response
         end
     end
 
@@ -147,6 +148,7 @@ class Scraper
                    if !message['attachments'].empty?
                        if message['attachments'][0]['type'] == "image"
                           image = message['attachments'][0]['url']
+			  image_avatar = image + '.avatar'
                        end
                    end
 
@@ -169,11 +171,12 @@ class Scraper
                        :avatar_url => message['avatar_url'],
                        :message => message['text'],
                        :image => image,
+		       :image_avatar => image_avatar,
                        :favorited_by => message['favorited_by'],
                        :number_of_likes => message['favorited_by'].size
                    }
 
-                   $elk.indexDocument('group-messages', 'message', document, message['id'])
+                   $elk.indexDocument("group-messages-#{group_id}", 'message', document, message['id'])
                end
 
                 t = messages['messages'].last['created_at']
