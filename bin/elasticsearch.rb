@@ -2,6 +2,7 @@
 require 'rubygems'
 require 'json'
 require 'time'
+require 'erb'
 
 require_relative 'groupme'
 
@@ -77,7 +78,22 @@ class Elasticsearch
     end
 
     # Initialization of the group index
-    def createGroupIndex(index)
+    def createGroupIndex(index, group_id)
+	ids = self.class.get(".kibana/_search?size=1000000", :body => { "query" => { "match_all" => {}}})['hits']['hits']
+        ids.each do | source |
+	    if source['_id'].include? "master"
+		source['_id'] = source['_id'].sub('master:', "#{group_id}")
+		document = source['_source']
+		if source['_type'] != 'index-pattern'		
+                    document['kibanaSavedObjectMeta']['searchSourceJSON'] = document['kibanaSavedObjectMeta']['searchSourceJSON'].sub('group-messages', "group-messages-#{group_id}")
+		end
+		if source['_type'].include? 'dashboard'
+		    document['title'] = group_id
+		    document['panelsJSON'] = document['panelsJSON'].gsub('master:', "#{group_id}")
+		end
+		response = self.class.put(".kibana/#{source['_type']}/#{source['_id']}", :body => document.to_json)
+	    end
+	end
         self.class.put(index)
 
         # A 'mapping' of property values for our message data
@@ -92,10 +108,18 @@ class Elasticsearch
                         'type' => 'string',
                         'index' => 'not_analyzed'
                     },
+                    'imagei_avatar' => {
+                        'type' => 'string',
+                        'index' => 'not_analyzed'
+                    },
                     'avatar_url' => {
                         'type' => 'string',
                         'index' => 'not_analyzed'
                     },
+		    'timestamp' => {
+           		'type' => 'date',
+            		'format' => 'dateOptionalTime'
+           	    },
                 } 
             } 
         }
